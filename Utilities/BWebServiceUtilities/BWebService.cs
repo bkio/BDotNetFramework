@@ -1,0 +1,254 @@
+/// MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
+
+using System;
+using System.Net;
+using System.Threading;
+using System.Text;
+using System.Collections.Generic;
+using BCommonUtilities;
+using BCloudServiceUtilities;
+
+namespace BWebServiceUtilities
+{
+    public class BWebService
+    {
+        private readonly BWebPrefixStructure[] PrefixesToListen;
+
+        private readonly HttpListener Listener = new HttpListener();
+
+        private readonly IBTracingServiceInterface TracingService;
+
+        private List<string> ServerNames = new List<string>()
+        {
+            "http://localhost",
+            "http://127.0.0.1"
+        };
+        private readonly int ServerPort = 8080;
+
+        public BWebService(BWebPrefixStructure[] _PrefixesToListen, int _ServerPort = 8080, IBTracingServiceInterface _TracingService = null, string _OverrideServerNames = null)
+        {
+            if (_PrefixesToListen == null || _PrefixesToListen.Length == 0)
+                throw new ArgumentException("PrefixesToListen");
+
+            if (_OverrideServerNames == null)
+            {
+                _OverrideServerNames = "http://*";
+            }
+
+            ServerPort = _ServerPort;
+
+            TracingService = _TracingService;
+
+            if (_OverrideServerNames != null && _OverrideServerNames.Length > 0)
+            {
+                string[] _OverrideServerNameArray = _OverrideServerNames.Split(';');
+                if (_OverrideServerNameArray != null && _OverrideServerNameArray.Length > 0)
+                {
+                    ServerNames.Clear();
+                    foreach (var _OverrideServerName in _OverrideServerNameArray)
+                    {
+                        ServerNames.Add(_OverrideServerName);
+                    }
+                }
+            }
+
+            foreach (string ServerName in ServerNames)
+            {
+                Listener.Prefixes.Add(ServerName + ":" + ServerPort + "/");
+            }
+
+            if (Listener.Prefixes.Count == 0)
+                throw new ArgumentException("Invalid prefixes");
+
+            PrefixesToListen = _PrefixesToListen;
+            
+            Listener.Start();
+        }
+
+        private bool LookForListenersFromRequest(out BWebServiceBase _Callback, HttpListenerContext _Context)
+        {
+            foreach (BWebPrefixStructure Prefix in PrefixesToListen)
+            {
+                if (Prefix != null)
+                {
+                    if (Prefix.GetCallbackFromRequest(out Func<BWebServiceBase> _CallbackInitializer, _Context))
+                    {
+                        _Callback = _CallbackInitializer.Invoke();
+                        _Callback.InitializeWebService(TracingService);
+                        return true;
+                    }
+                }
+            }
+            _Callback = null;
+            return false;
+        }
+
+        public void Run(Action<string> _ServerLogAction = null)
+        {
+            BTaskWrapper.Run(() =>
+            {
+                Thread.CurrentThread.IsBackground = true;
+
+                _ServerLogAction?.Invoke("BWebserver->Run: Server is running.");
+                try
+                {
+                    while (Listener.IsListening)
+                    {
+                        var Context = Listener.GetContext();
+
+                        BTaskWrapper.Run(() =>
+                        {
+                            Thread.CurrentThread.IsBackground = true;
+
+                            try
+                            {
+                                Context.Response.AddHeader("Access-Control-Allow-Origin", "*");
+
+                                if (Context.Request.HttpMethod == "OPTIONS")
+                                {
+                                    Context.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, api-key, token, auto-close-response");
+                                    Context.Response.AddHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+                                    Context.Response.AddHeader("Access-Control-Max-Age", "-1");
+                                    Context.Response.StatusCode = BWebResponseStatus.Status_OK_Code;
+                                }
+                                else
+                                {
+                                    if (PrefixesToListen == null)
+                                    {
+                                        _ServerLogAction?.Invoke("BWebserver->Run: PrefixesToListen is null.");
+                                        WriteInternalError(Context.Response, "Code: WS-PTLN.");
+                                    }
+                                    else if (!LookForListenersFromRequest(out BWebServiceBase _Callback, Context))
+                                    {
+                                        _ServerLogAction?.Invoke("BWebserver->Run: Request is not being listened. Request: " + Context.Request.RawUrl);
+                                        WriteNotFound(Context.Response, "Request is not being listened.");
+                                    }
+                                    else
+                                    {
+                                        var Response = _Callback.OnRequest(Context, _ServerLogAction);
+
+                                        Context.Response.StatusCode = Response.StatusCode;
+
+                                        if (Response.Headers != null && Response.Headers.Length > 0)
+                                        {
+                                            foreach (Tuple<string, string> CurrentHeader in Response.Headers)
+                                            {
+                                                if (CurrentHeader.Item1.Length > 0)
+                                                {
+                                                    Context.Response.AppendHeader(CurrentHeader.Item1, CurrentHeader.Item2);
+                                                }
+                                            }
+                                        }
+                                        if (Response.Cookies != null && Response.Cookies.Length > 0)
+                                        {
+                                            foreach (Tuple<string, string> CurrentCookie in Response.Cookies)
+                                            {
+                                                if (CurrentCookie.Item1.Length > 0)
+                                                {
+                                                    Context.Response.AppendCookie(new Cookie(CurrentCookie.Item1, CurrentCookie.Item2));
+                                                }
+                                            }
+                                        }
+
+                                        Context.Response.ContentType = BWebUtilities.GetMimeStringFromEnum(Response.ResponseContentType);
+
+                                        if (Response.ResponseContent.Type == EBStringOrStreamEnum.String)
+                                        {
+                                            byte[] Buffer = Encoding.UTF8.GetBytes(Response.ResponseContent.String);
+                                            if (Buffer != null && Buffer.Length > 0)
+                                            {
+                                                Context.Response.ContentLength64 = Buffer.Length;
+                                                Context.Response.OutputStream.Write(Buffer, 0, Buffer.Length);
+                                            }
+                                            else
+                                            {
+                                                _ServerLogAction?.Invoke("BWebserver->Error: Response is string, but UTF8 encoding result is " + (Response.ResponseContent.String == null ? "null" : "valid") + " and string is " + Response.ResponseContent.String);
+                                                WriteInternalError(Context.Response, "Code: WS-STRGINV.");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (Response.ResponseContent.Stream != null && Response.ResponseContent.StreamLength > 0)
+                                            {
+                                                Context.Response.ContentLength64 = Response.ResponseContent.StreamLength;
+                                                Response.ResponseContent.Stream.CopyTo(Context.Response.OutputStream);
+                                            }
+                                            else
+                                            {
+                                                _ServerLogAction?.Invoke("BWebserver->Error: Response is stream, but stream object is " + (Response.ResponseContent.Stream == null ? "null" : "valid") + " and content length is " + Response.ResponseContent.StreamLength);
+                                                WriteInternalError(Context.Response, "Code: WS-STRMINV.");
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            catch
+                            {
+                                //Suppress any exceptions
+                            }
+                            finally
+                            {
+                                //Always close the stream
+                                Context.Response.OutputStream.Close();
+                            }
+                        });
+                    }
+                }
+                catch
+                {
+                    //Suppress any exceptions
+                }
+            });
+        }
+        
+        private static void WriteInternalError(HttpListenerResponse _WriteTo, string _CustomMessage)
+        {
+            string Resp = BWebResponseStatus.Error_InternalError_String(_CustomMessage);
+            byte[] Buff = Encoding.UTF8.GetBytes(Resp);
+
+            _WriteTo.ContentType = BWebUtilities.GetMimeStringFromEnum(BWebResponseStatus.Error_InternalError_ContentType);
+            _WriteTo.StatusCode = BWebResponseStatus.Error_InternalError_Code;
+            _WriteTo.ContentLength64 = Buff.Length;
+            _WriteTo.OutputStream.Write(Buff, 0, Buff.Length);
+        }
+        private static void WriteNotFound(HttpListenerResponse _WriteTo, string _CustomMessage)
+        {
+            string Resp = BWebResponseStatus.Error_NotFound_String(_CustomMessage);
+            byte[] Buff = Encoding.UTF8.GetBytes(Resp);
+
+            _WriteTo.ContentType = BWebUtilities.GetMimeStringFromEnum(BWebResponseStatus.Error_NotFound_ContentType);
+            _WriteTo.StatusCode = BWebResponseStatus.Error_NotFound_Code;
+            _WriteTo.ContentLength64 = Buff.Length;
+            _WriteTo.OutputStream.Write(Buff, 0, Buff.Length);
+        }
+
+        public void Stop()
+        {
+            try
+            {
+                if (Listener != null)
+                {
+                    Listener.Stop();
+                    Listener.Close();
+                }
+            }
+            catch
+            {
+                //Suppress any exceptions
+            }
+        }
+    }
+
+    public class CDefaultService
+    {
+        public static BWebServiceResponse OnRequest(HttpListenerContext Context, Action<string> _ErrorMessage)
+        {
+            return new BWebServiceResponse(
+                BWebResponseStatus.Status_OK_Code,
+                null,
+                null,
+                new BStringOrStream("Copyright Burak Kara, All rights reserved."),
+                EBResponseContentType.TextHtml);
+        }
+    }
+}
