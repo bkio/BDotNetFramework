@@ -55,10 +55,22 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-FileServi
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-DatabaseService", "Services\BServiceUtilities-DatabaseService\BServiceUtilities-DatabaseService.shproj", "{C7018B29-1B52-49E9-B950-2D324A0F5A84}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-PubSubService", "Services\BServiceUtilities-PubSubService\BServiceUtilities-PubSubService.shproj", "{2980DF72-423B-4445-A6AB-3C0BAA971A33}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-MemoryService", "Services\BServiceUtilities-MemoryService\BServiceUtilities-MemoryService.shproj", "{2018DCBF-3944-4F92-91F2-2275A660804D}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-MailService", "Services\BServiceUtilities-MailService\BServiceUtilities-MailService.shproj", "{96028A89-F350-452E-B7AF-9D16ED6367B4}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-SMSService", "Services\BServiceUtilities-SMSService\BServiceUtilities-SMSService.shproj", "{CBA14AED-AA31-4DD6-A169-5E7187A441DA}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Services\BServiceUtilities-MemoryService\BServiceUtilities-MemoryService.projitems*{2018dcbf-3944-4f92-91f2-2275a660804d}*SharedItemsImports = 13
+		Services\BServiceUtilities-PubSubService\BServiceUtilities-PubSubService.projitems*{2980df72-423b-4445-a6ab-3c0baa971a33}*SharedItemsImports = 13
 		Services\BServiceUtilities-FileService\BServiceUtilities-FileService.projitems*{4d334f6f-894f-45ae-949c-23e97d747d35}*SharedItemsImports = 13
+		Services\BServiceUtilities-MailService\BServiceUtilities-MailService.projitems*{96028a89-f350-452e-b7af-9d16ed6367b4}*SharedItemsImports = 13
 		Services\BServiceUtilities-DatabaseService\BServiceUtilities-DatabaseService.projitems*{c7018b29-1b52-49e9-b950-2d324a0f5a84}*SharedItemsImports = 13
+		Services\BServiceUtilities-SMSService\BServiceUtilities-SMSService.projitems*{cba14aed-aa31-4dd6-a169-5e7187a441da}*SharedItemsImports = 13
 		Services\BServiceUtilities\BServiceUtilities.projitems*{d7336b33-a128-40d9-8fef-14ecec61bfb6}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -174,6 +186,10 @@ Global
 		{D7336B33-A128-40D9-8FEF-14ECEC61BFB6} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 		{4D334F6F-894F-45AE-949C-23E97D747D35} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 		{C7018B29-1B52-49E9-B950-2D324A0F5A84} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{2980DF72-423B-4445-A6AB-3C0BAA971A33} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{2018DCBF-3944-4F92-91F2-2275A660804D} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{96028A89-F350-452E-B7AF-9D16ED6367B4} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{CBA14AED-AA31-4DD6-A169-5E7187A441DA} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0A20A57-39B7-4A17-85B0-DB0190848294}
