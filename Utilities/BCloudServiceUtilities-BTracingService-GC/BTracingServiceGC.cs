@@ -176,7 +176,7 @@ namespace BCloudServiceUtilities.TracingServices
                 Timestamp StartTime = null;
                 try
                 {
-                    StartTime = Timestamp.FromDateTime(DateTime.Parse(_Context.Request.Headers.Get("SpanStartTime")));
+                    StartTime = Timestamp.FromDateTimeOffset(DateTime.Parse(_Context.Request.Headers.Get("SpanStartTime")));
                 }
                 catch (Exception ex)
                 {
