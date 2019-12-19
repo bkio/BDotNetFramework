@@ -2,8 +2,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using BCommonUtilities;
+using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Datastore.V1;
+using Grpc.Auth;
 using Newtonsoft.Json.Linq;
 
 namespace BCloudServiceUtilities.DatabaseServices
@@ -15,7 +18,11 @@ namespace BCloudServiceUtilities.DatabaseServices
         /// </summary>
         private readonly bool bInitializationSucceed;
 
-        private readonly DatastoreDb DSClient;
+        private readonly DatastoreClient DSClient;
+        private readonly DatastoreDb DSDB;
+
+        private readonly ServiceAccountCredential Credential;
+        private readonly Grpc.Core.Channel Channel;
 
         /// <summary>
         /// 
@@ -32,16 +39,50 @@ namespace BCloudServiceUtilities.DatabaseServices
             try
             {
                 string ApplicationCredentials = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
-                string ApplicationCredentialsPlain = Environment.GetEnvironmentVariable("GOOGLE_CREDENTIALS");
+                string ApplicationCredentialsPlain = Environment.GetEnvironmentVariable("GOOGLE_PLAIN_CREDENTIALS");
                 if (ApplicationCredentials == null && ApplicationCredentialsPlain == null)
                 {
-                    _ErrorMessageAction?.Invoke("BDatabaseServiceGC->Constructor: GOOGLE_APPLICATION_CREDENTIALS (or GOOGLE_CREDENTIALS) environment variable is not defined.");
+                    _ErrorMessageAction?.Invoke("BDatabaseServiceGC->Constructor: GOOGLE_APPLICATION_CREDENTIALS (or GOOGLE_PLAIN_CREDENTIALS) environment variable is not defined.");
                     bInitializationSucceed = false;
                 }
                 else
                 {
-                    DSClient = DatastoreDb.Create(_ProjectID);
-                    bInitializationSucceed = DSClient != null;
+                    if (ApplicationCredentials == null)
+                    {
+                        ApplicationCredentialsPlain = BUtility.HexDecode(ApplicationCredentialsPlain);
+                        Credential = GoogleCredential.FromJson(ApplicationCredentialsPlain)
+                                         .CreateScoped(DatastoreClient.DefaultScopes)
+                                         .UnderlyingCredential as ServiceAccountCredential;
+                    }
+                    else
+                    {
+                        using (var Stream = new FileStream(ApplicationCredentials, FileMode.Open, FileAccess.Read))
+                        {
+                            Credential = GoogleCredential.FromStream(Stream)
+                                         .CreateScoped(DatastoreClient.DefaultScopes)
+                                         .UnderlyingCredential as ServiceAccountCredential;
+                        }
+                    }
+
+                    if (Credential != null)
+                    {
+                        Channel = new Grpc.Core.Channel(
+                            DatastoreClient.DefaultEndpoint.ToString(),
+                            Credential.ToChannelCredentials());
+
+                        DSClient = DatastoreClient.Create(Channel);
+                    }
+
+                    if (DSClient != null)
+                    {
+                        DSDB = DatastoreDb.Create(_ProjectID, "", DSClient);
+
+                        bInitializationSucceed = DSDB != null;
+                    }
+                    else
+                    {
+                        bInitializationSucceed = false;
+                    }
                 }
             }
             catch (Exception e)
@@ -84,7 +125,7 @@ namespace BCloudServiceUtilities.DatabaseServices
                 {
                     try
                     {
-                        _ResultKeyFactory = DSClient.CreateKeyFactory(_Kind);
+                        _ResultKeyFactory = DSDB.CreateKeyFactory(_Kind);
                     }
                     catch (Exception e)
                     {
@@ -271,7 +312,7 @@ namespace BCloudServiceUtilities.DatabaseServices
                 Entity ReturnedEntity = null;
                 try
                 {
-                    ReturnedEntity = DSClient.Lookup(Factory.CreateKey(GetFinalKeyFromNameValue(_KeyName, _KeyValue)));
+                    ReturnedEntity = DSDB.Lookup(Factory.CreateKey(GetFinalKeyFromNameValue(_KeyName, _KeyValue)));
                 }
                 catch (Exception e)
                 {
@@ -392,7 +433,7 @@ namespace BCloudServiceUtilities.DatabaseServices
             if (LoadStoreAndGetKindKeyFactory(_Table, out KeyFactory Factory, _ErrorMessageAction))
             {
                 JObject ReturnedPreOperationObject = null;
-                using (DatastoreTransaction Transaction = DSClient.BeginTransaction())
+                using (DatastoreTransaction Transaction = DSDB.BeginTransaction())
                 {
                     if (_PutOrUpdateItemType == EBPutOrUpdateItemType.UpdateItem)
                     {
@@ -672,7 +713,7 @@ namespace BCloudServiceUtilities.DatabaseServices
             if (LoadStoreAndGetKindKeyFactory(_Table, out KeyFactory Factory, _ErrorMessageAction))
             {
                 JObject ReturnedPreOperationObject = null;
-                using (DatastoreTransaction Transaction = DSClient.BeginTransaction())
+                using (DatastoreTransaction Transaction = DSDB.BeginTransaction())
                 {
                     if (!GetItemInTransaction(Transaction, Factory, _KeyName, _KeyValue, out ReturnedPreOperationObject, _ErrorMessageAction))
                     {
@@ -838,7 +879,7 @@ namespace BCloudServiceUtilities.DatabaseServices
             if (LoadStoreAndGetKindKeyFactory(_Table, out KeyFactory Factory, _ErrorMessageAction))
             {
                 JObject ReturnedPreOperationObject = null;
-                using (DatastoreTransaction Transaction = DSClient.BeginTransaction())
+                using (DatastoreTransaction Transaction = DSDB.BeginTransaction())
                 {
                     if (!GetItemInTransaction(Transaction, Factory, _KeyName, _KeyValue, out ReturnedPreOperationObject, _ErrorMessageAction))
                     {
@@ -957,7 +998,7 @@ namespace BCloudServiceUtilities.DatabaseServices
 
             if (LoadStoreAndGetKindKeyFactory(_Table, out KeyFactory Factory, _ErrorMessageAction))
             {
-                using (DatastoreTransaction Transaction = DSClient.BeginTransaction())
+                using (DatastoreTransaction Transaction = DSDB.BeginTransaction())
                 {
                     if (!GetItemInTransaction(Transaction, Factory, _KeyName, _KeyValue, out JObject ReturnItem, _ErrorMessageAction))
                     {
@@ -1046,7 +1087,7 @@ namespace BCloudServiceUtilities.DatabaseServices
 
             if (LoadStoreAndGetKindKeyFactory(_Table, out KeyFactory Factory, _ErrorMessageAction))
             {
-                using (DatastoreTransaction Transaction = DSClient.BeginTransaction())
+                using (DatastoreTransaction Transaction = DSDB.BeginTransaction())
                 {
                     if (_ReturnItemBehaviour == EBReturnItemBehaviour.ReturnAllOld)
                     {
@@ -1099,7 +1140,7 @@ namespace BCloudServiceUtilities.DatabaseServices
             DatastoreQueryResults QueryResult = null;
             try
             {
-                QueryResult = DSClient.RunQuery(new Query(_Table));
+                QueryResult = DSDB.RunQuery(new Query(_Table));
             }
             catch (Exception e)
             {

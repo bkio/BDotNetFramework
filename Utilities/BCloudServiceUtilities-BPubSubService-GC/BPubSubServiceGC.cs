@@ -10,6 +10,7 @@ using BCommonUtilities;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.PubSub.V1;
 using Google.Protobuf;
+using Grpc.Auth;
 using Grpc.Core;
 using Newtonsoft.Json.Linq;
 
@@ -24,7 +25,10 @@ namespace BCloudServiceUtilities.PubSubServices
 
         private readonly string ProjectID;
 
-        private readonly ServiceAccountCredential Credential;
+        private readonly ServiceAccountCredential PublishCredential;
+        private readonly ServiceAccountCredential SubscribeCredential;
+        private readonly Channel PublishChannel;
+        private readonly Channel SubscribeChannel;
 
         private readonly Dictionary<string, PublisherServiceApiClient> PublisherTopicDictionary = new Dictionary<string, PublisherServiceApiClient>();
         private readonly List<BTuple<string, SubscriberServiceApiClient, SubscriptionName>> SubscriberTopicList = new List<BTuple<string, SubscriberServiceApiClient, SubscriptionName>>();
@@ -50,51 +54,68 @@ namespace BCloudServiceUtilities.PubSubServices
             try
             {
                 string ApplicationCredentials = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
-                string ApplicationCredentialsPlain = Environment.GetEnvironmentVariable("GOOGLE_CREDENTIALS");
+                string ApplicationCredentialsPlain = Environment.GetEnvironmentVariable("GOOGLE_PLAIN_CREDENTIALS");
                 if (ApplicationCredentials == null && ApplicationCredentialsPlain == null)
                 {
-                    _ErrorMessageAction?.Invoke("BPubSubServiceGC->Constructor: GOOGLE_APPLICATION_CREDENTIALS (or GOOGLE_CREDENTIALS) environment variable is not defined.");
+                    _ErrorMessageAction?.Invoke("BPubSubServiceGC->Constructor: GOOGLE_APPLICATION_CREDENTIALS (or GOOGLE_PLAIN_CREDENTIALS) environment variable is not defined.");
                     bInitializationSucceed = false;
                 }
                 else
                 {
-                    var Scopes = new List<string>();
+                    var PublishScopes = new List<string>();
+                    var SubscribeScopes = new List<string>();
                     foreach (var Scope in PublisherServiceApiClient.DefaultScopes)
                     {
-                        if (!Scopes.Contains(Scope))
+                        if (!PublishScopes.Contains(Scope))
                         {
-                            Scopes.Add(Scope);
+                            PublishScopes.Add(Scope);
                         }
                     }
                     foreach (var Scope in SubscriberServiceApiClient.DefaultScopes)
                     {
-                        if (!Scopes.Contains(Scope))
+                        if (!SubscribeScopes.Contains(Scope))
                         {
-                            Scopes.Add(Scope);
+                            SubscribeScopes.Add(Scope);
                         }
                     }
 
                     if (ApplicationCredentials == null)
                     {
-                        Credential = GoogleCredential.FromJson(ApplicationCredentialsPlain)
+                        ApplicationCredentialsPlain = BUtility.HexDecode(ApplicationCredentialsPlain);
+                        PublishCredential = GoogleCredential.FromJson(ApplicationCredentialsPlain)
                                 .CreateScoped(
-                                Scopes.ToArray())
+                                PublishScopes.ToArray())
+                                .UnderlyingCredential as ServiceAccountCredential;
+                        SubscribeCredential = GoogleCredential.FromJson(ApplicationCredentialsPlain)
+                                .CreateScoped(
+                                SubscribeScopes.ToArray())
                                 .UnderlyingCredential as ServiceAccountCredential;
                     }
                     else
                     {
                         using (var Stream = new FileStream(ApplicationCredentials, FileMode.Open, FileAccess.Read))
                         {
-                            Credential = GoogleCredential.FromStream(Stream)
+                            PublishCredential = GoogleCredential.FromStream(Stream)
                                 .CreateScoped(
-                                Scopes.ToArray())
+                                PublishScopes.ToArray())
+                                .UnderlyingCredential as ServiceAccountCredential;
+                            SubscribeCredential = GoogleCredential.FromStream(Stream)
+                                .CreateScoped(
+                                SubscribeScopes.ToArray())
                                 .UnderlyingCredential as ServiceAccountCredential;
                         }
                     }
                     
-
-                    if (Credential != null)
+                    if (PublishCredential != null && SubscribeCredential != null)
                     {
+                        PublishChannel = new Channel(
+                            PublisherServiceApiClient.DefaultEndpoint.ToString(),
+                            PublishCredential.ToChannelCredentials());
+
+                        SubscribeChannel = new Channel(
+                            SubscriberServiceApiClient.DefaultEndpoint.ToString(),
+                            SubscribeCredential.ToChannelCredentials());
+
                         bInitializationSucceed = true;
                     }
                     else
@@ -131,7 +152,7 @@ namespace BCloudServiceUtilities.PubSubServices
 
                 try
                 {
-                    Result = PublisherServiceApiClient.Create();
+                    Result = PublisherServiceApiClient.Create(PublishChannel);
                     PublisherTopicDictionary[GoogleFriendlyTopicName.TopicId] = Result;
                 }
                 catch (Exception e)
@@ -168,7 +189,7 @@ namespace BCloudServiceUtilities.PubSubServices
 
                 try
                 {
-                    APIClientVar = SubscriberServiceApiClient.Create();
+                    APIClientVar = SubscriberServiceApiClient.Create(SubscribeChannel);
                 }
                 catch (Exception e)
                 {
@@ -217,7 +238,7 @@ namespace BCloudServiceUtilities.PubSubServices
             {
                 if (_PublisherAPIClient == null)
                 {
-                    _PublisherAPIClient = PublisherServiceApiClient.Create();
+                    _PublisherAPIClient = PublisherServiceApiClient.Create(PublishChannel);
                 }
                 _PublisherAPIClient.CreateTopic(_TopicInstance);
             }
@@ -237,7 +258,7 @@ namespace BCloudServiceUtilities.PubSubServices
         }
         private bool DeleteTopic(TopicName _TopicInstance, Action<string> _ErrorMessageAction)
         {
-            var PublisherAPIClient = PublisherServiceApiClient.Create();
+            var PublisherAPIClient = PublisherServiceApiClient.Create(SubscribeChannel);
             try
             {
                 PublisherAPIClient.DeleteTopic(_TopicInstance);

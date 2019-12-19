@@ -2,11 +2,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Timers;
+using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Trace.V2;
 using Google.Protobuf.WellKnownTypes;
+using Grpc.Auth;
 
 namespace BCloudServiceUtilities.TracingServices
 {
@@ -22,6 +25,9 @@ namespace BCloudServiceUtilities.TracingServices
         private readonly Google.Api.Gax.ResourceNames.ProjectName ProjectName;
 
         private readonly TraceServiceClient TraceClient;
+
+        private readonly ServiceAccountCredential Credential;
+        private readonly Grpc.Core.Channel Channel;
 
         private readonly List<Span> Spans = new List<Span>();
 
@@ -62,22 +68,64 @@ namespace BCloudServiceUtilities.TracingServices
             try
             {
                 string ApplicationCredentials = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
-                string ApplicationCredentialsPlain = Environment.GetEnvironmentVariable("GOOGLE_CREDENTIALS");
+                string ApplicationCredentialsPlain = Environment.GetEnvironmentVariable("GOOGLE_PLAIN_CREDENTIALS");
                 if (ApplicationCredentials == null && ApplicationCredentialsPlain == null)
                 {
-                    _ErrorMessageAction?.Invoke("BTracingServiceGC->Constructor: GOOGLE_APPLICATION_CREDENTIALS (or GOOGLE_CREDENTIALS) environment variable is not defined.");
+                    _ErrorMessageAction?.Invoke("BTracingServiceGC->Constructor: GOOGLE_APPLICATION_CREDENTIALS (or GOOGLE_PLAIN_CREDENTIALS) environment variable is not defined.");
                     bInitializationSucceed = false;
                 }
                 else
                 {
-                    TraceClient = TraceServiceClient.Create();
-                    ProjectName = new Google.Api.Gax.ResourceNames.ProjectName(_ProjectID);
-                    bInitializationSucceed = TraceClient != null;
+                    var Scopes = new List<string>();
+                    foreach (var Scope in TraceServiceClient.DefaultScopes)
+                    {
+                        if (!Scopes.Contains(Scope))
+                        {
+                            Scopes.Add(Scope);
+                        }
+                    }
 
-                    UploadTimer = new Timer(1_000);
-                    UploadTimer.Elapsed += OnTimedEvent;
-                    UploadTimer.AutoReset = true;
-                    UploadTimer.Enabled = true;
+                    if (ApplicationCredentials == null)
+                    {
+                        ApplicationCredentialsPlain = BUtility.HexDecode(ApplicationCredentialsPlain);
+                        Credential = GoogleCredential.FromJson(ApplicationCredentialsPlain)
+                                .CreateScoped(
+                                Scopes.ToArray())
+                                .UnderlyingCredential as ServiceAccountCredential;
+                    }
+                    else
+                    {
+                        using (var Stream = new FileStream(ApplicationCredentials, FileMode.Open, FileAccess.Read))
+                        {
+                            Credential = GoogleCredential.FromStream(Stream)
+                                .CreateScoped(
+                                Scopes.ToArray())
+                                .UnderlyingCredential as ServiceAccountCredential;
+                        }
+                    }
+
+                    if (Credential != null)
+                    {
+                        Channel = new Grpc.Core.Channel(
+                            TraceServiceClient.DefaultEndpoint.ToString(),
+                            Credential.ToChannelCredentials());
+                    }
+
+                    if (Channel != null)
+                    {
+                        TraceClient = TraceServiceClient.Create(Channel);
+                        ProjectName = new Google.Api.Gax.ResourceNames.ProjectName(_ProjectID);
+                        bInitializationSucceed = TraceClient != null;
+
+                        UploadTimer = new Timer(1_000);
+                        UploadTimer.Elapsed += OnTimedEvent;
+                        UploadTimer.AutoReset = true;
+                        UploadTimer.Enabled = true;
+                    }
+                    else
+                    {
+                        bInitializationSucceed = false;
+                    }
                 }
             }
             catch (Exception e)

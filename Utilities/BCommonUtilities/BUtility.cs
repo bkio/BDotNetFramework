@@ -586,6 +586,29 @@ namespace BCommonUtilities
 
         /// <summary>
         /// 
+        /// <para>HexDecode:</para>
+        /// 
+        /// <para>Decodes Hex String</para>
+        /// 
+        /// <para>Parameters:</para>
+        /// <para><paramref name="_Input"/>                       Input Parameter</para>
+        /// 
+        /// <returns> Returns:                                    Hex-decoded string</returns>
+        /// 
+        /// </summary>
+        /// 
+        public static string HexDecode(string _Input)
+        {
+            var Result = new byte[_Input.Length / 2];
+            for (var i = 0; i < Result.Length; i++)
+            {
+                Result[i] = Convert.ToByte(_Input.Substring(i * 2, 2), 16);
+            }
+            return Encoding.ASCII.GetString(Result);
+        }
+
+        /// <summary>
+        /// 
         /// <para>GetApplicationExePath:</para>
         /// 
         /// <para>Returns full path to this exe</para>

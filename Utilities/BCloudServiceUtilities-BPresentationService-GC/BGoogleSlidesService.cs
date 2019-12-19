@@ -41,17 +41,18 @@ namespace BCloudServiceUtilities
             try
             {
                 string ApplicationCredentials = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
-                string ApplicationCredentialsPlain = Environment.GetEnvironmentVariable("GOOGLE_CREDENTIALS");
+                string ApplicationCredentialsPlain = Environment.GetEnvironmentVariable("GOOGLE_PLAIN_CREDENTIALS");
 
                 if (ApplicationCredentials == null && ApplicationCredentialsPlain == null)
                 {
-                    _ErrorMessageAction?.Invoke("BGoogleSlidesService->Constructor: GOOGLE_APPLICATION_CREDENTIALS (or GOOGLE_CREDENTIALS) environment variable is not defined.");
+                    _ErrorMessageAction?.Invoke("BGoogleSlidesService->Constructor: GOOGLE_APPLICATION_CREDENTIALS (or GOOGLE_PLAIN_CREDENTIALS) environment variable is not defined.");
                     bInitializationSucceed = false;
                 }
                 else
                 {
                     if (ApplicationCredentials == null)
                     {
+                        ApplicationCredentialsPlain = BUtility.HexDecode(ApplicationCredentialsPlain);
                         Credential = GoogleCredential.FromJson(ApplicationCredentialsPlain)
                                          .CreateScoped(
                                             new string[]

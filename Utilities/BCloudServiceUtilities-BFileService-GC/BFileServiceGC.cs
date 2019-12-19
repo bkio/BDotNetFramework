@@ -19,7 +19,8 @@ namespace BCloudServiceUtilities.FileServices
         /// <summary>Holds initialization success</summary>
         private readonly bool bInitializationSucceed;
 
-        private readonly ServiceAccountCredential Credential;
+        private readonly GoogleCredential Credential;
+        private readonly ServiceAccountCredential CredentialScoped;
 
         private readonly string ProjectID;
 
@@ -38,22 +39,21 @@ namespace BCloudServiceUtilities.FileServices
             try
             {
                 string ApplicationCredentials = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
-                string ApplicationCredentialsPlain = Environment.GetEnvironmentVariable("GOOGLE_CREDENTIALS");
+                string ApplicationCredentialsPlain = Environment.GetEnvironmentVariable("GOOGLE_PLAIN_CREDENTIALS");
                 if (ApplicationCredentials == null && ApplicationCredentialsPlain == null)
                 {
-                    _ErrorMessageAction?.Invoke("BFileServiceGC->Constructor: GOOGLE_APPLICATION_CREDENTIALS (or GOOGLE_CREDENTIALS) environment variable is not defined.");
+                    _ErrorMessageAction?.Invoke("BFileServiceGC->Constructor: GOOGLE_APPLICATION_CREDENTIALS (or GOOGLE_PLAIN_CREDENTIALS) environment variable is not defined.");
                     bInitializationSucceed = false;
                 }
                 else
                 {
                     ProjectID = _ProjectID;
 
-                    GSClient = StorageClient.Create();
-
                     if (ApplicationCredentials == null)
                     {
-                        Credential = GoogleCredential.FromJson(ApplicationCredentialsPlain)
-                                .CreateScoped(
+                        ApplicationCredentialsPlain = BUtility.HexDecode(ApplicationCredentialsPlain);
+                        Credential = GoogleCredential.FromJson(ApplicationCredentialsPlain);
+                        CredentialScoped = Credential.CreateScoped(
                                 new string[]
                                 {
                                     StorageService.Scope.DevstorageReadWrite
@@ -64,19 +64,21 @@ namespace BCloudServiceUtilities.FileServices
                     {
                         using (var Stream = new FileStream(ApplicationCredentials, FileMode.Open, FileAccess.Read))
                         {
-                            Credential = GoogleCredential.FromStream(Stream)
-                                .CreateScoped(
-                                new string[]
-                                {
-                                    StorageService.Scope.DevstorageReadWrite
-                                })
-                                .UnderlyingCredential as ServiceAccountCredential;
+                            Credential = GoogleCredential.FromStream(Stream);
+                            CredentialScoped = Credential.CreateScoped(
+                                    new string[]
+                                    {
+                                        StorageService.Scope.DevstorageReadWrite
+                                    })
+                                    .UnderlyingCredential as ServiceAccountCredential;
                         }
                     }
 
                     if (Credential != null)
                     {
-                        bInitializationSucceed = true;
+                        GSClient = StorageClient.Create(Credential);
+
+                        bInitializationSucceed = GSClient != null;
                     }
                     else
                     {
@@ -319,7 +321,7 @@ namespace BCloudServiceUtilities.FileServices
 
             try
             {                  
-                UrlSigner Signer = UrlSigner.FromServiceAccountCredential(Credential);
+                UrlSigner Signer = UrlSigner.FromServiceAccountCredential(CredentialScoped);
                 _SignedUrl = Signer.Sign(_BucketName, _KeyInBucket, TimeSpan.FromMinutes(_URLValidForMinutes), HttpMethod.Put, null, ContentHeaders);
             }
             catch (Exception e)
@@ -349,7 +351,7 @@ namespace BCloudServiceUtilities.FileServices
         {
             try
             {
-                UrlSigner Signer = UrlSigner.FromServiceAccountCredential(Credential);
+                UrlSigner Signer = UrlSigner.FromServiceAccountCredential(CredentialScoped);
                 _SignedUrl = Signer.Sign(_BucketName, _KeyInBucket, TimeSpan.FromMinutes(_URLValidForMinutes), HttpMethod.Get);
             }
             catch (Exception e)
