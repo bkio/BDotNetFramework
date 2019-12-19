@@ -136,7 +136,7 @@ namespace BCloudServiceUtilities.TracingServices
             //Start
             if (_StartOrEndInRequest)
             {
-                _Context.Request.Headers.Set("SpanStartTime", DateTime.UtcNow.ToString());
+                _Context.Request.Headers.Set("SpanStartTime", DateTime.Now.ToString());
             }
             //End
             else
@@ -188,8 +188,8 @@ namespace BCloudServiceUtilities.TracingServices
                     SpanName = LegitSpanName,
                     DisplayName = TruncString,
                     SpanId = SpanID,
-                    StartTime = StartTime ?? Timestamp.FromDateTimeOffset(DateTime.UtcNow),
-                    EndTime = Timestamp.FromDateTimeOffset(DateTime.UtcNow),
+                    StartTime = StartTime ?? Timestamp.FromDateTimeOffset(DateTime.Now),
+                    EndTime = Timestamp.FromDateTimeOffset(DateTime.Now),
                     Attributes = new Span.Types.Attributes()
                 };
                 if (ParentSpanID != null)
