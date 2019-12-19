@@ -10,11 +10,11 @@ namespace BWebServiceUtilities
     {
         public readonly int StatusCode;
         public readonly Tuple<string, string>[] Headers;
-        public readonly Tuple<string, string>[] Cookies;
+        public readonly Tuple<string, string, string>[] Cookies;
         public readonly BStringOrStream ResponseContent;
         public readonly EBResponseContentType ResponseContentType;
 
-        public BWebServiceResponse(int _StatusCode, Tuple<string, string>[] _Headers, Tuple<string, string>[] _Cookies, BStringOrStream _ResponseContent, EBResponseContentType _ResponseContentType)
+        public BWebServiceResponse(int _StatusCode, Tuple<string, string>[] _Headers, Tuple<string, string, string>[] _Cookies, BStringOrStream _ResponseContent, EBResponseContentType _ResponseContentType)
         {
             StatusCode = _StatusCode;
             Headers = _Headers;

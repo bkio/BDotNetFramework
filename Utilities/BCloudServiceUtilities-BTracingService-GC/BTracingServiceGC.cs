@@ -206,8 +206,8 @@ namespace BCloudServiceUtilities.TracingServices
                 }
                 SpanID = GetRandomHexNumber(16);
 
-                _Context.Response.Headers.Set("TraceID", TraceID);
-                _Context.Response.Headers.Set("SpanID", SpanID);
+                _Context.Request.Headers.Set("TraceID", TraceID);
+                _Context.Request.Headers.Set("SpanID", SpanID);
 
                 var LegitSpanName = new SpanName(ProjectName.ProjectId, TraceID, SpanID);
                 var TruncString = new TruncatableString

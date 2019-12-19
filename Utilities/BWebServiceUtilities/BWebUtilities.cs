@@ -87,7 +87,7 @@ namespace BWebServiceUtilities
         public static bool PerformHTTPRequestSynchronously(
             out int _ResultCode,
             out Tuple<string, string>[] _ResultHeaders,
-            out Tuple<string, string>[] _ResultCookies,
+            out Tuple<string, string, string>[] _ResultCookies,
             out HttpWebResponse _ResultResponse,
             out EBResponseContentType _ResultContentType,
             string _Url,
@@ -195,16 +195,16 @@ namespace BWebServiceUtilities
                         ResponseHeaders[j] = new Tuple<string, string>(Response.Headers.Keys[j], CombinedValues);
                     }
                 }
-                Tuple<string, string>[] ResponseCookies = null;
+                Tuple<string, string, string>[] ResponseCookies = null;
                 if (Response.Cookies != null && Response.Cookies.Count > 0)
                 {
-                    ResponseCookies = new Tuple<string, string>[Response.Cookies.Count];
+                    ResponseCookies = new Tuple<string, string, string>[Response.Cookies.Count];
                     for (int j = 0; j < Response.Cookies.Count; j++)
                     {
                         var CurrentCookie = Response.Cookies[j];
                         if (CurrentCookie != null)
                         {
-                            ResponseCookies[j] = new Tuple<string, string>(CurrentCookie.Name, CurrentCookie.Value);
+                            ResponseCookies[j] = new Tuple<string, string, string>(CurrentCookie.Name, CurrentCookie.Value, CurrentCookie.Domain);
                         }
                     }
                 }
@@ -235,6 +235,74 @@ namespace BWebServiceUtilities
             {
                 _ErrorMessageAction?.Invoke("BWebUtilities->PerformHTTPRequestSynchronously: Response read failed: " + e.Message + ", Trace: " + e.StackTrace);
                 return false;
+            }
+        }
+
+        public static void InjectHeadersFromTupleArraysIntoContext(Tuple<string, string>[] _Headers, HttpListenerContext _Context)
+        {
+            if (_Headers != null && _Headers.Length > 0)
+            {
+                foreach (var Header in _Headers)
+                {
+                    if (Header != null)
+                    {
+                        _Context.Request.Headers.Set(Header.Item1, Header.Item2);
+                    }
+                }
+            }
+        }
+
+        public static void ExtractHeadersCookiesAsTupleArraysFromContext(out Tuple<string, string>[] _Headers, out Tuple<string, string, string>[] _Cookies, HttpListenerContext _Context)
+        {
+            var TempHeaderList = new List<Tuple<string, string>>();
+            if (_Context.Request.Headers != null && _Context.Request.Headers.AllKeys != null)
+            {
+                foreach (var HeaderKey in _Context.Request.Headers.AllKeys)
+                {
+                    if (HeaderKey != null)
+                    {
+                        var HeaderValues = _Context.Request.Headers.GetValues(HeaderKey);
+                        if (HeaderValues != null)
+                        {
+                            foreach (var HeaderValue in HeaderValues)
+                            {
+                                if (HeaderValue != null)
+                                {
+                                    TempHeaderList.Add(new Tuple<string, string>(HeaderKey, HeaderValue));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (TempHeaderList.Count == 0)
+            {
+                _Headers = null;
+            }
+            else
+            {
+                _Headers = TempHeaderList.ToArray();
+            }
+
+            var TempCookieList = new List<Tuple<string, string, string>>();
+            if (_Context.Request.Cookies != null)
+            {
+                for (int i = 0; i < _Context.Request.Cookies.Count; i++)
+                {
+                    var CurrentCookie = _Context.Request.Cookies[i];
+                    if (CurrentCookie != null)
+                    {
+                        TempCookieList.Add(new Tuple<string, string, string>(CurrentCookie.Name, CurrentCookie.Value, CurrentCookie.Domain));
+                    }
+                }
+            }
+            if (TempCookieList.Count == 0)
+            {
+                _Cookies = null;
+            }
+            else
+            {
+                _Cookies = TempCookieList.ToArray();
             }
         }
 

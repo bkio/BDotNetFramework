@@ -141,11 +141,11 @@ namespace BWebServiceUtilities
                                         }
                                         if (Response.Cookies != null && Response.Cookies.Length > 0)
                                         {
-                                            foreach (Tuple<string, string> CurrentCookie in Response.Cookies)
+                                            foreach (Tuple<string, string, string> CurrentCookie in Response.Cookies)
                                             {
                                                 if (CurrentCookie.Item1.Length > 0)
                                                 {
-                                                    Context.Response.AppendCookie(new Cookie(CurrentCookie.Item1, CurrentCookie.Item2));
+                                                    Context.Response.AppendCookie(new Cookie(CurrentCookie.Item1, CurrentCookie.Item2, "/", CurrentCookie.Item3));
                                                 }
                                             }
                                         }
