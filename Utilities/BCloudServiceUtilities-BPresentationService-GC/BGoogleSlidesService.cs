@@ -10,6 +10,7 @@ using Google.Apis.Requests;
 using Google.Apis.Services;
 using Google.Apis.Slides.v1;
 using Google.Apis.Slides.v1.Data;
+using BCommonUtilities;
 
 namespace BCloudServiceUtilities
 {

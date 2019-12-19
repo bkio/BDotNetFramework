@@ -3,12 +3,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using BCommonUtilities;
 using Google.Api;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Logging.Type;
 using Google.Cloud.Logging.V2;
 using Grpc.Auth;
+using BCommonUtilities;
 
 namespace BCloudServiceUtilities.LoggingServices
 {

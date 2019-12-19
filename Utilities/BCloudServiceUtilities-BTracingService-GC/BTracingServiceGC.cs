@@ -10,6 +10,7 @@ using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Trace.V2;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Auth;
+using BCommonUtilities;
 
 namespace BCloudServiceUtilities.TracingServices
 {
