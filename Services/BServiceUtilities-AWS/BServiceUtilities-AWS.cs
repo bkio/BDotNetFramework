@@ -57,17 +57,17 @@ namespace BServiceUtilities
         public static bool Initialize(
             out BServiceInitializer _Result,
             Action<string> _PreLoggingServiceLogger = null,
-            string[] _RequiredExtraEnvVars = null)
+            string[][] _RequiredExtraEnvVars = null)
         {
             var Instance = new BServiceInitializer();
             _Result = null;
 
             Instance.PreLoggingServiceLogger = _PreLoggingServiceLogger;
 
-            var RequiredEnvVarKeys = new List<string>()
+            var RequiredEnvVarKeys = new List<string[]>()
             {
-                "PORT",
-                "PROGRAM_ID"
+                new string[] { "PORT" },
+                new string[] { "PROGRAM_ID" }
             };
             if (_RequiredExtraEnvVars != null)
             {
@@ -83,11 +83,11 @@ namespace BServiceUtilities
 
             //Cloud provider setup
             if (!BUtility.GetEnvironmentVariables(out Instance.CloudProviderEnvVars,
-                new string[]
+                new string[][]
                 {
-                    "AWS_ACCESS_KEY",
-                    "AWS_SECRET_KEY",
-                    "AWS_REGION"
+                    new string[] { "AWS_ACCESS_KEY" },
+                    new string[] { "AWS_SECRET_KEY" },
+                    new string[] { "AWS_REGION" }
                 },
                 _PreLoggingServiceLogger)) return false;
 

@@ -32,9 +32,10 @@ namespace BCloudServiceUtilities.DatabaseServices
             try
             {
                 string ApplicationCredentials = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
-                if (ApplicationCredentials == null)
+                string ApplicationCredentialsPlain = Environment.GetEnvironmentVariable("GOOGLE_CREDENTIALS");
+                if (ApplicationCredentials == null && ApplicationCredentialsPlain == null)
                 {
-                    _ErrorMessageAction?.Invoke("BDatabaseServiceGC->Constructor: GOOGLE_APPLICATION_CREDENTIALS environment variable is not defined.");
+                    _ErrorMessageAction?.Invoke("BDatabaseServiceGC->Constructor: GOOGLE_APPLICATION_CREDENTIALS (or GOOGLE_CREDENTIALS) environment variable is not defined.");
                     bInitializationSucceed = false;
                 }
                 else

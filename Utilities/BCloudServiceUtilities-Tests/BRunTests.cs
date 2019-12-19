@@ -83,9 +83,9 @@ namespace BCloudServiceUtilitiesTest
         public static bool RunTests()
         {
             if (!BUtility.GetEnvironmentVariables(out Dictionary<string, string> RequiredEnvVars,
-                new string[]
+                new string[][]
                 {
-                    "GC_PROJECT_ID"
+                    new string[] { "GC_PROJECT_ID" }
                 },
                 Console.WriteLine)) return false;
 

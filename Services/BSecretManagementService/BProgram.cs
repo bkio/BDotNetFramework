@@ -28,9 +28,9 @@ namespace BSecretManagementService
             * Common initialization step
             */
             if (!BServiceInitializer.Initialize(out BServiceInitializer ServInit, Console.WriteLine, 
-                new string[]
+                new string[][]
                 {
-                    "SECRETS_STORAGE_BUCKET"
+                    new string[] { "SECRETS_STORAGE_BUCKET" }
                 }))
                 return;
 

@@ -217,23 +217,24 @@ namespace BCommonUtilities
 
     public static class BUtility
     {
+        //Option based; in the second array, it is sufficient for one of the elements to exists in environment variable to succeed.
         public static bool GetEnvironmentVariables(
-            out Dictionary<string, string> _ParsedResult, 
-            IEnumerable<string> _VaribleKeys,
+            out Dictionary<string, string> _ParsedResult,
+            IEnumerable<IEnumerable<string>> _VaribleKeysOptions,
             Action<string> _ErrorMessageAction)
         {
-            if (_VaribleKeys == null)
+            if (_VaribleKeysOptions == null)
             {
                 _ParsedResult = null;
-                _ErrorMessageAction?.Invoke("BUtility->GetRequiredEnvironmentVariables: Input VariableKeys is null.");
+                _ErrorMessageAction?.Invoke("BUtility->GetRequiredEnvironmentVariables: Input _VaribleKeysOptions is null.");
                 return false;
             }
 
-            var Count = _VaribleKeys.Count();
+            var Count = _VaribleKeysOptions.Count();
             if (Count == 0)
             {
                 _ParsedResult = null;
-                _ErrorMessageAction?.Invoke("BUtility->GetRequiredEnvironmentVariables: Input VariableKeys does not have a key.");
+                _ErrorMessageAction?.Invoke("BUtility->GetRequiredEnvironmentVariables: Input _VaribleKeysOptions does not have a key.");
                 return false;
             }
 
@@ -243,9 +244,30 @@ namespace BCommonUtilities
             _ParsedResult = new Dictionary<string, string>(Count);
             try
             {
-                foreach (var VarKey in _VaribleKeys)
+                foreach (var VarKey in _VaribleKeysOptions)
                 {
-                    _ParsedResult[VarKey] = Environment.GetEnvironmentVariable(VarKey);
+                    if (VarKey.Count() == 0)
+                    {
+                        _ParsedResult = null;
+                        _ErrorMessageAction?.Invoke("BUtility->GetRequiredEnvironmentVariables: Some required environment variable options are not set.");
+                        return false;
+                    }
+
+                    bool bFound = false;
+                    foreach (var OptionKey in VarKey)
+                    {
+                        _ParsedResult[OptionKey] = Environment.GetEnvironmentVariable(OptionKey);
+                        if (_ParsedResult[OptionKey] != null)
+                        {
+                            bFound = true;
+                        }
+                    }
+                    if (!bFound)
+                    {
+                        _ParsedResult = null;
+                        _ErrorMessageAction?.Invoke("BUtility->GetRequiredEnvironmentVariables: Some required environment variables are not set.");
+                        return false;
+                    }
                 }
             }
             catch (Exception e)
@@ -253,15 +275,6 @@ namespace BCommonUtilities
                 _ParsedResult = null;
                 _ErrorMessageAction?.Invoke("BUtility->GetRequiredEnvironmentVariables: Failure during getting required environment variables: " + e.Message);
                 return false;
-            }
-            foreach (var EnvVar in _ParsedResult)
-            {
-                if (EnvVar.Value == null)
-                {
-                    _ParsedResult = null;
-                    _ErrorMessageAction?.Invoke("BUtility->GetRequiredEnvironmentVariables: Some required environment variables are not set.");
-                    return false;
-                }
             }
             return true;
         }
