@@ -13,6 +13,7 @@ namespace BSecretManagementService
     /// <summary>
     /// 
     /// <para>Check BServiceUtilities.BServiceInitializer for required common environment variables.</para>
+    /// <para>Also check BServiceUtilities.TracingService for required additional environment variables.</para>
     /// 
     /// <para>Service specific environment variables:</para>
     /// 
@@ -32,6 +33,9 @@ namespace BSecretManagementService
                     "SECRETS_STORAGE_BUCKET"
                 }))
                 return;
+
+            //Tracing service is required
+            if (!ServInit.WithTracingService()) return;
 
             //File service is required
             if (!ServInit.WithFileService()) return;

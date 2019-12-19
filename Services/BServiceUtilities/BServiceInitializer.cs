@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using BCloudServiceUtilities;
 using BCloudServiceUtilities.LoggingServices;
-using BCloudServiceUtilities.TracingServices;
 using BCommonUtilities;
 
 namespace BServiceUtilities
@@ -20,9 +19,7 @@ namespace BServiceUtilities
     /// <para>Parameters:</para>
     /// <para>1) PROGRAM_ID:                                Program Unique ID</para>
     /// <para>2) CLOUD_PROVIDER:                            AWS or GC</para>
-    /// <para>3) TRACING_SERVER_IP:                         Tracing Service IP</para>
-    /// <para>4) TRACING_SERVER_PORT:                       Tracing Service Port</para>
-    /// <para>5) PORT:                                      Port of the http server</para>
+    /// <para>3) PORT:                                      Port of the http server</para>
     /// 
     /// </summary>
     public partial class BServiceInitializer
@@ -43,11 +40,6 @@ namespace BServiceUtilities
         public IBLoggingServiceInterface LoggingService { get; private set; } = null;
 
         /// <summary>
-        /// <para>Initialized Tracing Service</para>
-        /// </summary>
-        public IBTracingServiceInterface TracingService { get; private set; } = null;
-
-        /// <summary>
         /// <para>HTTP Server Port</para>
         /// </summary>
         public int ServerPort { get; private set; }
@@ -63,6 +55,11 @@ namespace BServiceUtilities
         public Dictionary<string, string> RequiredEnvironmentVariables { get { return _RequiredEnvironmentVariables; } }
         private Dictionary<string, string> _RequiredEnvironmentVariables = null;
 
+        /// <summary>
+        /// <para>Logs created before logging service is initialized will be passed to this action.</para>
+        /// </summary>
+        public Action<string> PreLoggingServiceLogger = null;
+
         public static bool Initialize(
             out BServiceInitializer _Result,
             Action<string> _PreLoggingServiceLogger = null,
@@ -71,13 +68,13 @@ namespace BServiceUtilities
             var Instance = new BServiceInitializer();
             _Result = null;
 
+            Instance.PreLoggingServiceLogger = _PreLoggingServiceLogger;
+
             var RequiredEnvVarKeys = new List<string>()
             {
                 "PORT",
                 "PROGRAM_ID",
-                "CLOUD_PROVIDER",
-                "TRACING_SERVER_IP",
-                "TRACING_SERVER_PORT"
+                "CLOUD_PROVIDER"
             };
             if (_RequiredExtraEnvVars != null)
             {
@@ -121,7 +118,7 @@ namespace BServiceUtilities
             }
 
             /*
-            * Logging and tracing services initialization
+            * Logging service initialization
             */
             if (Instance.CloudProvider == "AWS")
                 Instance.LoggingService = new BLoggingServiceAWS(Instance.CloudProviderEnvVars["AWS_ACCESS_KEY"], Instance.CloudProviderEnvVars["AWS_SECRET_KEY"], Instance.CloudProviderEnvVars["AWS_REGION"], _PreLoggingServiceLogger);
@@ -134,31 +131,6 @@ namespace BServiceUtilities
             }
 
             Instance.ProgramID = Instance.RequiredEnvironmentVariables["PROGRAM_ID"];
-
-            var LoggingServiceLogger = new BLoggingServiceLoggerZipkin(
-                Instance.LoggingService,
-                _PreLoggingServiceLogger,
-                Instance.ProgramID);
-            if (!int.TryParse(Instance.RequiredEnvironmentVariables["TRACING_SERVER_PORT"], out int TracingServerPort))
-            {
-                Instance.LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, "Given tracing server port is invalid."), Instance.ProgramID, "Initialization");
-                return false;
-            }
-
-            Instance.TracingService = new BTracingServiceZipkin(
-                LoggingServiceLogger,
-                Instance.ProgramID,
-                Instance.RequiredEnvironmentVariables["TRACING_SERVER_IP"],
-                TracingServerPort,
-                (string Message) =>
-                {
-                    Instance.LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, Message), Instance.ProgramID, "Initialization");
-                });
-            if (Instance.TracingService == null || !Instance.TracingService.HasInitializationSucceed())
-            {
-                Instance.LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, "Tracing service initialization has failed."), Instance.ProgramID, "Initialization");
-                return false;
-            }
 
             /*
             * Parsing http server port

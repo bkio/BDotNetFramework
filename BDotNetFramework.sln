@@ -63,10 +63,15 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-MailServi
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-SMSService", "Services\BServiceUtilities-SMSService\BServiceUtilities-SMSService.shproj", "{CBA14AED-AA31-4DD6-A169-5E7187A441DA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BTracingService-GC", "Utilities\BCloudServiceUtilities-BTracingService-GC\BCloudServiceUtilities-BTracingService-GC.csproj", "{4A1405F7-7488-4F1C-A520-FF90EF8AF83B}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-TracingService", "Services\BServiceUtilities-TracingService\BServiceUtilities-TracingService.shproj", "{2991128C-4D36-4F98-A3FE-8554E0C27EE7}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Services\BServiceUtilities-MemoryService\BServiceUtilities-MemoryService.projitems*{2018dcbf-3944-4f92-91f2-2275a660804d}*SharedItemsImports = 13
 		Services\BServiceUtilities-PubSubService\BServiceUtilities-PubSubService.projitems*{2980df72-423b-4445-a6ab-3c0baa971a33}*SharedItemsImports = 13
+		Services\BServiceUtilities-TracingService\BServiceUtilities-TracingService.projitems*{2991128c-4d36-4f98-a3fe-8554e0c27ee7}*SharedItemsImports = 13
 		Services\BServiceUtilities-FileService\BServiceUtilities-FileService.projitems*{4d334f6f-894f-45ae-949c-23e97d747d35}*SharedItemsImports = 13
 		Services\BServiceUtilities-MailService\BServiceUtilities-MailService.projitems*{96028a89-f350-452e-b7af-9d16ed6367b4}*SharedItemsImports = 13
 		Services\BServiceUtilities-DatabaseService\BServiceUtilities-DatabaseService.projitems*{c7018b29-1b52-49e9-b950-2d324a0f5a84}*SharedItemsImports = 13
@@ -158,6 +163,10 @@ Global
 		{1ACDADFE-53D8-4171-BB66-85AFE91205DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1ACDADFE-53D8-4171-BB66-85AFE91205DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1ACDADFE-53D8-4171-BB66-85AFE91205DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A1405F7-7488-4F1C-A520-FF90EF8AF83B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A1405F7-7488-4F1C-A520-FF90EF8AF83B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A1405F7-7488-4F1C-A520-FF90EF8AF83B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A1405F7-7488-4F1C-A520-FF90EF8AF83B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -190,6 +199,8 @@ Global
 		{2018DCBF-3944-4F92-91F2-2275A660804D} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 		{96028A89-F350-452E-B7AF-9D16ED6367B4} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 		{CBA14AED-AA31-4DD6-A169-5E7187A441DA} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{4A1405F7-7488-4F1C-A520-FF90EF8AF83B} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
+		{2991128C-4D36-4F98-A3FE-8554E0C27EE7} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0A20A57-39B7-4A17-85B0-DB0190848294}
