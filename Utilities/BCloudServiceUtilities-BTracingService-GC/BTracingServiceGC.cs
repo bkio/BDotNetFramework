@@ -181,10 +181,10 @@ namespace BCloudServiceUtilities.TracingServices
             }
         }
 
-        private void AddTrace(HttpListenerContext _Context, bool _bNewSpan, bool _StartOrEndInRequest, Action<string> _ErrorMessageAction = null)
+        private void AddTrace(HttpListenerContext _Context, bool _bNewSpan, Action<string> _ErrorMessageAction = null)
         {
             //Start
-            if (_StartOrEndInRequest)
+            if (_bNewSpan)
             {
                 _Context.Request.Headers.Set("SpanStartTime", DateTime.Now.ToString());
             }
@@ -200,18 +200,11 @@ namespace BCloudServiceUtilities.TracingServices
 
                 string ParentSpanID = null;
                 string SpanID = _Context.Request.Headers.Get("SpanID");
-                if (_bNewSpan)
+                if (SpanID != null && SpanID.Length > 0)
                 {
-                    if (SpanID != null && SpanID.Length > 0)
-                    {
-                        ParentSpanID = SpanID;
-                    }
-                    SpanID = GetRandomHexNumber(16);
+                    ParentSpanID = SpanID;
                 }
-                else if (SpanID == null || SpanID.Length == 0)
-                {
-                    SpanID = GetRandomHexNumber(16);
-                }
+                SpanID = GetRandomHexNumber(16);
 
                 _Context.Response.Headers.Set("TraceID", TraceID);
                 _Context.Response.Headers.Set("SpanID", SpanID);
@@ -279,19 +272,31 @@ namespace BCloudServiceUtilities.TracingServices
         /// </summary>
         public void On_FromClientToGateway_Received(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
         {
-            AddTrace(_Context, true, true, _ErrorMessageAction);
+            AddTrace(_Context, true, _ErrorMessageAction);
         }
 
         /// <summary>
         ///
-        /// <para>On_FromGatewayToClient_Sent:</para>
+        /// <para>On_FromGatewayToService_Sent:</para>
         /// 
-        /// <para>Check <seealso cref="IBTracingServiceInterface.On_FromGatewayToClient_Sent"/> for detailed documentation</para>
+        /// <para>Check <seealso cref="IBTracingServiceInterface.On_FromGatewayToService_Sent"/> for detailed documentation</para>
         ///
         /// </summary>
-        public void On_FromGatewayToClient_Sent(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
+        public void On_FromGatewayToService_Sent(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
         {
-            AddTrace(_Context, false, false, _ErrorMessageAction);
+            AddTrace(_Context, false, _ErrorMessageAction);
+        }
+
+        /// <summary>
+        ///
+        /// <para>On_FromGatewayToService_Received:</para>
+        /// 
+        /// <para>Check <seealso cref="IBTracingServiceInterface.On_FromGatewayToService_Received"/> for detailed documentation</para>
+        ///
+        /// </summary>
+        public void On_FromGatewayToService_Received(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
+        {
+            AddTrace(_Context, true, _ErrorMessageAction);
         }
 
         /// <summary>
@@ -303,7 +308,7 @@ namespace BCloudServiceUtilities.TracingServices
         /// </summary>
         public void On_FromServiceToService_Sent(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
         {
-            AddTrace(_Context, false, false, _ErrorMessageAction);
+            AddTrace(_Context, false, _ErrorMessageAction);
         }
 
         /// <summary>
@@ -315,7 +320,43 @@ namespace BCloudServiceUtilities.TracingServices
         /// </summary>
         public void On_FromServiceToService_Received(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
         {
-            AddTrace(_Context, true, true, _ErrorMessageAction);
+            AddTrace(_Context, true, _ErrorMessageAction);
+        }
+
+        /// <summary>
+        ///
+        /// <para>On_FromServiceToGateway_Sent:</para>
+        /// 
+        /// <para>Check <seealso cref="IBTracingServiceInterface.On_FromGatewayToService_Received"/> for detailed documentation</para>
+        ///
+        /// </summary>
+        public void On_FromServiceToGateway_Sent(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
+        {
+            AddTrace(_Context, false, _ErrorMessageAction);
+        }
+
+        /// <summary>
+        ///
+        /// <para>On_FromServiceToGateway_Received:</para>
+        /// 
+        /// <para>Check <seealso cref="IBTracingServiceInterface.On_FromGatewayToService_Received"/> for detailed documentation</para>
+        ///
+        /// </summary>
+        public void On_FromServiceToGateway_Received(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
+        {
+            AddTrace(_Context, true, _ErrorMessageAction);
+        }
+
+        /// <summary>
+        ///
+        /// <para>On_FromGatewayToClient_Sent:</para>
+        /// 
+        /// <para>Check <seealso cref="IBTracingServiceInterface.On_FromGatewayToClient_Sent"/> for detailed documentation</para>
+        ///
+        /// </summary>
+        public void On_FromGatewayToClient_Sent(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
+        {
+            AddTrace(_Context, false, _ErrorMessageAction);
         }
     }
 }

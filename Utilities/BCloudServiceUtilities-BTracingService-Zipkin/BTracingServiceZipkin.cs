@@ -79,21 +79,39 @@ namespace BCloudServiceUtilities.TracingServices
 
             CommonHttpTraceAnnotations(CreatedTrace, _Context);
             CreatedTrace.Record(Annotations.ServerRecv());
+
+            CommonHttpTraceAnnotations(CreatedTrace, _Context);
+            CreatedTrace.Record(Annotations.LocalOperationStart(ProgramUniqueID + "->" + _Context.Request.Url.AbsolutePath));
         }
 
         /// <summary>
         ///
-        /// <para>On_FromGatewayToClient_Sent:</para>
+        /// <para>On_FromGatewayToService_Sent:</para>
         /// 
-        /// <para>Check <seealso cref="IBTracingServiceInterface.On_FromGatewayToClient_Sent"/> for detailed documentation</para>
+        /// <para>Check <seealso cref="IBTracingServiceInterface.On_FromGatewayToService_Sent"/> for detailed documentation</para>
         ///
         /// </summary>
-        public void On_FromGatewayToClient_Sent(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
+        public void On_FromGatewayToService_Sent(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
         {
             var TraceContext = TraceExtractor.Extract(_Context.Request.Headers);
             var CreatedTrace = TraceContext == null ? Trace.Create() : Trace.CreateFromId(TraceContext).Child();
             CommonHttpTraceAnnotations(CreatedTrace, _Context);
-            CreatedTrace.Record(Annotations.ServerSend());
+            CreatedTrace.Record(Annotations.LocalOperationStop());
+        }
+
+        /// <summary>
+        ///
+        /// <para>On_FromGatewayToService_Received:</para>
+        /// 
+        /// <para>Check <seealso cref="IBTracingServiceInterface.On_FromGatewayToService_Received"/> for detailed documentation</para>
+        ///
+        /// </summary>
+        public void On_FromGatewayToService_Received(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
+        {
+            var TraceContext = TraceExtractor.Extract(_Context.Request.Headers);
+            var CreatedTrace = TraceContext == null ? Trace.Create() : Trace.CreateFromId(TraceContext).Child();
+            CommonHttpTraceAnnotations(CreatedTrace, _Context);
+            CreatedTrace.Record(Annotations.LocalOperationStart(ProgramUniqueID + "->" + _Context.Request.Url.AbsolutePath));
         }
 
         /// <summary>
@@ -108,7 +126,7 @@ namespace BCloudServiceUtilities.TracingServices
             var TraceContext = TraceExtractor.Extract(_Context.Request.Headers);
             var CreatedTrace = TraceContext == null ? Trace.Create() : Trace.CreateFromId(TraceContext).Child();
             CommonHttpTraceAnnotations(CreatedTrace, _Context);
-            CreatedTrace.Record(Annotations.LocalOperationStart(ProgramUniqueID + "->" + _Context.Request.Url.AbsolutePath));
+            CreatedTrace.Record(Annotations.LocalOperationStop());
         }
 
         /// <summary>
@@ -123,7 +141,56 @@ namespace BCloudServiceUtilities.TracingServices
             var TraceContext = TraceExtractor.Extract(_Context.Request.Headers);
             var CreatedTrace = TraceContext == null ? Trace.Create() : Trace.CreateFromId(TraceContext).Child();
             CommonHttpTraceAnnotations(CreatedTrace, _Context);
+            CreatedTrace.Record(Annotations.LocalOperationStart(ProgramUniqueID + "->" + _Context.Request.Url.AbsolutePath));
+        }
+
+        /// <summary>
+        ///
+        /// <para>On_FromServiceToGateway_Sent:</para>
+        /// 
+        /// <para>Check <seealso cref="IBTracingServiceInterface.On_FromGatewayToService_Received"/> for detailed documentation</para>
+        ///
+        /// </summary>
+        public void On_FromServiceToGateway_Sent(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
+        {
+            var TraceContext = TraceExtractor.Extract(_Context.Request.Headers);
+            var CreatedTrace = TraceContext == null ? Trace.Create() : Trace.CreateFromId(TraceContext).Child();
+            CommonHttpTraceAnnotations(CreatedTrace, _Context);
             CreatedTrace.Record(Annotations.LocalOperationStop());
+        }
+
+        /// <summary>
+        ///
+        /// <para>On_FromServiceToGateway_Received:</para>
+        /// 
+        /// <para>Check <seealso cref="IBTracingServiceInterface.On_FromGatewayToService_Received"/> for detailed documentation</para>
+        ///
+        /// </summary>
+        public void On_FromServiceToGateway_Received(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
+        {
+            var TraceContext = TraceExtractor.Extract(_Context.Request.Headers);
+            var CreatedTrace = TraceContext == null ? Trace.Create() : Trace.CreateFromId(TraceContext).Child();
+            CommonHttpTraceAnnotations(CreatedTrace, _Context);
+            CreatedTrace.Record(Annotations.LocalOperationStart(ProgramUniqueID + "->" + _Context.Request.Url.AbsolutePath));
+        }
+
+        /// <summary>
+        ///
+        /// <para>On_FromGatewayToClient_Sent:</para>
+        /// 
+        /// <para>Check <seealso cref="IBTracingServiceInterface.On_FromGatewayToClient_Sent"/> for detailed documentation</para>
+        ///
+        /// </summary>
+        public void On_FromGatewayToClient_Sent(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
+        {
+            var TraceContext = TraceExtractor.Extract(_Context.Request.Headers);
+            var CreatedTrace = TraceContext == null ? Trace.Create() : Trace.CreateFromId(TraceContext).Child();
+
+            CommonHttpTraceAnnotations(CreatedTrace, _Context);
+            CreatedTrace.Record(Annotations.LocalOperationStop());
+
+            CommonHttpTraceAnnotations(CreatedTrace, _Context);
+            CreatedTrace.Record(Annotations.ServerSend());
         }
     }
 }

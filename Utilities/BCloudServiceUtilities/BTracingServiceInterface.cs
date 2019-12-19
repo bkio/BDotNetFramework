@@ -31,6 +31,58 @@ namespace BCloudServiceUtilities
 
         /// <summary>
         /// 
+        /// <para>On_FromGatewayToService_Sent</para>
+        /// 
+        /// <para>Parameters:</para>
+        /// <para><paramref name="_Context"/>                       Http context</para>
+        /// <para><paramref name="_ErrorMessageAction"/>            Error messages will be pushed to this action</para>
+        /// 
+        /// </summary>
+        void On_FromGatewayToService_Sent(
+            HttpListenerContext _Context,
+            Action<string> _ErrorMessageAction = null);
+
+        /// <summary>
+        /// 
+        /// <para>On_FromGatewayToService_Received</para>
+        /// 
+        /// <para>Parameters:</para>
+        /// <para><paramref name="_Context"/>                       Http context</para>
+        /// <para><paramref name="_ErrorMessageAction"/>            Error messages will be pushed to this action</para>
+        /// 
+        /// </summary>
+        void On_FromGatewayToService_Received(
+            HttpListenerContext _Context,
+            Action<string> _ErrorMessageAction = null);
+
+        /// <summary>
+        /// 
+        /// <para>On_FromServiceToGateway_Sent</para>
+        /// 
+        /// <para>Parameters:</para>
+        /// <para><paramref name="_Context"/>                       Http context</para>
+        /// <para><paramref name="_ErrorMessageAction"/>            Error messages will be pushed to this action</para>
+        /// 
+        /// </summary>
+        void On_FromServiceToGateway_Sent(
+            HttpListenerContext _Context,
+            Action<string> _ErrorMessageAction = null);
+
+        /// <summary>
+        /// 
+        /// <para>On_FromServiceToGateway_Received</para>
+        /// 
+        /// <para>Parameters:</para>
+        /// <para><paramref name="_Context"/>                       Http context</para>
+        /// <para><paramref name="_ErrorMessageAction"/>            Error messages will be pushed to this action</para>
+        /// 
+        /// </summary>
+        void On_FromServiceToGateway_Received(
+            HttpListenerContext _Context,
+            Action<string> _ErrorMessageAction = null);
+
+        /// <summary>
+        /// 
         /// <para>On_FromServiceToService_Sent</para>
         /// 
         /// <para>Parameters:</para>
