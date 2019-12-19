@@ -50,9 +50,10 @@ namespace BCloudServiceUtilities.PubSubServices
             try
             {
                 string ApplicationCredentials = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
-                if (ApplicationCredentials == null)
+                string ApplicationCredentialsPlain = Environment.GetEnvironmentVariable("GOOGLE_CREDENTIALS");
+                if (ApplicationCredentials == null && ApplicationCredentialsPlain == null)
                 {
-                    _ErrorMessageAction?.Invoke("BPubSubServiceGC->Constructor: GOOGLE_APPLICATION_CREDENTIALS environment variable is not defined.");
+                    _ErrorMessageAction?.Invoke("BPubSubServiceGC->Constructor: GOOGLE_APPLICATION_CREDENTIALS (or GOOGLE_CREDENTIALS) environment variable is not defined.");
                     bInitializationSucceed = false;
                 }
                 else
@@ -73,13 +74,24 @@ namespace BCloudServiceUtilities.PubSubServices
                         }
                     }
 
-                    using (var Stream = new FileStream(ApplicationCredentials, FileMode.Open, FileAccess.Read))
+                    if (ApplicationCredentials == null)
                     {
-                        Credential = GoogleCredential.FromStream(Stream)
-                            .CreateScoped(
-                            Scopes.ToArray())
-                            .UnderlyingCredential as ServiceAccountCredential;
+                        Credential = GoogleCredential.FromJson(ApplicationCredentialsPlain)
+                                .CreateScoped(
+                                Scopes.ToArray())
+                                .UnderlyingCredential as ServiceAccountCredential;
                     }
+                    else
+                    {
+                        using (var Stream = new FileStream(ApplicationCredentials, FileMode.Open, FileAccess.Read))
+                        {
+                            Credential = GoogleCredential.FromStream(Stream)
+                                .CreateScoped(
+                                Scopes.ToArray())
+                                .UnderlyingCredential as ServiceAccountCredential;
+                        }
+                    }
+                    
 
                     if (Credential != null)
                     {

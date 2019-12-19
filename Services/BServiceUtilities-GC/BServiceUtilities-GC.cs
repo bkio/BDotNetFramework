@@ -12,7 +12,7 @@ namespace BServiceUtilities
     /// 
     /// <para>Required Environment variables:</para>
     /// 
-    /// GOOGLE_CLOUD_PROJECT_ID, GOOGLE_APPLICATION_CREDENTIALS environment variables are needed.
+    /// GOOGLE_CLOUD_PROJECT_ID, GOOGLE_APPLICATION_CREDENTIALS (or GOOGLE_CREDENTIALS) environment variables are needed.
     /// 
     /// NOTE: For the application; access/secret key or credentials should have access to logging service
     /// 
@@ -85,7 +85,7 @@ namespace BServiceUtilities
             if (!BUtility.GetEnvironmentVariables(out Instance.CloudProviderEnvVars,
                 new string[][]
                 {
-                    new string[] { "GOOGLE_APPLICATION_CREDENTIALS" },
+                    new string[] { "GOOGLE_APPLICATION_CREDENTIALS", "GOOGLE_CREDENTIALS" },
                     new string[] { "GOOGLE_CLOUD_PROJECT_ID" }
                 },
                 _PreLoggingServiceLogger)) return false;

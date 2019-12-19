@@ -38,9 +38,10 @@ namespace BCloudServiceUtilities.FileServices
             try
             {
                 string ApplicationCredentials = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
-                if (ApplicationCredentials == null)
+                string ApplicationCredentialsPlain = Environment.GetEnvironmentVariable("GOOGLE_CREDENTIALS");
+                if (ApplicationCredentials == null && ApplicationCredentialsPlain == null)
                 {
-                    _ErrorMessageAction?.Invoke("BFileServiceGC->Constructor: GOOGLE_APPLICATION_CREDENTIALS environment variable is not defined.");
+                    _ErrorMessageAction?.Invoke("BFileServiceGC->Constructor: GOOGLE_APPLICATION_CREDENTIALS (or GOOGLE_CREDENTIALS) environment variable is not defined.");
                     bInitializationSucceed = false;
                 }
                 else
@@ -49,15 +50,28 @@ namespace BCloudServiceUtilities.FileServices
 
                     GSClient = StorageClient.Create();
 
-                    using (var Stream = new FileStream(ApplicationCredentials, FileMode.Open, FileAccess.Read))
+                    if (ApplicationCredentials == null)
                     {
-                        Credential = GoogleCredential.FromStream(Stream)
-                            .CreateScoped(
-                            new string[]
-                            {
-                                StorageService.Scope.DevstorageReadWrite
-                            })
-                            .UnderlyingCredential as ServiceAccountCredential;
+                        Credential = GoogleCredential.FromJson(ApplicationCredentialsPlain)
+                                .CreateScoped(
+                                new string[]
+                                {
+                                    StorageService.Scope.DevstorageReadWrite
+                                })
+                                .UnderlyingCredential as ServiceAccountCredential;
+                    }
+                    else
+                    {
+                        using (var Stream = new FileStream(ApplicationCredentials, FileMode.Open, FileAccess.Read))
+                        {
+                            Credential = GoogleCredential.FromStream(Stream)
+                                .CreateScoped(
+                                new string[]
+                                {
+                                    StorageService.Scope.DevstorageReadWrite
+                                })
+                                .UnderlyingCredential as ServiceAccountCredential;
+                        }
                     }
 
                     if (Credential != null)
