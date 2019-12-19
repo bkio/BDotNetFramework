@@ -67,7 +67,7 @@ namespace BServiceUtilities
                 RequiredEnvVarKeys.ToArray(),
                 (string Message) =>
                 {
-                    Instance.LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, Message), ProgramID, "Initialization");
+                    Instance.LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, Message), Instance.ProgramID, "Initialization");
                 })) return false;
 
             Instance.ProgramID = Instance.RequiredEnvironmentVariables["PROGRAM_ID"];
