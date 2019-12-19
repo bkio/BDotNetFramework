@@ -49,34 +49,52 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BSecretManagementService", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BDatabaseService-MongoDB", "Utilities\BCloudServiceUtilities-BDatabaseService-MongoDB\BCloudServiceUtilities-BDatabaseService-MongoDB.csproj", "{1ACDADFE-53D8-4171-BB66-85AFE91205DD}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities", "Services\BServiceUtilities\BServiceUtilities.shproj", "{D7336B33-A128-40D9-8FEF-14ECEC61BFB6}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-FileService", "Services\BServiceUtilities-FileService\BServiceUtilities-FileService.shproj", "{4D334F6F-894F-45AE-949C-23E97D747D35}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-DatabaseService", "Services\BServiceUtilities-DatabaseService\BServiceUtilities-DatabaseService.shproj", "{C7018B29-1B52-49E9-B950-2D324A0F5A84}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-PubSubService", "Services\BServiceUtilities-PubSubService\BServiceUtilities-PubSubService.shproj", "{2980DF72-423B-4445-A6AB-3C0BAA971A33}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-MemoryService", "Services\BServiceUtilities-MemoryService\BServiceUtilities-MemoryService.shproj", "{2018DCBF-3944-4F92-91F2-2275A660804D}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-MailService", "Services\BServiceUtilities-MailService\BServiceUtilities-MailService.shproj", "{96028A89-F350-452E-B7AF-9D16ED6367B4}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-SMSService", "Services\BServiceUtilities-SMSService\BServiceUtilities-SMSService.shproj", "{CBA14AED-AA31-4DD6-A169-5E7187A441DA}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BTracingService-GC", "Utilities\BCloudServiceUtilities-BTracingService-GC\BCloudServiceUtilities-BTracingService-GC.csproj", "{4A1405F7-7488-4F1C-A520-FF90EF8AF83B}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-TracingService", "Services\BServiceUtilities-TracingService\BServiceUtilities-TracingService.shproj", "{2991128C-4D36-4F98-A3FE-8554E0C27EE7}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-TracingService-Zipkin", "Services\BServiceUtilities-TracingService-Zipkin\BServiceUtilities-TracingService-Zipkin.shproj", "{18AFC8BD-2D17-40F0-B02C-34F67C5A7D79}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-TracingService-GC", "Services\BServiceUtilities-TracingService-GC\BServiceUtilities-TracingService-GC.shproj", "{69BF3823-D5CD-42C4-BE63-8133A6D97A93}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-SMSService-Twilio", "Services\BServiceUtilities-SMSService-Twilio\BServiceUtilities-SMSService-Twilio.shproj", "{B4DD4534-945F-4FD1-894D-E5AC2CC254FC}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-PubSubService-AWS", "Services\BServiceUtilities-PubSubService-AWS\BServiceUtilities-PubSubService-AWS.shproj", "{6A9D7D85-897B-4660-B068-C8246BE79519}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-PubSubService-GC", "Services\BServiceUtilities-PubSubService-GC\BServiceUtilities-PubSubService-GC.shproj", "{1CE00F9B-1598-40BC-80B0-A184D2A68246}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-PubSubService-Redis", "Services\BServiceUtilities-PubSubService-Redis\BServiceUtilities-PubSubService-Redis.shproj", "{58D5D147-A1C6-4051-9CB0-1D4B44949AA6}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-MemoryService-Redis", "Services\BServiceUtilities-MemoryService-Redis\BServiceUtilities-MemoryService-Redis.shproj", "{5CF16D7B-E3ED-463B-BBD9-BA483A7EB4BE}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-MailService-SendGrid", "Services\BServiceUtilities-MailService-SendGrid\BServiceUtilities-MailService-SendGrid.shproj", "{66A97FF4-5D8D-44E4-B5A0-2875B566DCB9}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-FileService-AWS", "Services\BServiceUtilities-FileService-AWS\BServiceUtilities-FileService-AWS.shproj", "{1C6C3236-F3D0-41D7-8E27-25FC29439511}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-FileService-GC", "Services\BServiceUtilities-FileService-GC\BServiceUtilities-FileService-GC.shproj", "{C7D560AC-A66B-44E9-8634-26543A8EAD2D}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-DatabaseService-AWS", "Services\BServiceUtilities-DatabaseService-AWS\BServiceUtilities-DatabaseService-AWS.shproj", "{D41EDAE0-59E2-4FAF-9FDA-B36C7B22AC60}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-DatabaseService-GC", "Services\BServiceUtilities-DatabaseService-GC\BServiceUtilities-DatabaseService-GC.shproj", "{747F302D-F7A8-468B-BE17-0DFC46A1F181}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-AWS", "Services\BServiceUtilities-AWS\BServiceUtilities-AWS.shproj", "{3DEAFE51-277D-4DB4-852C-506CC1C23883}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-GC", "Services\BServiceUtilities-GC\BServiceUtilities-GC.shproj", "{655C8DC6-D475-4651-9D27-3A2A228A068D}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		Services\BServiceUtilities-MemoryService\BServiceUtilities-MemoryService.projitems*{2018dcbf-3944-4f92-91f2-2275a660804d}*SharedItemsImports = 13
-		Services\BServiceUtilities-PubSubService\BServiceUtilities-PubSubService.projitems*{2980df72-423b-4445-a6ab-3c0baa971a33}*SharedItemsImports = 13
-		Services\BServiceUtilities-TracingService\BServiceUtilities-TracingService.projitems*{2991128c-4d36-4f98-a3fe-8554e0c27ee7}*SharedItemsImports = 13
-		Services\BServiceUtilities-FileService\BServiceUtilities-FileService.projitems*{4d334f6f-894f-45ae-949c-23e97d747d35}*SharedItemsImports = 13
-		Services\BServiceUtilities-MailService\BServiceUtilities-MailService.projitems*{96028a89-f350-452e-b7af-9d16ed6367b4}*SharedItemsImports = 13
-		Services\BServiceUtilities-DatabaseService\BServiceUtilities-DatabaseService.projitems*{c7018b29-1b52-49e9-b950-2d324a0f5a84}*SharedItemsImports = 13
-		Services\BServiceUtilities-SMSService\BServiceUtilities-SMSService.projitems*{cba14aed-aa31-4dd6-a169-5e7187a441da}*SharedItemsImports = 13
-		Services\BServiceUtilities\BServiceUtilities.projitems*{d7336b33-a128-40d9-8fef-14ecec61bfb6}*SharedItemsImports = 13
+		Services\BServiceUtilities-TracingService-Zipkin\BServiceUtilities-TracingService-Zipkin.projitems*{18afc8bd-2d17-40f0-b02c-34f67c5a7d79}*SharedItemsImports = 13
+		Services\BServiceUtilities-FileService-AWS\BServiceUtilities-FileService-AWS.projitems*{1c6c3236-f3d0-41d7-8e27-25fc29439511}*SharedItemsImports = 13
+		Services\BServiceUtilities-PubSubService-GC\BServiceUtilities-PubSubService-GC.projitems*{1ce00f9b-1598-40bc-80b0-a184d2a68246}*SharedItemsImports = 13
+		Services\BServiceUtilities-AWS\BServiceUtilities-AWS.projitems*{3deafe51-277d-4db4-852c-506cc1c23883}*SharedItemsImports = 13
+		Services\BServiceUtilities-PubSubService-Redis\BServiceUtilities-PubSubService-Redis.projitems*{58d5d147-a1c6-4051-9cb0-1d4b44949aa6}*SharedItemsImports = 13
+		Services\BServiceUtilities-MemoryService-Redis\BServiceUtilities-MemoryService-Redis.projitems*{5cf16d7b-e3ed-463b-bbd9-ba483a7eb4be}*SharedItemsImports = 13
+		Services\BServiceUtilities-GC\BServiceUtilities-GC.projitems*{655c8dc6-d475-4651-9d27-3a2a228a068d}*SharedItemsImports = 13
+		Services\BServiceUtilities-MailService-SendGrid\BServiceUtilities-MailService-SendGrid.projitems*{66a97ff4-5d8d-44e4-b5a0-2875b566dcb9}*SharedItemsImports = 13
+		Services\BServiceUtilities-TracingService-GC\BServiceUtilities-TracingService-GC.projitems*{69bf3823-d5cd-42c4-be63-8133a6d97a93}*SharedItemsImports = 13
+		Services\BServiceUtilities-PubSubService-AWS\BServiceUtilities-PubSubService-AWS.projitems*{6a9d7d85-897b-4660-b068-c8246be79519}*SharedItemsImports = 13
+		Services\BServiceUtilities-DatabaseService-GC\BServiceUtilities-DatabaseService-GC.projitems*{747f302d-f7a8-468b-be17-0dfc46a1f181}*SharedItemsImports = 13
+		Services\BServiceUtilities-SMSService-Twilio\BServiceUtilities-SMSService-Twilio.projitems*{b4dd4534-945f-4fd1-894d-e5ac2cc254fc}*SharedItemsImports = 13
+		Services\BServiceUtilities-FileService-GC\BServiceUtilities-FileService-GC.projitems*{c7d560ac-a66b-44e9-8634-26543a8ead2d}*SharedItemsImports = 13
+		Services\BServiceUtilities-DatabaseService-AWS\BServiceUtilities-DatabaseService-AWS.projitems*{d41edae0-59e2-4faf-9fda-b36c7b22ac60}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -192,15 +210,21 @@ Global
 		{FC4FD518-FC36-48D8-B458-0C7258229745} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{12DA451B-D5B9-453B-8B07-FFFCCBA7742E} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 		{1ACDADFE-53D8-4171-BB66-85AFE91205DD} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
-		{D7336B33-A128-40D9-8FEF-14ECEC61BFB6} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
-		{4D334F6F-894F-45AE-949C-23E97D747D35} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
-		{C7018B29-1B52-49E9-B950-2D324A0F5A84} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
-		{2980DF72-423B-4445-A6AB-3C0BAA971A33} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
-		{2018DCBF-3944-4F92-91F2-2275A660804D} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
-		{96028A89-F350-452E-B7AF-9D16ED6367B4} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
-		{CBA14AED-AA31-4DD6-A169-5E7187A441DA} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 		{4A1405F7-7488-4F1C-A520-FF90EF8AF83B} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
-		{2991128C-4D36-4F98-A3FE-8554E0C27EE7} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{18AFC8BD-2D17-40F0-B02C-34F67C5A7D79} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{69BF3823-D5CD-42C4-BE63-8133A6D97A93} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{B4DD4534-945F-4FD1-894D-E5AC2CC254FC} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{6A9D7D85-897B-4660-B068-C8246BE79519} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{1CE00F9B-1598-40BC-80B0-A184D2A68246} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{58D5D147-A1C6-4051-9CB0-1D4B44949AA6} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{5CF16D7B-E3ED-463B-BBD9-BA483A7EB4BE} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{66A97FF4-5D8D-44E4-B5A0-2875B566DCB9} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{1C6C3236-F3D0-41D7-8E27-25FC29439511} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{C7D560AC-A66B-44E9-8634-26543A8EAD2D} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{D41EDAE0-59E2-4FAF-9FDA-B36C7B22AC60} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{747F302D-F7A8-468B-BE17-0DFC46A1F181} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{3DEAFE51-277D-4DB4-852C-506CC1C23883} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{655C8DC6-D475-4651-9D27-3A2A228A068D} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0A20A57-39B7-4A17-85B0-DB0190848294}
