@@ -12,11 +12,6 @@ namespace BServiceUtilities
     /// 
     /// <para>Required Environment variables:</para>
     /// 
-    /// AWS_ACCESS_KEY, AWS_SECRET_KEY, AWS_REGION environment variables are needed.
-    /// 
-    /// NOTE: For the application; access/secret key or credentials should have access to logging service
-    /// 
-    /// <para>Parameters:</para>
     /// <para>1) PROGRAM_ID:                                Program Unique ID</para>
     /// <para>2) PORT:                                      Port of the http server</para>
     /// 
@@ -24,9 +19,6 @@ namespace BServiceUtilities
     public partial class BServiceInitializer
     {
         private BServiceInitializer() { }
-
-        //Private: Access, secret keys, project ID etc.
-        private Dictionary<string, string> CloudProviderEnvVars;
 
         /// <summary>
         /// <para>Initialized Logging Service</para>
@@ -49,20 +41,14 @@ namespace BServiceUtilities
         public Dictionary<string, string> RequiredEnvironmentVariables { get { return _RequiredEnvironmentVariables; } }
         private Dictionary<string, string> _RequiredEnvironmentVariables = null;
 
-        /// <summary>
-        /// <para>Logs created before logging service is initialized will be passed to this action.</para>
-        /// </summary>
-        public Action<string> PreLoggingServiceLogger = null;
-
         public static bool Initialize(
             out BServiceInitializer _Result,
-            Action<string> _PreLoggingServiceLogger = null,
             string[][] _RequiredExtraEnvVars = null)
         {
             var Instance = new BServiceInitializer();
             _Result = null;
 
-            Instance.PreLoggingServiceLogger = _PreLoggingServiceLogger;
+            Instance.LoggingService = new BLoggingServiceBasic();
 
             var RequiredEnvVarKeys = new List<string[]>()
             {
@@ -79,27 +65,10 @@ namespace BServiceUtilities
             */
             if (!BUtility.GetEnvironmentVariables(out Instance._RequiredEnvironmentVariables,
                 RequiredEnvVarKeys.ToArray(),
-                _PreLoggingServiceLogger)) return false;
-
-            //Cloud provider setup
-            if (!BUtility.GetEnvironmentVariables(out Instance.CloudProviderEnvVars,
-                new string[][]
+                (string Message) =>
                 {
-                    new string[] { "AWS_ACCESS_KEY" },
-                    new string[] { "AWS_SECRET_KEY" },
-                    new string[] { "AWS_REGION" }
-                },
-                _PreLoggingServiceLogger)) return false;
-
-            /*
-            * Logging service initialization
-            */
-            Instance.LoggingService = new BLoggingServiceAWS(Instance.CloudProviderEnvVars["AWS_ACCESS_KEY"], Instance.CloudProviderEnvVars["AWS_SECRET_KEY"], Instance.CloudProviderEnvVars["AWS_REGION"], _PreLoggingServiceLogger);
-            if (Instance.LoggingService == null || !Instance.LoggingService.HasInitializationSucceed())
-            {
-                _PreLoggingServiceLogger?.Invoke("Logging service initialization has failed.");
-                return false;
-            }
+                    Instance.LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, Message), ProgramID, "Initialization");
+                })) return false;
 
             Instance.ProgramID = Instance.RequiredEnvironmentVariables["PROGRAM_ID"];
 

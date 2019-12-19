@@ -1,6 +1,5 @@
 ﻿/// MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
 
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using BCloudServiceUtilities;
@@ -27,9 +26,11 @@ namespace BSecretManagementService
             /*
             * Common initialization step
             */
-            if (!BServiceInitializer.Initialize(out BServiceInitializer ServInit, Console.WriteLine, 
+            if (!BServiceInitializer.Initialize(out BServiceInitializer ServInit,
                 new string[][]
                 {
+                    new string[] { "GOOGLE_APPLICATION_CREDENTIALS", "GOOGLE_PLAIN_CREDENTIALS" },
+                    new string[] { "GOOGLE_CLOUD_PROJECT_ID" },
                     new string[] { "SECRETS_STORAGE_BUCKET" }
                 }))
                 return;

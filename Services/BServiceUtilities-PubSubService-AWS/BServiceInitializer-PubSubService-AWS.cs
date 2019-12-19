@@ -24,7 +24,7 @@ namespace BServiceUtilities
             /*
             * Pub/Sub service initialization
             */
-            PubSubService = new BPubSubServiceAWS(CloudProviderEnvVars["AWS_ACCESS_KEY"], CloudProviderEnvVars["AWS_SECRET_KEY"], CloudProviderEnvVars["AWS_REGION"],
+            PubSubService = new BPubSubServiceAWS(RequiredEnvironmentVariables["AWS_ACCESS_KEY"], RequiredEnvironmentVariables["AWS_SECRET_KEY"], RequiredEnvironmentVariables["AWS_REGION"],
                 (string Message) =>
                 {
                     LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, Message), ProgramID, "Initialization");

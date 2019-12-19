@@ -22,9 +22,9 @@ namespace BServiceUtilities
         public bool WithDatabaseService()
         {
             /*
-            * File service initialization
+            * Database service initialization
             */
-            DatabaseService = new BDatabaseServiceAWS(CloudProviderEnvVars["AWS_ACCESS_KEY"], CloudProviderEnvVars["AWS_SECRET_KEY"], CloudProviderEnvVars["AWS_REGION"],
+            DatabaseService = new BDatabaseServiceAWS(RequiredEnvironmentVariables["AWS_ACCESS_KEY"], RequiredEnvironmentVariables["AWS_SECRET_KEY"], RequiredEnvironmentVariables["AWS_REGION"],
                 (string Message) =>
                 {
                     LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, Message), ProgramID, "Initialization");

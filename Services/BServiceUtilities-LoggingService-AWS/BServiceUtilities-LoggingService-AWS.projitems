@@ -3,12 +3,12 @@
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
-    <SharedGUID>655c8dc6-d475-4651-9d27-3a2a228a068d</SharedGUID>
+    <SharedGUID>1d64afe7-5361-41bf-a1ac-95ce4b81d988</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>BServiceUtilities_GC</Import_RootNamespace>
+    <Import_RootNamespace>BServiceUtilities_LoggingService_AWS</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)BServiceUtilities-GC.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BServiceUtilities-LoggingService-AWS.cs" />
   </ItemGroup>
 </Project>

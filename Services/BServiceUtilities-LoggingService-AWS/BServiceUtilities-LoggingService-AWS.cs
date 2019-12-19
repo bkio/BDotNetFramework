@@ -1,7 +1,7 @@
 ﻿/// MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
 
 using BCloudServiceUtilities;
-using BCloudServiceUtilities.FileServices;
+using BCloudServiceUtilities.LoggingServices;
 
 namespace BServiceUtilities
 {
@@ -14,25 +14,20 @@ namespace BServiceUtilities
     /// </summary>
     public partial class BServiceInitializer
     {
-        /// <summary>
-        /// <para>Initialized File Service</para>
-        /// </summary>
-        public IBFileServiceInterface FileService = null;
-
-        public bool WithFileService()
+        public bool WithLoggingService()
         {
             /*
-            * File service initialization
+            * Logging service initialization
             */
-            FileService = new BFileServiceAWS(RequiredEnvironmentVariables["AWS_ACCESS_KEY"], RequiredEnvironmentVariables["AWS_SECRET_KEY"], RequiredEnvironmentVariables["AWS_REGION"],
+            LoggingService = new BLoggingServiceAWS(RequiredEnvironmentVariables["AWS_ACCESS_KEY"], RequiredEnvironmentVariables["AWS_SECRET_KEY"], RequiredEnvironmentVariables["AWS_REGION"], 
                 (string Message) =>
                 {
                     LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, Message), ProgramID, "Initialization");
                 });
 
-            if (FileService == null || !FileService.HasInitializationSucceed())
+            if (LoggingService == null || !LoggingService.HasInitializationSucceed())
             {
-                LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, "File service initialization has failed."), ProgramID, "Initialization");
+                LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, "Logging service initialization has failed."), ProgramID, "Initialization");
                 return false;
             }
 
