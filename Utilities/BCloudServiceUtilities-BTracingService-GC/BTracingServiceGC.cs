@@ -186,12 +186,12 @@ namespace BCloudServiceUtilities.TracingServices
             //Start
             if (_bNewSpan)
             {
-                _Context.Request.Headers.Set("SpanStartTime", DateTime.Now.ToString());
+                _Context.Request.Headers.Set("span-start-time", DateTime.Now.ToString());
             }
             //End
             else
             {
-                var TraceID = _Context.Request.Headers.Get("TraceID");
+                var TraceID = _Context.Request.Headers.Get("trace-id");
                 if (TraceID == null || TraceID.Length == 0)
                 {
                     //It is a new trace
@@ -199,15 +199,15 @@ namespace BCloudServiceUtilities.TracingServices
                 }
 
                 string ParentSpanID = null;
-                string SpanID = _Context.Request.Headers.Get("SpanID");
+                string SpanID = _Context.Request.Headers.Get("span-id");
                 if (SpanID != null && SpanID.Length > 0)
                 {
                     ParentSpanID = SpanID;
                 }
                 SpanID = GetRandomHexNumber(16);
 
-                _Context.Request.Headers.Set("TraceID", TraceID);
-                _Context.Request.Headers.Set("SpanID", SpanID);
+                _Context.Request.Headers.Set("trace-id", TraceID);
+                _Context.Request.Headers.Set("span-id", SpanID);
 
                 var LegitSpanName = new SpanName(ProjectName.ProjectId, TraceID, SpanID);
                 var TruncString = new TruncatableString
@@ -219,7 +219,7 @@ namespace BCloudServiceUtilities.TracingServices
                 Timestamp StartTime = null;
                 try
                 {
-                    StartTime = Timestamp.FromDateTimeOffset(DateTime.Parse(_Context.Request.Headers.Get("SpanStartTime")));
+                    StartTime = Timestamp.FromDateTimeOffset(DateTime.Parse(_Context.Request.Headers.Get("span-start-time")));
                 }
                 catch (Exception ex)
                 {
