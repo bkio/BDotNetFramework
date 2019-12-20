@@ -51,7 +51,7 @@ namespace BWebServiceUtilities
             }
         }
 
-        private static EBResponseContentType GetEnumFromMimeString(string _ContentType)
+        public static EBResponseContentType GetEnumFromMimeString(string _ContentType)
         {
             _ContentType = _ContentType.ToLower();
             switch (_ContentType)
