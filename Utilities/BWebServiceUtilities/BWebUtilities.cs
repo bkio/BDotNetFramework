@@ -2,10 +2,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using BCommonUtilities;
-using Flurl.Http;
 
 namespace BWebServiceUtilities
 {
@@ -79,148 +77,6 @@ namespace BWebServiceUtilities
                 default:
                     return EBResponseContentType.TextHtml;
             }
-        }
-
-        /// <summary>
-        /// Note: Do not forget to dispose HttpWebResponse(_ResultResponse) and inner streams
-        /// </summary>
-        public static bool PerformHTTPRequestSynchronously(
-            out int _ResultCode,
-            out Tuple<string, string>[] _ResultHeaders,
-            out string _ResultResponse,
-            out EBResponseContentType _ResultContentType,
-            string _Url,
-            string _HttpMethod = "GET",
-            Tuple<string, string>[] _Headers = null,
-            BStringOrStream _Content = null,
-            Action<string> _ErrorMessageAction = null)
-        {
-            _ResultCode = 500;
-            _ResultHeaders = null;
-            _ResultResponse = null;
-            _ResultContentType = EBResponseContentType.None;
-
-            var FlurlRequest = _Url.WithHeader("reserved", "common");
-            System.Net.Http.HttpResponseMessage FlurlResponse = null;
-
-            System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage> ResponseTask = null;
-            try
-            {
-                if (_Headers != null && _Headers.Length > 0)
-                {
-                    var Headers = new WebHeaderCollection();
-                    foreach (var _Header in _Headers)
-                    {
-                        FlurlRequest = FlurlRequest.WithHeader(_Header.Item1, _Header.Item2);
-                    }
-                }
-
-                if (_HttpMethod == "POST" || _HttpMethod == "PUT" || _HttpMethod == "PATCH")
-                {
-                    if (_Content.Type == EBStringOrStreamEnum.String)
-                    {
-                        switch (_HttpMethod)
-                        {
-                            case "POST":
-                                ResponseTask = FlurlRequest.PostStringAsync(_Content.String);
-                                break;
-                            case "PUT":
-                                ResponseTask = FlurlRequest.PutStringAsync(_Content.String);
-                                break;
-                            case "PATCH":
-                                ResponseTask = FlurlRequest.PatchStringAsync(_Content.String);
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        using (StreamReader Reader = new StreamReader(_Content.Stream))
-                        {
-                            switch (_HttpMethod)
-                            {
-                                case "POST":
-                                    ResponseTask = FlurlRequest.PostStringAsync(Reader.ReadToEnd());
-                                    break;
-                                case "PUT":
-                                    ResponseTask = FlurlRequest.PutStringAsync(Reader.ReadToEnd());
-                                    break;
-                                case "PATCH":
-                                    ResponseTask = FlurlRequest.PatchStringAsync(Reader.ReadToEnd());
-                                    break;
-                            }
-                        }
-                    }
-                }
-                else if (_HttpMethod == "GET")
-                {
-                    ResponseTask = FlurlRequest.GetAsync();
-                }
-                else if (_HttpMethod == "DELETE")
-                {
-                    ResponseTask = FlurlRequest.DeleteAsync();
-                }
-                else if (_HttpMethod == "HEAD")
-                {
-                    ResponseTask = FlurlRequest.HeadAsync();
-                }
-                else if (_HttpMethod == "OPTION")
-                {
-                    ResponseTask = FlurlRequest.OptionsAsync();
-                }
-                else throw new Exception("Invalid method type " + _HttpMethod);
-
-                ResponseTask.Wait();
-                FlurlResponse = ResponseTask.Result;
-            }
-            catch (Exception e)
-            {
-                _ErrorMessageAction?.Invoke("BWebUtilities->PerformHTTPRequestSynchronously: " + e.Message + ", Trace: " + e.StackTrace);
-                return false;
-            }
-            finally
-            {
-                ResponseTask?.Dispose();
-            }
-
-            
-            var ResponseHeaders = new List<Tuple<string, string>>();
-            foreach (var Header in FlurlResponse.Headers)
-            {
-                string CombinedValues = "";
-                foreach (var Value in Header.Value)
-                {
-                    CombinedValues += (Value + ",");
-                }
-                CombinedValues = CombinedValues.TrimEnd(',');
-
-                ResponseHeaders.Add(new Tuple<string, string>(Header.Key, CombinedValues));
-            }
-
-            string ContentTypeResult = FlurlResponse.GetHeaderValue("Content-Type");
-
-            _ResultCode = (int)FlurlResponse.StatusCode;
-            _ResultHeaders = ResponseHeaders.ToArray();
-            _ResultContentType = GetEnumFromMimeString(FlurlResponse.Content.Headers.ContentType.ToString());
-
-            System.Threading.Tasks.Task<string> ReadContentTask = null;
-            try
-            {
-                ReadContentTask = FlurlResponse.Content.ReadAsStringAsync();
-                ReadContentTask.Wait();
-            }
-            catch (Exception e)
-            {
-                _ErrorMessageAction?.Invoke("BWebUtilities->PerformHTTPRequestSynchronously: " + e.Message + ", Trace: " + e.StackTrace);
-                return false;
-            }
-            finally
-            {
-                _ResultResponse = ReadContentTask?.Result;
-                ReadContentTask?.Dispose();
-                FlurlResponse?.Dispose();
-            }
-            
-            return true;
         }
 
         public static void InjectHeadersFromTupleArraysIntoContext(Tuple<string, string>[] _Headers, HttpListenerContext _Context)
