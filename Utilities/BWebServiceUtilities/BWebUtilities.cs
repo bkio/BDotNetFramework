@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using BCommonUtilities;
 
 namespace BWebServiceUtilities
@@ -144,6 +145,43 @@ namespace BWebServiceUtilities
             else
             {
                 _Cookies = TempCookieList.ToArray();
+            }
+        }
+
+        private static bool DoesContextContainHeader(out string HeaderValues, HttpListenerContext Context, string HeaderKey)
+        {
+            HeaderKey = HeaderKey.ToLower();
+            HeaderValues = "";
+
+            foreach (var RequestKey in Context.Request.Headers.AllKeys)
+            {
+                string Key = RequestKey.ToLower();
+                if (Key == HeaderKey)
+                {
+                    foreach (var HeaderValue in Context.Request.Headers.GetValues(RequestKey))
+                    {
+                        HeaderValues += HeaderValue + ",";
+                    }
+                    HeaderValues = HeaderValues.TrimEnd(',');
+
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static void ConvertHeadersFromHttpContentToTuples(HttpContent Content, List<Tuple<string, string>> HttpRequestResponseHeaders)
+        {
+            foreach (var Header in Content.Headers)
+            {
+                var HeadersString = "";
+                foreach (var HeaderValue in Header.Value)
+                {
+                    HeadersString += HeaderValue + ",";
+                }
+                HeadersString = HeadersString.TrimEnd(',');
+
+                HttpRequestResponseHeaders.Add(new Tuple<string, string>(Header.Key, HeadersString));
             }
         }
 
