@@ -148,7 +148,7 @@ namespace BWebServiceUtilities
             }
         }
 
-        private static bool DoesContextContainHeader(out string HeaderValues, HttpListenerContext Context, string HeaderKey)
+        public static bool DoesContextContainHeader(out string HeaderValues, HttpListenerContext Context, string HeaderKey)
         {
             HeaderKey = HeaderKey.ToLower();
             HeaderValues = "";
@@ -170,7 +170,7 @@ namespace BWebServiceUtilities
             return false;
         }
 
-        private static void ConvertHeadersFromHttpContentToTuples(HttpContent Content, List<Tuple<string, string>> HttpRequestResponseHeaders)
+        public static void ConvertHeadersFromHttpContentToTuples(HttpContent Content, List<Tuple<string, string>> HttpRequestResponseHeaders)
         {
             foreach (var Header in Content.Headers)
             {
