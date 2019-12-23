@@ -582,14 +582,10 @@ namespace BCloudServiceUtilities.FileServices
 
             try
             {
-                var ResultObject = GSClient.GetObject(_BucketName, _KeyInBucket);
-                if (ResultObject == null)
+                if (GSClient.GetObject(_BucketName, _KeyInBucket) != null)
                 {
-                    _ErrorMessageAction?.Invoke("BFileServiceGC->CheckFileExistence: GetObject Response is null.");
-                    return false;
+                    _bExists = true;
                 }
-
-                _bExists = true;
             }
             catch (Exception e)
             {
