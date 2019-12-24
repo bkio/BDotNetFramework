@@ -222,6 +222,11 @@ namespace BCloudServiceUtilities.DatabaseServices
                     {
                         BooleanValue = (bool)_Value
                     };
+                case JTokenType.String:
+                    return new Value()
+                    {
+                        StringValue = (string)_Value
+                    };
                 default:
                     return new Value()
                     {
