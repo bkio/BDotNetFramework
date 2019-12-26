@@ -38,11 +38,8 @@ namespace BSecretManagementService.WebServices
         {
             if (Context.Request.HttpMethod != "POST" && Context.Request.HttpMethod != "PUT")
             {
-                _ErrorMessageAction?.Invoke("BPutSecretsRequest: POST/PUT method is accepted. But received request method:  " + Context.Request.HttpMethod);
-                return new BWebServiceResponse(
-                    BWebResponseStatus.Error_MethodNotAllowed_Code,
-                    new BStringOrStream(BWebResponseStatus.Error_MethodNotAllowed_String("POST/PUT method is accepted. But received request method: " + Context.Request.HttpMethod)),
-                    BWebResponseStatus.Error_MethodNotAllowed_ContentType);
+                _ErrorMessageAction?.Invoke("BPutSecretsRequest: POST/PUT methods are accepted. But received request method:  " + Context.Request.HttpMethod);
+                return BWebResponse.MethodNotAllowed("POST/PUT methods are accepted. But received request method: " + Context.Request.HttpMethod);
             }
 
             JObject ParsedBody;
@@ -54,19 +51,13 @@ namespace BSecretManagementService.WebServices
             catch (Exception e)
             {
                 _ErrorMessageAction?.Invoke("BPutSecretsRequest-> Read request body stage has failed. Exception: " + e.Message + ", Trace: " + e.StackTrace);
-                return new BWebServiceResponse(
-                    BWebResponseStatus.Error_BadRequest_Code,
-                    new BStringOrStream(BWebResponseStatus.Error_BadRequest_String("Malformed request body. Request must be a valid json form.")),
-                    BWebResponseStatus.Error_BadRequest_ContentType);
+                return BWebResponse.BadRequest("Malformed request body. Request must be a valid json form.");
             }
 
             if (ParsedBody.Count == 0)
             {
                 _ErrorMessageAction?.Invoke("BPutSecretsRequest-> Request does not have any secret field.");
-                return new BWebServiceResponse(
-                    BWebResponseStatus.Error_BadRequest_Code,
-                    new BStringOrStream(BWebResponseStatus.Error_BadRequest_String("Request does not have secret field.")),
-                    BWebResponseStatus.Error_BadRequest_ContentType);
+                return BWebResponse.BadRequest("Request does not have secret field.");
             }
 
             var WaitUntilSignal = new ManualResetEvent(false);
@@ -132,7 +123,7 @@ namespace BSecretManagementService.WebServices
             }
 
             return new BWebServiceResponse(
-                BWebResponseStatus.Status_OK_Code,
+                BWebResponse.Status_OK_Code,
                 new BStringOrStream(ResultObject.ToString()),
                 EBResponseContentType.JSON);
         }

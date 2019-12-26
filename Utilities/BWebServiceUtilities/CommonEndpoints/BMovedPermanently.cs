@@ -22,11 +22,9 @@ namespace BWebServiceUtilities
             string NewLocation = ServerName + RedirectToHTMLEndpoint;
 
             return new BWebServiceResponse(
-                BWebResponseStatus.From_Internal_To_Gateway_Moved_Permanently_Code,
-                null,
-                null,
-                new BStringOrStream(BWebResponseStatus.From_Internal_To_Gateway_Moved_Permanently_String(NewLocation)),
-                BWebResponseStatus.From_Internal_To_Gateway_Moved_Permanently_ContentType);
+                BWebResponse.From_Internal_To_Gateway_Moved_Permanently_Code,
+                new BStringOrStream(BWebResponse.From_Internal_To_Gateway_Moved_Permanently_String(NewLocation)),
+                BWebResponse.From_Internal_To_Gateway_Moved_Permanently_ContentType);
         }
     }
 }

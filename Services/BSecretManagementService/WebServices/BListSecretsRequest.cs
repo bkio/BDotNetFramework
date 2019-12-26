@@ -37,10 +37,7 @@ namespace BSecretManagementService.WebServices
             if (Context.Request.HttpMethod != "GET")
             {
                 _ErrorMessageAction?.Invoke("BListSecretsRequest: GET method is accepted. But received request method:  " + Context.Request.HttpMethod);
-                return new BWebServiceResponse(
-                    BWebResponseStatus.Error_MethodNotAllowed_Code,
-                    new BStringOrStream(BWebResponseStatus.Error_MethodNotAllowed_String("GET method is accepted. But received request method: " + Context.Request.HttpMethod)),
-                    BWebResponseStatus.Error_MethodNotAllowed_ContentType);
+                return BWebResponse.MethodNotAllowed("GET method is accepted. But received request method: " + Context.Request.HttpMethod);
             }
 
             if (!FileService.ListAllFilesInBucket(
@@ -51,10 +48,7 @@ namespace BSecretManagementService.WebServices
                     _ErrorMessageAction?.Invoke("BListSecretsRequest->Error-> " + Message);
                 }))
             {
-                return new BWebServiceResponse(
-                    BWebResponseStatus.Error_InternalError_Code,
-                    new BStringOrStream(BWebResponseStatus.Error_InternalError_String("An internal error occured.")),
-                    BWebResponseStatus.Error_InternalError_ContentType);
+                return BWebResponse.InternalError("List all files operation has failed.`");
             }
 
             var ResultObject = new JObject
@@ -67,7 +61,7 @@ namespace BSecretManagementService.WebServices
             }
 
             return new BWebServiceResponse(
-                BWebResponseStatus.Status_OK_Code,
+                BWebResponse.Status_OK_Code,
                 new BStringOrStream(ResultObject.ToString()),
                 EBResponseContentType.JSON);
         }

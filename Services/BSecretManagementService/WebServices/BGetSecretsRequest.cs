@@ -39,10 +39,7 @@ namespace BSecretManagementService.WebServices
             if (Context.Request.HttpMethod != "GET")
             {
                 _ErrorMessageAction?.Invoke("BGetSecretsRequest: GET method is accepted. But received request method:  " + Context.Request.HttpMethod);
-                return new BWebServiceResponse(
-                    BWebResponseStatus.Error_MethodNotAllowed_Code,
-                    new BStringOrStream(BWebResponseStatus.Error_MethodNotAllowed_String("GET method is accepted. But received request method: " + Context.Request.HttpMethod)),
-                    BWebResponseStatus.Error_MethodNotAllowed_ContentType);
+                return BWebResponse.MethodNotAllowed("GET method is accepted. But received request method: " + Context.Request.HttpMethod);
             }
 
             JObject ParsedBody;
@@ -54,29 +51,20 @@ namespace BSecretManagementService.WebServices
             catch (Exception e)
             {
                 _ErrorMessageAction?.Invoke("BGetSecretsRequest-> Read request body stage has failed. Exception: " + e.Message + ", Trace: " + e.StackTrace);
-                return new BWebServiceResponse(
-                    BWebResponseStatus.Error_BadRequest_Code,
-                    new BStringOrStream(BWebResponseStatus.Error_BadRequest_String("Malformed request body. Request must be a valid json form.")),
-                    BWebResponseStatus.Error_BadRequest_ContentType);
+                return BWebResponse.BadRequest("Malformed request body. Request must be a valid json form.");
             }
 
             if (!ParsedBody.ContainsKey("keys"))
             {
                 _ErrorMessageAction?.Invoke("BGetSecretsRequest-> Request does not have keys field.");
-                return new BWebServiceResponse(
-                    BWebResponseStatus.Error_BadRequest_Code,
-                    new BStringOrStream(BWebResponseStatus.Error_BadRequest_String("Request does not have keys field.")),
-                    BWebResponseStatus.Error_BadRequest_ContentType);
+                return BWebResponse.BadRequest("Request does not have keys field.");
             }
 
             var RequestedKeys = (JArray)ParsedBody["keys"];
             if (RequestedKeys == null || RequestedKeys.Count == 0)
             {
                 _ErrorMessageAction?.Invoke("BGetSecretsRequest-> Request does not have keys array or elements.");
-                return new BWebServiceResponse(
-                BWebResponseStatus.Error_BadRequest_Code,
-                new BStringOrStream(BWebResponseStatus.Error_BadRequest_String("Request does not have keys array.")),
-                BWebResponseStatus.Error_BadRequest_ContentType);
+                return BWebResponse.BadRequest("Request does not have keys array.");
             }
 
             var CompletionStateStack = new ConcurrentStack<object>();
@@ -141,7 +129,7 @@ namespace BSecretManagementService.WebServices
             }
 
             return new BWebServiceResponse(
-                BWebResponseStatus.Status_OK_Code,
+                BWebResponse.Status_OK_Code,
                 new BStringOrStream(ResultObject.ToString()),
                 EBResponseContentType.JSON);
         }

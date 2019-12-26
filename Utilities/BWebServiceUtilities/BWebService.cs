@@ -18,7 +18,7 @@ namespace BWebServiceUtilities
 
         private readonly IBTracingServiceInterface TracingService;
 
-        private List<string> ServerNames = new List<string>()
+        private readonly List<string> ServerNames = new List<string>()
         {
             "http://localhost",
             "http://127.0.0.1"
@@ -71,10 +71,10 @@ namespace BWebServiceUtilities
             {
                 if (Prefix != null)
                 {
-                    if (Prefix.GetCallbackFromRequest(out Func<BWebServiceBase> _CallbackInitializer, _Context))
+                    if (Prefix.GetCallbackFromRequest(out Func<BWebServiceBase> _CallbackInitializer, out string _MatchedPrefix, _Context))
                     {
                         _Callback = _CallbackInitializer.Invoke();
-                        _Callback.InitializeWebService(TracingService);
+                        _Callback.InitializeWebService(_Context, _MatchedPrefix, TracingService);
                         return true;
                     }
                 }
@@ -109,7 +109,7 @@ namespace BWebServiceUtilities
                                     Context.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, api-key, token, auto-close-response");
                                     Context.Response.AddHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
                                     Context.Response.AddHeader("Access-Control-Max-Age", "-1");
-                                    Context.Response.StatusCode = BWebResponseStatus.Status_OK_Code;
+                                    Context.Response.StatusCode = BWebResponse.Status_OK_Code;
                                 }
                                 else
                                 {
@@ -182,9 +182,9 @@ namespace BWebServiceUtilities
                                     }
                                 }
                             }
-                            catch
+                            catch (Exception e)
                             {
-                                //Suppress any exceptions
+                                _ServerLogAction?.Invoke("Uncaught exception-2: " + e.Message + ", trace: " + e.StackTrace);
                             }
                             finally
                             {
@@ -194,30 +194,30 @@ namespace BWebServiceUtilities
                         });
                     }
                 }
-                catch
+                catch (Exception e)
                 {
-                    //Suppress any exceptions
+                    _ServerLogAction?.Invoke("Uncaught exception-1: " + e.Message + ", trace: " + e.StackTrace);
                 }
             });
         }
         
         private static void WriteInternalError(HttpListenerResponse _WriteTo, string _CustomMessage)
         {
-            string Resp = BWebResponseStatus.Error_InternalError_String(_CustomMessage);
+            string Resp = BWebResponse.Error_InternalError_String(_CustomMessage);
             byte[] Buff = Encoding.UTF8.GetBytes(Resp);
 
-            _WriteTo.ContentType = BWebUtilities.GetMimeStringFromEnum(BWebResponseStatus.Error_InternalError_ContentType);
-            _WriteTo.StatusCode = BWebResponseStatus.Error_InternalError_Code;
+            _WriteTo.ContentType = BWebUtilities.GetMimeStringFromEnum(BWebResponse.Error_InternalError_ContentType);
+            _WriteTo.StatusCode = BWebResponse.Error_InternalError_Code;
             _WriteTo.ContentLength64 = Buff.Length;
             _WriteTo.OutputStream.Write(Buff, 0, Buff.Length);
         }
         private static void WriteNotFound(HttpListenerResponse _WriteTo, string _CustomMessage)
         {
-            string Resp = BWebResponseStatus.Error_NotFound_String(_CustomMessage);
+            string Resp = BWebResponse.Error_NotFound_String(_CustomMessage);
             byte[] Buff = Encoding.UTF8.GetBytes(Resp);
 
-            _WriteTo.ContentType = BWebUtilities.GetMimeStringFromEnum(BWebResponseStatus.Error_NotFound_ContentType);
-            _WriteTo.StatusCode = BWebResponseStatus.Error_NotFound_Code;
+            _WriteTo.ContentType = BWebUtilities.GetMimeStringFromEnum(BWebResponse.Error_NotFound_ContentType);
+            _WriteTo.StatusCode = BWebResponse.Error_NotFound_Code;
             _WriteTo.ContentLength64 = Buff.Length;
             _WriteTo.OutputStream.Write(Buff, 0, Buff.Length);
         }
@@ -244,9 +244,7 @@ namespace BWebServiceUtilities
         public static BWebServiceResponse OnRequest(HttpListenerContext Context, Action<string> _ErrorMessage)
         {
             return new BWebServiceResponse(
-                BWebResponseStatus.Status_OK_Code,
-                null,
-                null,
+                BWebResponse.Status_OK_Code,
                 new BStringOrStream("Copyright Burak Kara, All rights reserved."),
                 EBResponseContentType.TextHtml);
         }

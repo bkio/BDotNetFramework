@@ -797,6 +797,30 @@ namespace BCommonUtilities
             return false;
         }
 
+        public static string WildCardToRegular(string _Value)
+        {
+            return "^" + Regex.Escape(_Value).Replace("\\*", ".*") + "$";
+        }
+
+        public static string RandomString(int _Size, bool _LowerCase)
+        {
+            var Builder = new StringBuilder();
+            Random Rand = new Random();
+
+            char Char;
+
+            for (int i = 0; i < _Size; i++)
+            {
+                Char = Convert.ToChar(Convert.ToInt32(Math.Floor(26 * Rand.NextDouble() + 65)));
+                Builder.Append(Char);
+            }
+            if (_LowerCase)
+            {
+                return Builder.ToString().ToLower();
+            }
+            return Builder.ToString();
+        }
+
         public static string EncodeStringForTagging(string _Input)
         {
             return WebUtility.UrlEncode(_Input).Replace("%", "@pPp@");
