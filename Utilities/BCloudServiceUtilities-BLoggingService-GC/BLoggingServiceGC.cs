@@ -70,7 +70,10 @@ namespace BCloudServiceUtilities.LoggingServices
 
                     if (ApplicationCredentials == null)
                     {
-                        ApplicationCredentialsPlain = BUtility.HexDecode(ApplicationCredentialsPlain);
+                        if (!BUtility.HexDecode(out ApplicationCredentialsPlain, ApplicationCredentialsPlain, _ErrorMessageAction))
+                        {
+                            throw new Exception("Hex decode operation for application credentials plain has failed.");
+                        }
                         Credential = GoogleCredential.FromJson(ApplicationCredentialsPlain)
                                 .CreateScoped(
                                 Scopes.ToArray())

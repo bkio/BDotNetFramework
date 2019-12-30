@@ -591,20 +591,34 @@ namespace BCommonUtilities
         /// <para>Decodes Hex String</para>
         /// 
         /// <para>Parameters:</para>
-        /// <para><paramref name="_Input"/>                       Input Parameter</para>
+        /// <para><paramref name="_Result"/>                        Hex-decoded string</para>
+        /// <para><paramref name="_Input"/>                         Input Parameter</para>
+        /// <para><paramref name="_ErrorMessageAction"/>            Error messages will be pushed to this action</para>
         /// 
-        /// <returns> Returns:                                    Hex-decoded string</returns>
+        /// <returns> Returns:                                      Success or failure</returns>
         /// 
         /// </summary>
         /// 
-        public static string HexDecode(string _Input)
+        public static bool HexDecode(out string _Result, string _Input, Action<string> _ErrorMessageAction = null)
         {
+            _Result = null;
+
             var Result = new byte[_Input.Length / 2];
-            for (var i = 0; i < Result.Length; i++)
+            try
             {
-                Result[i] = Convert.ToByte(_Input.Substring(i * 2, 2), 16);
+                for (var i = 0; i < Result.Length; i++)
+                {
+                    Result[i] = Convert.ToByte(_Input.Substring(i * 2, 2), 16);
+                }
+                _Result = Encoding.ASCII.GetString(Result);
             }
-            return Encoding.ASCII.GetString(Result);
+            catch (Exception e)
+            {
+                _ErrorMessageAction?.Invoke(e.Message + ", Trace: " + e.StackTrace);
+                return false;
+            }
+            
+            return _Result != null;
         }
 
         /// <summary>

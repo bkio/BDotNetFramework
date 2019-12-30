@@ -81,7 +81,10 @@ namespace BCloudServiceUtilities.PubSubServices
 
                     if (ApplicationCredentials == null)
                     {
-                        ApplicationCredentialsPlain = BUtility.HexDecode(ApplicationCredentialsPlain);
+                        if (!BUtility.HexDecode(out ApplicationCredentialsPlain, ApplicationCredentialsPlain, _ErrorMessageAction))
+                        {
+                            throw new Exception("Hex decode operation for application credentials plain has failed.");
+                        }
                         PublishCredential = GoogleCredential.FromJson(ApplicationCredentialsPlain)
                                 .CreateScoped(
                                 PublishScopes.ToArray())
