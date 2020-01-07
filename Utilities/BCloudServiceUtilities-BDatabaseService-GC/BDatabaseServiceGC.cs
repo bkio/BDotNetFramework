@@ -621,12 +621,15 @@ namespace BCloudServiceUtilities.DatabaseServices
 
                     if (_PutOrUpdateItemType == EBPutOrUpdateItemType.UpdateItem)
                     {
-                        var CopyObject = new JObject(ReturnedPreOperationObject);
-                        CopyObject.Merge(NewItem, new JsonMergeSettings
+                        if (ReturnedPreOperationObject != null)
                         {
-                            MergeArrayHandling = MergeArrayHandling.Replace
-                        });
-                        NewItem = CopyObject;
+                            var CopyObject = new JObject(ReturnedPreOperationObject);
+                            CopyObject.Merge(NewItem, new JsonMergeSettings
+                            {
+                                MergeArrayHandling = MergeArrayHandling.Replace
+                            });
+                            NewItem = CopyObject;
+                        }
                     }
 
                     if (_ReturnItemBehaviour == EBReturnItemBehaviour.ReturnAllOld)
