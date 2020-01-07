@@ -109,7 +109,13 @@ namespace BCloudServiceUtilities.MemoryServices
 
             try
             {
-                return RedisConnection.GetDatabase().KeyExpire(Topic, _TTL);
+                var bDoesKeyExist = RedisConnection.GetDatabase().KeyExpire(Topic, _TTL);
+                if (!bDoesKeyExist)
+                {
+                    RedisConnection.GetDatabase().SetAdd(Topic, "");
+                    return RedisConnection.GetDatabase().KeyExpire(Topic, _TTL);
+                }
+                return true;
             }
             catch (Exception e)
             {
