@@ -101,7 +101,7 @@ namespace BWebServiceUtilities
         //
 
         public static readonly EBResponseContentType Moved_Permanently_ContentType = EBResponseContentType.JSON;
-        public static string Moved_Permanently_String() { return "{\"result\":\"failure\",\"message\":\"Moved Permanently.\"}"; }
+        public static string Moved_Permanently_String(string Message = "") { return "{\"result\":\"failure\",\"message\":\"Moved Permanently. " + Message + "\"}"; }
         public static readonly int Moved_Permanently_Code = 301;
         public static BWebServiceResponse MovedPermanently(string Message) { return new BWebServiceResponse(Moved_Permanently_Code, new BStringOrStream(Moved_Permanently_String(Message)), Moved_Permanently_ContentType); }
 
