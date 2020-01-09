@@ -86,6 +86,28 @@ namespace BCloudServiceUtilities
 
         /// <summary>
         /// 
+        /// <para>SetKeyValueConditionally</para>
+        /// 
+        /// <para>Sets given keys' values within given namespace and publishes message to [_Domain]:[_SubDomain] topic;</para>
+        /// <para>With a condition; if key does not exist.</para>
+        /// 
+        /// <para>Parameters:</para>
+        /// <para><paramref name="_QueryParameters"/>           Parameters need to be provided for performing this operation</para>
+        /// <para><paramref name="_KeyValue"/>                  Key-value to be set</para>
+        /// <para><paramref name="_ErrorMessageAction"/>        Error messages will be pushed to this action</para>
+        /// <para><paramref name="_bPublishChange"/>            Publish the change to Pub/Sub channel</para>
+        /// 
+        /// <returns> Returns:                                  Operation success; if condition fails; returns false.</returns>
+        /// 
+        /// </summary>
+        bool SetKeyValueConditionally(
+            BMemoryQueryParameters _QueryParameters,
+            Tuple<string, BPrimitiveType> _KeyValue,
+            Action<string> _ErrorMessageAction = null,
+            bool _bPublishChange = true);
+
+        /// <summary>
+        /// 
         /// <para>GetKeyValue</para>
         /// 
         /// <para>Gets given key's value within given namespace [_Domain]:[_SubDomain]</para>

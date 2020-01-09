@@ -269,6 +269,107 @@ namespace BCloudServiceUtilities.MemoryServices
 
         /// <summary>
         ///
+        /// <para>SetKeyValue:</para>
+        ///
+        /// <para>Sets given keys' values within given namespace and publishes message to [_Domain]:[_SubDomain] topic;</para>
+        /// <para>With a condition; if key does not exist.</para>
+        ///
+        /// <para>Check <seealso cref="IBMemoryServiceInterface.SetKeyValueConditionally"/> for detailed documentation</para>
+        ///
+        /// </summary>
+        public bool SetKeyValueConditionally(
+            BMemoryQueryParameters _QueryParameters,
+            Tuple<string, BPrimitiveType> _KeyValue,
+            Action<string> _ErrorMessageAction = null,
+            bool _bPublishChange = true)
+        {
+            if (_KeyValue == null) return false;
+
+            JObject ChangesObject = new JObject();
+
+            HashEntry Entry = new HashEntry();
+            if (_KeyValue.Item2 != null)
+            {
+                if (_KeyValue.Item2.Type == EBPrimitiveTypeEnum.Double)
+                {
+                    Entry = new HashEntry(_KeyValue.Item1, _KeyValue.Item2.AsDouble.ToString());
+                    ChangesObject[_KeyValue.Item1] = _KeyValue.Item2.AsDouble;
+                }
+                else if (_KeyValue.Item2.Type == EBPrimitiveTypeEnum.Integer)
+                {
+                    Entry = new HashEntry(_KeyValue.Item1, _KeyValue.Item2.AsInteger);
+                    ChangesObject[_KeyValue.Item1] = _KeyValue.Item2.AsInteger;
+                }
+                else if (_KeyValue.Item2.Type == EBPrimitiveTypeEnum.String)
+                {
+                    Entry = new HashEntry(_KeyValue.Item1, _KeyValue.Item2.AsString);
+                    ChangesObject[_KeyValue.Item1] = _KeyValue.Item2.AsString;
+                }
+                else if (_KeyValue.Item2.Type == EBPrimitiveTypeEnum.ByteArray)
+                {
+                    Entry = new HashEntry(_KeyValue.Item1, _KeyValue.Item2.AsByteArray);
+                    ChangesObject[_KeyValue.Item1] = _KeyValue.Item2.ToString();
+                }
+            }
+
+            JObject PublishObject = new JObject
+            {
+                ["operation"] = "SetKeyValue", //Identical with SetKeyValue
+                ["changes"] = ChangesObject
+            };
+
+            string CompiledQueryParameters = _QueryParameters.Domain + ":" + _QueryParameters.SubDomain + ":" + _QueryParameters.Identifier;
+
+            var RedisValues = new RedisValue[]
+            {
+                Entry.Name,
+                Entry.Value
+            };
+            var Script = @"
+                if redis.call('hexists', KEYS[1], ARGV[1]) == 0 then
+                return redis.call('hset', KEYS[1], ARGV[1], ARGV[2])
+                else
+                return nil
+                end";
+
+            FailoverCheck();
+            try
+            {
+                var Result = (RedisValue)RedisConnection.GetDatabase().ScriptEvaluate(Script,
+                    new RedisKey[]
+                    {
+                        CompiledQueryParameters
+                    },
+                    RedisValues);
+                if (Result.IsNull) return false;
+            }
+            catch (Exception e)
+            {
+                if (e is RedisException || e is TimeoutException)
+                {
+                    OnFailoverDetected(_ErrorMessageAction);
+                    var Result = (RedisValue)RedisConnection.GetDatabase().ScriptEvaluate(Script,
+                        new RedisKey[]
+                        {
+                            CompiledQueryParameters
+                        },
+                        RedisValues);
+                    if (Result.IsNull) return false;
+                }
+                else
+                {
+                    _ErrorMessageAction?.Invoke("BMemoryServiceRedis->SetKeyValue: " + e.Message + ", Trace: " + e.StackTrace);
+                    return false;
+                }
+            }
+
+            if (PubSubService == null || !_bPublishChange) return true; //Means PubSubService is not needed and memory set has succeed.
+            PubSubService.Publish(_QueryParameters, PublishObject, _ErrorMessageAction);
+            return true;
+        }
+
+        /// <summary>
+        ///
         /// <para>GetKeyValue:</para>
         ///
         /// <para>Gets given key's value within given namespace [_QueryParameters.Domain]:[_QueryParameters.SubDomain]</para>
