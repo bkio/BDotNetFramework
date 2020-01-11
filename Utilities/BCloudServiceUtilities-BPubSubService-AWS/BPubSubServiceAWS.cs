@@ -1,4 +1,5 @@
 ﻿/// MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
+/// TODO: REPLACE WITH SNS FOR MULTIPLE CONSUMER SUPPORT, THIS WAY ITS DIFFERENT THAN GC AND REDIS
 
 using System;
 using System.Collections.Generic;
