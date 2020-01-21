@@ -155,10 +155,13 @@ namespace BWebServiceUtilities
                                         if (Response.ResponseContent.Type == EBStringOrStreamEnum.String)
                                         {
                                             byte[] Buffer = Encoding.UTF8.GetBytes(Response.ResponseContent.String);
-                                            if (Buffer != null && Buffer.Length > 0)
+                                            if (Buffer != null)
                                             {
                                                 Context.Response.ContentLength64 = Buffer.Length;
-                                                Context.Response.OutputStream.Write(Buffer, 0, Buffer.Length);
+                                                if (Buffer.Length > 0)
+                                                {
+                                                    Context.Response.OutputStream.Write(Buffer, 0, Buffer.Length);
+                                                }
                                             }
                                             else
                                             {
