@@ -165,8 +165,7 @@ namespace BWebServiceUtilities
                                             }
                                             else
                                             {
-                                                _ServerLogAction?.Invoke("BWebserver->Error: Response is string, but UTF8 encoding result is " + (Response.ResponseContent.String == null ? "null" : "valid") + " and string is " + Response.ResponseContent.String);
-                                                WriteInternalError(Context.Response, "Code: WS-STRGINV.");
+                                                Context.Response.ContentLength64 = 0;
                                             }
                                         }
                                         else
