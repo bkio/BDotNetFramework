@@ -107,6 +107,13 @@ namespace BWebServiceUtilities
 
         //
 
+        public static readonly EBResponseContentType Moved_Temporarily_ContentType = EBResponseContentType.JSON;
+        public static string Moved_Temporarily_String(string Message = "") { return "{\"result\":\"failure\",\"message\":\"Moved Temporarily. " + Message + "\"}"; }
+        public static readonly int Moved_Temporarily_Code = 302;
+        public static BWebServiceResponse MovedTemporarily(string Message) { return new BWebServiceResponse(Moved_Temporarily_Code, new BStringOrStream(Moved_Temporarily_String(Message)), Moved_Temporarily_ContentType); }
+
+        //
+
         public static readonly EBResponseContentType From_Internal_To_Gateway_Moved_Permanently_ContentType = EBResponseContentType.JSON;
         public static string From_Internal_To_Gateway_Moved_Permanently_String(string To) { return "{\"redirectTo\":\"" + To + "\"}"; }
         public static readonly int From_Internal_To_Gateway_Moved_Permanently_Code = 418;
