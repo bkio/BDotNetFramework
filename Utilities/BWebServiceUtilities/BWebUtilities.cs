@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using BCommonUtilities;
 
 namespace BWebServiceUtilities
@@ -170,9 +171,23 @@ namespace BWebServiceUtilities
             return false;
         }
 
-        public static void ConvertHeadersFromHttpContentToTuples(HttpContent Content, List<Tuple<string, string>> HttpRequestResponseHeaders)
+        public static void ConvertHeadersFromHttpContentToTuples(HttpContentHeaders ContentHeaders, List<Tuple<string, string>> HttpRequestResponseHeaders)
         {
-            foreach (var Header in Content.Headers)
+            foreach (var Header in ContentHeaders)
+            {
+                var HeadersString = "";
+                foreach (var HeaderValue in Header.Value)
+                {
+                    HeadersString += HeaderValue + ",";
+                }
+                HeadersString = HeadersString.TrimEnd(',');
+
+                HttpRequestResponseHeaders.Add(new Tuple<string, string>(Header.Key, HeadersString));
+            }
+        }
+        public static void ConvertHeadersFromHttpContentToTuples(HttpResponseHeaders ResponseHeaders, List<Tuple<string, string>> HttpRequestResponseHeaders)
+        {
+            foreach (var Header in ResponseHeaders)
             {
                 var HeadersString = "";
                 foreach (var HeaderValue in Header.Value)
