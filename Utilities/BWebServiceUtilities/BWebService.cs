@@ -132,15 +132,12 @@ namespace BWebServiceUtilities
 
                                     foreach (var CurrentHeader in Response.Headers)
                                     {
-                                        if (CurrentHeader.Key.ToLower() == "set-cookie") continue;
-
                                         foreach (var Value in CurrentHeader.Value)
                                         {
                                             Context.Response.AppendHeader(CurrentHeader.Key, Value);
                                         }
                                     }
-                                    Context.Response.Cookies = Response.Cookies;
-
+                                    
                                     Context.Response.ContentType = BWebUtilities.GetMimeStringFromEnum(Response.ResponseContentType);
 
                                     if (Response.ResponseContent.Type == EBStringOrStreamEnum.String)

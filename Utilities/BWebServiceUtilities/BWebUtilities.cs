@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using BCommonUtilities;
 
@@ -81,15 +80,15 @@ namespace BWebServiceUtilities
             }
         }
 
-        public static void InjectHeadersFromTupleArraysIntoContext(Tuple<string, string>[] _Headers, HttpListenerContext _Context)
+        public static void InjectHeadersFromTupleArraysIntoContext(Dictionary<string, IEnumerable<string>> _Headers, HttpListenerContext _Context)
         {
-            if (_Headers != null && _Headers.Length > 0)
+            if (_Headers != null && _Headers.Count > 0)
             {
                 foreach (var Header in _Headers)
                 {
-                    if (Header != null)
+                    foreach (var Value in Header.Value)
                     {
-                        _Context.Request.Headers.Set(Header.Item1, Header.Item2);
+                        _Context.Request.Headers.Add(Header.Key, Value);
                     }
                 }
             }
@@ -182,32 +181,6 @@ namespace BWebServiceUtilities
             }
             LogText = LogText.TrimEnd('\n');
             Console.WriteLine(_Identifier + " headers:\n" + LogText);
-        }
-
-        public static void LogCookies(string _Identifier, CookieCollection _Cookies)
-        {
-            var LogText = "";
-            for (var i = 0; i < _Cookies.Count; i++)
-            {
-                var Current = _Cookies[i];
-                
-                LogText += Current.Name + 
-                    "--->Value:" + Current.Value + 
-                    "[-]Domain:" + Current.Domain + 
-                    "[-]Port:" + Current.Port + 
-                    "[-]Path:" + Current.Path + 
-                    "[-]Expires:" + Current.Expires + 
-                    "[-]Expired:" + Current.Expired + 
-                    "[-]Secure:" + Current.Secure + 
-                    "[-]HttpOnly:" + Current.HttpOnly + 
-                    "[-]Comment:" + Current.Comment + 
-                    "[-]CommentUri:" + Current.CommentUri + 
-                    "[-]Discard:" + Current.Discard + 
-                    "[-]Version:" + Current.Version + 
-                    "[-]TimeStamp:" + Current.TimeStamp + '\n';
-            }
-            LogText = LogText.TrimEnd('\n');
-            Console.WriteLine(_Identifier + " cookies:\n" + LogText);
         }
 
         public static Tuple<string, string>[] AnalyzeURLParametersFromRawURL(string _RawURL)

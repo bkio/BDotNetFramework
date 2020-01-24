@@ -11,7 +11,6 @@ namespace BWebServiceUtilities
     {
         public readonly int StatusCode;
         public readonly Dictionary<string, IEnumerable<string>> Headers;
-        public readonly CookieCollection Cookies;
         public readonly BStringOrStream ResponseContent;
         public readonly EBResponseContentType ResponseContentType;
 
@@ -28,46 +27,6 @@ namespace BWebServiceUtilities
                 Headers = new Dictionary<string, IEnumerable<string>>(_Headers);
             }
 
-            Cookies = new CookieCollection();
-
-            ResponseContent = _ResponseContent;
-            ResponseContentType = _ResponseContentType;
-        }
-
-        public BWebServiceResponse(int _StatusCode, Dictionary<string, IEnumerable<string>> _Headers, CookieCollection _Cookies, BStringOrStream _ResponseContent, EBResponseContentType _ResponseContentType)
-        {
-            StatusCode = _StatusCode;
-            if (_Headers == null)
-            {
-                Headers = new Dictionary<string, IEnumerable<string>>();
-            }
-            else
-            {
-                Headers = new Dictionary<string, IEnumerable<string>>(_Headers);
-            }
-
-            Cookies = new CookieCollection();
-            if (_Cookies != null)
-            {
-                Cookies.Add(_Cookies);
-            }
-
-            ResponseContent = _ResponseContent;
-            ResponseContentType = _ResponseContentType;
-        }
-
-        public BWebServiceResponse(int _StatusCode, CookieCollection _Cookies, BStringOrStream _ResponseContent, EBResponseContentType _ResponseContentType)
-        {
-            StatusCode = _StatusCode;
-
-            Headers = new Dictionary<string, IEnumerable<string>>();
-
-            Cookies = new CookieCollection();
-            if (_Cookies != null)
-            {
-                Cookies.Add(_Cookies);
-            }
-
             ResponseContent = _ResponseContent;
             ResponseContentType = _ResponseContentType;
         }
@@ -77,8 +36,6 @@ namespace BWebServiceUtilities
             StatusCode = _StatusCode;
 
             Headers = new Dictionary<string, IEnumerable<string>>();
-
-            Cookies = new CookieCollection();
 
             ResponseContent = _ResponseContent;
             ResponseContentType = _ResponseContentType;
