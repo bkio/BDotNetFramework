@@ -117,59 +117,60 @@ namespace BWebServiceUtilities
                                     {
                                         _ServerLogAction?.Invoke("BWebserver->Run: PrefixesToListen is null.");
                                         WriteInternalError(Context.Response, "Code: WS-PTLN.");
+                                        return;
                                     }
-                                    else if (!LookForListenersFromRequest(out BWebServiceBase _Callback, Context))
+                                    if (!LookForListenersFromRequest(out BWebServiceBase _Callback, Context))
                                     {
                                         _ServerLogAction?.Invoke("BWebserver->Run: Request is not being listened. Request: " + Context.Request.RawUrl);
                                         WriteNotFound(Context.Response, "Request is not being listened.");
+                                        return;
                                     }
-                                    else
+
+                                    var Response = _Callback.OnRequest(Context, _ServerLogAction);
+
+                                    Context.Response.StatusCode = Response.StatusCode;
+
+                                    foreach (var CurrentHeader in Response.Headers)
                                     {
-                                        var Response = _Callback.OnRequest(Context, _ServerLogAction);
+                                        if (CurrentHeader.Key.ToLower() == "set-cookie") continue;
 
-                                        Context.Response.StatusCode = Response.StatusCode;
-
-                                        if (Response.Headers != null && Response.Headers.Length > 0)
+                                        foreach (var Value in CurrentHeader.Value)
                                         {
-                                            foreach (Tuple<string, string> CurrentHeader in Response.Headers)
-                                            {
-                                                if (CurrentHeader.Item1.Length > 0)
-                                                {
-                                                    Context.Response.AppendHeader(CurrentHeader.Item1, CurrentHeader.Item2);
-                                                }
-                                            }
+                                            Context.Response.AppendHeader(CurrentHeader.Key, Value);
                                         }
+                                    }
+                                    Context.Response.Cookies = Response.Cookies;
 
-                                        Context.Response.ContentType = BWebUtilities.GetMimeStringFromEnum(Response.ResponseContentType);
+                                    Context.Response.ContentType = BWebUtilities.GetMimeStringFromEnum(Response.ResponseContentType);
 
-                                        if (Response.ResponseContent.Type == EBStringOrStreamEnum.String)
+                                    if (Response.ResponseContent.Type == EBStringOrStreamEnum.String)
+                                    {
+                                        byte[] Buffer = Encoding.UTF8.GetBytes(Response.ResponseContent.String);
+                                        if (Buffer != null)
                                         {
-                                            byte[] Buffer = Encoding.UTF8.GetBytes(Response.ResponseContent.String);
-                                            if (Buffer != null)
+                                            Context.Response.ContentLength64 = Buffer.Length;
+                                            if (Buffer.Length > 0)
                                             {
-                                                Context.Response.ContentLength64 = Buffer.Length;
-                                                if (Buffer.Length > 0)
-                                                {
-                                                    Context.Response.OutputStream.Write(Buffer, 0, Buffer.Length);
-                                                }
-                                            }
-                                            else
-                                            {
-                                                Context.Response.ContentLength64 = 0;
+                                                Context.Response.OutputStream.Write(Buffer, 0, Buffer.Length);
                                             }
                                         }
                                         else
                                         {
-                                            if (Response.ResponseContent.Stream != null && Response.ResponseContent.StreamLength > 0)
-                                            {
-                                                Context.Response.ContentLength64 = Response.ResponseContent.StreamLength;
-                                                Response.ResponseContent.Stream.CopyTo(Context.Response.OutputStream);
-                                            }
-                                            else
-                                            {
-                                                _ServerLogAction?.Invoke("BWebserver->Error: Response is stream, but stream object is " + (Response.ResponseContent.Stream == null ? "null" : "valid") + " and content length is " + Response.ResponseContent.StreamLength);
-                                                WriteInternalError(Context.Response, "Code: WS-STRMINV.");
-                                            }
+                                            Context.Response.ContentLength64 = 0;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (Response.ResponseContent.Stream != null && Response.ResponseContent.StreamLength > 0)
+                                        {
+                                            Context.Response.ContentLength64 = Response.ResponseContent.StreamLength;
+                                            Response.ResponseContent.Stream.CopyTo(Context.Response.OutputStream);
+                                        }
+                                        else
+                                        {
+                                            _ServerLogAction?.Invoke("BWebserver->Error: Response is stream, but stream object is " + (Response.ResponseContent.Stream == null ? "null" : "valid") + " and content length is " + Response.ResponseContent.StreamLength);
+                                            WriteInternalError(Context.Response, "Code: WS-STRMINV.");
+                                            return;
                                         }
                                     }
                                 }
