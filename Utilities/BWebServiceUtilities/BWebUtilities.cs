@@ -109,10 +109,9 @@ namespace BWebServiceUtilities
                     {
                         HeaderValues.Add(HeaderValue);
                     }
-                    return true;
                 }
             }
-            return false;
+            return HeaderValues.Count > 0;
         }
 
         public static string ReplaceHostPart(string Source, string NewHostname)
