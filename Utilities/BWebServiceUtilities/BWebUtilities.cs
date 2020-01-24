@@ -165,7 +165,7 @@ namespace BWebServiceUtilities
                 LogText += HeaderKey + "--->" + HeaderValues + '\n';
             }
             LogText = LogText.TrimEnd('\n');
-            Console.WriteLine(_Identifier + " request headers:\n" + LogText);
+            Console.WriteLine(_Identifier + " headers:\n" + LogText);
         }
         public static void LogHeaders(string _Identifier, HttpRequestHeaders _Headers)
         {
@@ -181,7 +181,33 @@ namespace BWebServiceUtilities
                 LogText += Header.Key + "--->" + HeaderValues + '\n';
             }
             LogText = LogText.TrimEnd('\n');
-            Console.WriteLine(_Identifier + " request headers:\n" + LogText);
+            Console.WriteLine(_Identifier + " headers:\n" + LogText);
+        }
+
+        public static void LogCookies(string _Identifier, CookieCollection _Cookies)
+        {
+            var LogText = "";
+            for (var i = 0; i < _Cookies.Count; i++)
+            {
+                var Current = _Cookies[i];
+                
+                LogText += Current.Name + 
+                    "--->Value:" + Current.Value + 
+                    "[-]Domain:" + Current.Domain + 
+                    "[-]Port:" + Current.Port + 
+                    "[-]Path:" + Current.Path + 
+                    "[-]Expires:" + Current.Expires + 
+                    "[-]Expired:" + Current.Expired + 
+                    "[-]Secure:" + Current.Secure + 
+                    "[-]HttpOnly:" + Current.HttpOnly + 
+                    "[-]Comment:" + Current.Comment + 
+                    "[-]CommentUri:" + Current.CommentUri + 
+                    "[-]Discard:" + Current.Discard + 
+                    "[-]Version:" + Current.Version + 
+                    "[-]TimeStamp:" + Current.TimeStamp + '\n';
+            }
+            LogText = LogText.TrimEnd('\n');
+            Console.WriteLine(_Identifier + " cookies:\n" + LogText);
         }
 
         public static Tuple<string, string>[] AnalyzeURLParametersFromRawURL(string _RawURL)

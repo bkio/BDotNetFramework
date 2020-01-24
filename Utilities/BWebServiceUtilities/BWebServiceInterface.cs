@@ -25,7 +25,7 @@ namespace BWebServiceUtilities
             }
             else
             {
-                Headers = _Headers;
+                Headers = new Dictionary<string, IEnumerable<string>>(_Headers);
             }
 
             Cookies = new CookieCollection();
@@ -43,16 +43,13 @@ namespace BWebServiceUtilities
             }
             else
             {
-                Headers = _Headers;
+                Headers = new Dictionary<string, IEnumerable<string>>(_Headers);
             }
 
-            if (_Cookies == null)
+            Cookies = new CookieCollection();
+            if (_Cookies != null)
             {
-                Cookies = new CookieCollection();
-            }
-            else
-            {
-                Cookies = _Cookies;
+                Cookies.Add(_Cookies);
             }
 
             ResponseContent = _ResponseContent;
@@ -65,13 +62,10 @@ namespace BWebServiceUtilities
 
             Headers = new Dictionary<string, IEnumerable<string>>();
 
-            if (_Cookies == null)
+            Cookies = new CookieCollection();
+            if (_Cookies != null)
             {
-                Cookies = new CookieCollection();
-            }
-            else
-            {
-                Cookies = _Cookies;
+                Cookies.Add(_Cookies);
             }
 
             ResponseContent = _ResponseContent;
