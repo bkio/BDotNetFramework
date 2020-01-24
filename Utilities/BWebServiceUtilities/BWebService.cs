@@ -139,16 +139,6 @@ namespace BWebServiceUtilities
                                                 }
                                             }
                                         }
-                                        if (Response.Cookies != null && Response.Cookies.Length > 0)
-                                        {
-                                            foreach (Tuple<string, string, string> CurrentCookie in Response.Cookies)
-                                            {
-                                                if (CurrentCookie.Item1.Length > 0)
-                                                {
-                                                    Context.Response.AppendCookie(new Cookie(CurrentCookie.Item1, CurrentCookie.Item2, "/", CurrentCookie.Item3));
-                                                }
-                                            }
-                                        }
 
                                         Context.Response.ContentType = BWebUtilities.GetMimeStringFromEnum(Response.ResponseContentType);
 
@@ -243,7 +233,7 @@ namespace BWebServiceUtilities
 
     public class CDefaultService
     {
-        public static BWebServiceResponse OnRequest(HttpListenerContext Context, Action<string> _ErrorMessage)
+        public static BWebServiceResponse OnRequest(HttpListenerContext _Context, Action<string> _ErrorMessage)
         {
             return new BWebServiceResponse(
                 BWebResponse.Status_OK_Code,

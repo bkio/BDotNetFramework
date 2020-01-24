@@ -95,60 +95,6 @@ namespace BWebServiceUtilities
             }
         }
 
-        public static void ExtractHeadersCookiesAsTupleArraysFromContext(out Tuple<string, string>[] _Headers, out Tuple<string, string, string>[] _Cookies, HttpListenerContext _Context)
-        {
-            var TempHeaderList = new List<Tuple<string, string>>();
-            if (_Context.Request.Headers != null && _Context.Request.Headers.AllKeys != null)
-            {
-                foreach (var HeaderKey in _Context.Request.Headers.AllKeys)
-                {
-                    if (HeaderKey != null)
-                    {
-                        var HeaderValues = _Context.Request.Headers.GetValues(HeaderKey);
-                        if (HeaderValues != null)
-                        {
-                            foreach (var HeaderValue in HeaderValues)
-                            {
-                                if (HeaderValue != null)
-                                {
-                                    TempHeaderList.Add(new Tuple<string, string>(HeaderKey, HeaderValue));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (TempHeaderList.Count == 0)
-            {
-                _Headers = null;
-            }
-            else
-            {
-                _Headers = TempHeaderList.ToArray();
-            }
-
-            var TempCookieList = new List<Tuple<string, string, string>>();
-            if (_Context.Request.Cookies != null)
-            {
-                for (int i = 0; i < _Context.Request.Cookies.Count; i++)
-                {
-                    var CurrentCookie = _Context.Request.Cookies[i];
-                    if (CurrentCookie != null)
-                    {
-                        TempCookieList.Add(new Tuple<string, string, string>(CurrentCookie.Name, CurrentCookie.Value, CurrentCookie.Domain));
-                    }
-                }
-            }
-            if (TempCookieList.Count == 0)
-            {
-                _Cookies = null;
-            }
-            else
-            {
-                _Cookies = TempCookieList.ToArray();
-            }
-        }
-
         public static bool DoesContextContainHeader(out string HeaderValues, HttpListenerContext Context, string HeaderKey)
         {
             HeaderKey = HeaderKey.ToLower();
