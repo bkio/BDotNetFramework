@@ -95,10 +95,10 @@ namespace BWebServiceUtilities
             }
         }
 
-        public static bool DoesContextContainHeader(out string HeaderValues, HttpListenerContext Context, string HeaderKey)
+        public static bool DoesContextContainHeader(out List<string> HeaderValues, HttpListenerContext Context, string HeaderKey)
         {
             HeaderKey = HeaderKey.ToLower();
-            HeaderValues = "";
+            HeaderValues = new List<string>();
 
             foreach (var RequestKey in Context.Request.Headers.AllKeys)
             {
@@ -107,43 +107,12 @@ namespace BWebServiceUtilities
                 {
                     foreach (var HeaderValue in Context.Request.Headers.GetValues(RequestKey))
                     {
-                        HeaderValues += HeaderValue + "; ";
+                        HeaderValues.Add(HeaderValue);
                     }
-                    HeaderValues = HeaderValues.TrimEnd("; ");
-
                     return true;
                 }
             }
             return false;
-        }
-
-        public static void ConvertHeadersFromHttpContentToTuples(HttpContentHeaders ContentHeaders, List<Tuple<string, string>> HttpRequestResponseHeaders)
-        {
-            foreach (var Header in ContentHeaders)
-            {
-                var HeadersString = "";
-                foreach (var HeaderValue in Header.Value)
-                {
-                    HeadersString += HeaderValue + "; ";
-                }
-                HeadersString = HeadersString.TrimEnd("; ");
-
-                HttpRequestResponseHeaders.Add(new Tuple<string, string>(Header.Key, HeadersString));
-            }
-        }
-        public static void ConvertHeadersFromHttpContentToTuples(HttpResponseHeaders ResponseHeaders, List<Tuple<string, string>> HttpRequestResponseHeaders)
-        {
-            foreach (var Header in ResponseHeaders)
-            {
-                var HeadersString = "";
-                foreach (var HeaderValue in Header.Value)
-                {
-                    HeadersString += HeaderValue + "; ";
-                }
-                HeadersString = HeadersString.TrimEnd("; ");
-
-                HttpRequestResponseHeaders.Add(new Tuple<string, string>(Header.Key, HeadersString));
-            }
         }
 
         public static string ReplaceHostPart(string Source, string NewHostname)
@@ -167,12 +136,18 @@ namespace BWebServiceUtilities
             return NewHostname + Source;
         }
 
-        public static void LogHeaders(string _Identifier, Tuple<string, string>[] _Headers)
+        public static void LogHeaders(string _Identifier, Dictionary<string, IEnumerable<string>> _Headers)
         {
             var LogText = "";
             foreach (var Header in _Headers)
             {
-                LogText += Header.Item1 + "--->" + Header.Item2 + '\n';
+                var HeaderValues = "";
+                foreach (var HeaderValue in Header.Value)
+                {
+                    HeaderValues += HeaderValue + "[-]";
+                }
+                HeaderValues = HeaderValues.TrimEnd("[-]");
+                LogText += Header.Key + "--->" + HeaderValues + '\n';
             }
             LogText = LogText.TrimEnd('\n');
             Console.WriteLine(_Identifier + " request headers:\n" + LogText);
@@ -185,9 +160,9 @@ namespace BWebServiceUtilities
                 var HeaderValues = "";
                 foreach (var HeaderValue in Header.Value)
                 {
-                    HeaderValues += HeaderValue + "; ";
+                    HeaderValues += HeaderValue + "[-]";
                 }
-                HeaderValues = HeaderValues.TrimEnd("; ");
+                HeaderValues = HeaderValues.TrimEnd("[-]");
                 LogText += Header.Key + "--->" + HeaderValues + '\n';
             }
             LogText = LogText.TrimEnd('\n');
