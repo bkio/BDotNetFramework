@@ -10,18 +10,18 @@ namespace BWebServiceUtilities
     public struct BWebServiceResponse
     {
         public readonly int StatusCode;
-        public readonly Dictionary<string, string[]> Headers;
+        public readonly Dictionary<string, IEnumerable<string>> Headers;
         public readonly CookieCollection Cookies;
         public readonly BStringOrStream ResponseContent;
         public readonly EBResponseContentType ResponseContentType;
 
-        public BWebServiceResponse(int _StatusCode, Dictionary<string, string[]> _Headers, BStringOrStream _ResponseContent, EBResponseContentType _ResponseContentType)
+        public BWebServiceResponse(int _StatusCode, Dictionary<string, IEnumerable<string>> _Headers, BStringOrStream _ResponseContent, EBResponseContentType _ResponseContentType)
         {
             StatusCode = _StatusCode;
 
             if (_Headers == null)
             {
-                Headers = new Dictionary<string, string[]>();
+                Headers = new Dictionary<string, IEnumerable<string>>();
             }
             else
             {
@@ -34,12 +34,12 @@ namespace BWebServiceUtilities
             ResponseContentType = _ResponseContentType;
         }
 
-        public BWebServiceResponse(int _StatusCode, Dictionary<string, string[]> _Headers, CookieCollection _Cookies, BStringOrStream _ResponseContent, EBResponseContentType _ResponseContentType)
+        public BWebServiceResponse(int _StatusCode, Dictionary<string, IEnumerable<string>> _Headers, CookieCollection _Cookies, BStringOrStream _ResponseContent, EBResponseContentType _ResponseContentType)
         {
             StatusCode = _StatusCode;
             if (_Headers == null)
             {
-                Headers = new Dictionary<string, string[]>();
+                Headers = new Dictionary<string, IEnumerable<string>>();
             }
             else
             {
@@ -63,7 +63,7 @@ namespace BWebServiceUtilities
         {
             StatusCode = _StatusCode;
 
-            Headers = new Dictionary<string, string[]>();
+            Headers = new Dictionary<string, IEnumerable<string>>();
 
             if (_Cookies == null)
             {
@@ -82,7 +82,7 @@ namespace BWebServiceUtilities
         {
             StatusCode = _StatusCode;
 
-            Headers = new Dictionary<string, string[]>();
+            Headers = new Dictionary<string, IEnumerable<string>>();
 
             Cookies = new CookieCollection();
 
