@@ -151,6 +151,22 @@ namespace BWebServiceUtilities
             LogText = LogText.TrimEnd('\n');
             Console.WriteLine(_Identifier + " request headers:\n" + LogText);
         }
+        public static void LogHeaders(string _Identifier, WebHeaderCollection _Headers)
+        {
+            var LogText = "";
+            foreach (var HeaderKey in _Headers.AllKeys)
+            {
+                var HeaderValues = "";
+                foreach (var HeaderValue in _Headers.GetValues(HeaderKey))
+                {
+                    HeaderValues += HeaderValue + "[-]";
+                }
+                HeaderValues = HeaderValues.TrimEnd("[-]");
+                LogText += HeaderKey + "--->" + HeaderValues + '\n';
+            }
+            LogText = LogText.TrimEnd('\n');
+            Console.WriteLine(_Identifier + " request headers:\n" + LogText);
+        }
         public static void LogHeaders(string _Identifier, HttpRequestHeaders _Headers)
         {
             var LogText = "";
