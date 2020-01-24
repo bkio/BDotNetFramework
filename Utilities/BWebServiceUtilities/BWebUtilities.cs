@@ -107,9 +107,9 @@ namespace BWebServiceUtilities
                 {
                     foreach (var HeaderValue in Context.Request.Headers.GetValues(RequestKey))
                     {
-                        HeaderValues += HeaderValue + ",";
+                        HeaderValues += HeaderValue + "; ";
                     }
-                    HeaderValues = HeaderValues.TrimEnd(',');
+                    HeaderValues = HeaderValues.TrimEnd("; ");
 
                     return true;
                 }
@@ -124,9 +124,9 @@ namespace BWebServiceUtilities
                 var HeadersString = "";
                 foreach (var HeaderValue in Header.Value)
                 {
-                    HeadersString += HeaderValue + ",";
+                    HeadersString += HeaderValue + "; ";
                 }
-                HeadersString = HeadersString.TrimEnd(',');
+                HeadersString = HeadersString.TrimEnd("; ");
 
                 HttpRequestResponseHeaders.Add(new Tuple<string, string>(Header.Key, HeadersString));
             }
@@ -138,9 +138,9 @@ namespace BWebServiceUtilities
                 var HeadersString = "";
                 foreach (var HeaderValue in Header.Value)
                 {
-                    HeadersString += HeaderValue + ",";
+                    HeadersString += HeaderValue + "; ";
                 }
-                HeadersString = HeadersString.TrimEnd(',');
+                HeadersString = HeadersString.TrimEnd("; ");
 
                 HttpRequestResponseHeaders.Add(new Tuple<string, string>(Header.Key, HeadersString));
             }
@@ -165,6 +165,33 @@ namespace BWebServiceUtilities
             Source = Source.Substring(FirstSlash);
 
             return NewHostname + Source;
+        }
+
+        public static void LogHeaders(string _Identifier, Tuple<string, string>[] _Headers)
+        {
+            var LogText = "";
+            foreach (var Header in _Headers)
+            {
+                LogText += Header.Item1 + "--->" + Header.Item2 + '\n';
+            }
+            LogText = LogText.TrimEnd('\n');
+            Console.WriteLine(_Identifier + " request headers:\n" + LogText);
+        }
+        public static void LogHeaders(string _Identifier, HttpRequestHeaders _Headers)
+        {
+            var LogText = "";
+            foreach (var Header in _Headers)
+            {
+                var HeaderValues = "";
+                foreach (var HeaderValue in Header.Value)
+                {
+                    HeaderValues += HeaderValue + "; ";
+                }
+                HeaderValues = HeaderValues.TrimEnd("; ");
+                LogText += Header.Key + "--->" + HeaderValues + '\n';
+            }
+            LogText = LogText.TrimEnd('\n');
+            Console.WriteLine(_Identifier + " request headers:\n" + LogText);
         }
 
         public static Tuple<string, string>[] AnalyzeURLParametersFromRawURL(string _RawURL)

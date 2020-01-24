@@ -217,6 +217,15 @@ namespace BCommonUtilities
 
     public static class BUtility
     {
+        public static string TrimEnd(this string _Source, string _Value)
+        {
+            if (!_Source.EndsWith(_Value))
+                return _Source;
+
+            return _Source.Remove(_Source.LastIndexOf(_Value));
+        }
+
+
         //Option based; in the second array, it is sufficient for one of the elements to exists in environment variable to succeed.
         public static bool GetEnvironmentVariables(
             out Dictionary<string, string> _ParsedResult,
