@@ -165,8 +165,6 @@ namespace BWebServiceUtilities
                                         {
                                             Context.Response.ContentLength64 = Response.ResponseContent.StreamLength;
                                             Response.ResponseContent.Stream.CopyTo(Context.Response.OutputStream);
-                                            try { Response.ResponseContent.Stream.Close(); } catch (Exception) { }
-                                            try { Response.ResponseContent.Stream.Dispose(); } catch (Exception)  {}
                                         }
                                         else
                                         {
