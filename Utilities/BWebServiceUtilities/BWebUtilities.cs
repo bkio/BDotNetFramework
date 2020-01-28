@@ -82,9 +82,9 @@ namespace BWebServiceUtilities
             }
         }
 
-        public static void InjectHeadersFromTupleArraysIntoContext(Dictionary<string, IEnumerable<string>> _Headers, HttpListenerContext _Context)
+        public static void InjectHeadersIntoDictionary(HttpHeaders _Headers, HttpListenerContext _Context)
         {
-            if (_Headers != null && _Headers.Count > 0)
+            if (_Headers != null && _Context != null)
             {
                 foreach (var Header in _Headers)
                 {
