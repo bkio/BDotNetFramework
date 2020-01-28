@@ -23,27 +23,41 @@ namespace BWebServiceUtilities_GC
             "content-length", "content-type"
         };
 
-        public static void InsertHeadersFromContextInto(HttpListenerContext Context, Action<string, string> CollectionAddFunction, string[] ExcludeHeaderKeys = null)
+        public static void InsertHeadersFromContextInto(HttpListenerContext _Context, Action<string, string> _CollectionAddFunction, string[] _ExcludeHeaderKeys = null)
         {
-            if (ExcludeHeaderKeys != null)
+            if (_ExcludeHeaderKeys != null)
             {
-                for (int i = 0; i < ExcludeHeaderKeys.Length; i++)
+                for (int i = 0; i < _ExcludeHeaderKeys.Length; i++)
                 {
-                    ExcludeHeaderKeys[i] = ExcludeHeaderKeys[i].ToLower();
+                    _ExcludeHeaderKeys[i] = _ExcludeHeaderKeys[i].ToLower();
                 }
             }
 
-            foreach (var RequestKey in Context.Request.Headers.AllKeys)
+            foreach (var RequestKey in _Context.Request.Headers.AllKeys)
             {
                 var LoweredKey = RequestKey.ToLower();
                 if (!IllegalHttpRequestHeaders.Contains(LoweredKey))
                 {
-                    if (ExcludeHeaderKeys != null && ExcludeHeaderKeys.Contains(LoweredKey)) continue;
+                    if (_ExcludeHeaderKeys != null && _ExcludeHeaderKeys.Contains(LoweredKey)) continue;
 
-                    var Values = Context.Request.Headers.GetValues(RequestKey);
+                    var Values = _Context.Request.Headers.GetValues(RequestKey);
                     foreach (var Value in Values)
                     {
-                        CollectionAddFunction?.Invoke(RequestKey, Value);
+                        _CollectionAddFunction?.Invoke(RequestKey, Value);
+                    }
+                }
+            }
+        }
+
+        public static void InsertHeadersFromDictionaryIntoContext(Dictionary<string, IEnumerable<string>> _HttpRequestResponseHeaders, HttpListenerContext Context)
+        {
+            foreach (var Header in _HttpRequestResponseHeaders)
+            {
+                if (!IllegalHttpRequestHeaders.Contains(Header.Key.ToLower()))
+                {
+                    foreach (var Value in Header.Value)
+                    {
+                        Context.Request.Headers.Add(Header.Key, Value);
                     }
                 }
             }
@@ -196,6 +210,8 @@ namespace BWebServiceUtilities_GC
                 _ErrorMessageAction?.Invoke("Error: Request has failed due to an internal api gateway error. Service endpoint: " + _FullEndpoint);
                 return BWebResponse.InternalError("Request has failed due to an internal api gateway error.");
             }
+
+            InsertHeadersFromDictionaryIntoContext(HttpRequestResponseHeaders, _Context);
 
             return new BWebServiceResponse(
                 HttpRequestResponseCode,
