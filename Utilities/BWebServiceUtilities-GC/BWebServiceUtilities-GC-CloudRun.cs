@@ -63,7 +63,7 @@ namespace BWebServiceUtilities_GC
 
                 using (var Client = new HttpClient(Handler))
                 {
-                    Client.DefaultRequestHeaders.Add("Metadata-Flavor", "Google");
+                    Client.DefaultRequestHeaders.TryAddWithoutValidation("Metadata-Flavor", "Google");
 
                     try
                     {
@@ -108,6 +108,16 @@ namespace BWebServiceUtilities_GC
                 return false;
             }
             _Request.Headers.Set("authorization", TokenType + " " + AccessKey);
+            return true;
+        }
+
+        public static bool AddAccessTokenForServiceExecution(HttpClient _Client, string _ForExecutingRequestUrl, Action<string> _ErrorMessageAction)
+        {
+            if (!GetAccessTokenForServiceExecution(out string TokenType, out string AccessKey, _ForExecutingRequestUrl, _ErrorMessageAction))
+            {
+                return false;
+            }
+            _Client.DefaultRequestHeaders.TryAddWithoutValidation("authorization", TokenType + " " + AccessKey);
             return true;
         }
 
