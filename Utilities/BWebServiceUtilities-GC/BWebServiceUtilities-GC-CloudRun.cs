@@ -8,10 +8,11 @@ using System.Net;
 using System.Net.Http;
 using System.Security.Authentication;
 using BCommonUtilities;
+using BWebServiceUtilities;
 
-namespace BWebServiceUtilities
+namespace BWebServiceUtilities_GC
 {
-    public static partial class BWebUtilities
+    public static partial class BWebUtilities_GC
     {
         private static readonly HashSet<string> IllegalHttpRequestHeaders = new HashSet<string>()
         {
