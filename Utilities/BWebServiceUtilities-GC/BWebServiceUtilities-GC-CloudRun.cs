@@ -12,7 +12,7 @@ using BWebServiceUtilities;
 
 namespace BWebServiceUtilities_GC
 {
-    public static partial class BWebUtilities_GC
+    public static class BWebUtilities_GC_CloudRun
     {
         private static readonly HashSet<string> IllegalHttpRequestHeaders = new HashSet<string>()
         {

@@ -23,7 +23,7 @@ namespace BWebServiceUtilities
         CSS
     }
 
-    public static partial class BWebUtilities
+    public static class BWebUtilities
     {
         public static string GetMimeStringFromEnum(EBResponseContentType ContentType)
         {
