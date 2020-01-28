@@ -23,7 +23,7 @@ namespace BWebServiceUtilities
         CSS
     }
 
-    public static class BWebUtilities
+    public static partial class BWebUtilities
     {
         public static string GetMimeStringFromEnum(EBResponseContentType ContentType)
         {
@@ -52,6 +52,8 @@ namespace BWebServiceUtilities
             }
         }
 
+        //Replicated method with BwebServiceUtilities-GC-CloudRun
+        //Change that too if there is any modification needed.
         public static EBResponseContentType GetEnumFromMimeString(string _ContentType)
         {
             _ContentType = _ContentType.ToLower();
@@ -212,6 +214,17 @@ namespace BWebServiceUtilities
 
             if (Parameters.Count == 0) return null;
             return Parameters.ToArray();
+        }
+
+        public static string GetFirstPathElementFromRawUrl(string _RawUrl)
+        {
+            string FirstPathElement = "";
+            var PathElements = _RawUrl.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            if (PathElements != null && PathElements.Length > 0)
+            {
+                FirstPathElement = PathElements[0];
+            }
+            return FirstPathElement;
         }
 
         public static bool GetEndpointListFromDirectoryTreeNode(out List<Tuple<string, string>> _EndpointList, BDirectoryTreeNode _ParentNode, Action<string> _ErrorMessageAction = null)

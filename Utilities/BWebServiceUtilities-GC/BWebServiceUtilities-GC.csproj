@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>BWebServiceUtilities_GC</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BCloudServiceUtilities\BCloudServiceUtilities.csproj" />
+    <ProjectReference Include="..\BCommonUtilities\BCommonUtilities.csproj" />
+    <ProjectReference Include="..\BWebServiceUtilities\BWebServiceUtilities.csproj" />
+  </ItemGroup>
+
+</Project>

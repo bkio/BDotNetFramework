@@ -83,6 +83,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-LoggingSe
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities", "Services\BServiceUtilities\BServiceUtilities.shproj", "{CD786AA9-0EFF-4445-B49C-FAE46451F8BC}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BWebServiceUtilities-GC", "Utilities\BWebServiceUtilities-GC\BWebServiceUtilities-GC.csproj", "{1C644898-999F-4A15-8C16-9ACD72F9C828}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Services\BServiceUtilities-TracingService-Zipkin\BServiceUtilities-TracingService-Zipkin.projitems*{18afc8bd-2d17-40f0-b02c-34f67c5a7d79}*SharedItemsImports = 13
@@ -194,6 +196,10 @@ Global
 		{7205BCBC-E07C-46ED-8561-A1663515AEC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7205BCBC-E07C-46ED-8561-A1663515AEC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7205BCBC-E07C-46ED-8561-A1663515AEC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C644898-999F-4A15-8C16-9ACD72F9C828}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C644898-999F-4A15-8C16-9ACD72F9C828}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C644898-999F-4A15-8C16-9ACD72F9C828}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C644898-999F-4A15-8C16-9ACD72F9C828}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -236,6 +242,7 @@ Global
 		{1D64AFE7-5361-41BF-A1AC-95CE4B81D988} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 		{ABF9C164-ADDE-4E24-B5D9-2B4247F323D9} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 		{CD786AA9-0EFF-4445-B49C-FAE46451F8BC} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{1C644898-999F-4A15-8C16-9ACD72F9C828} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0A20A57-39B7-4A17-85B0-DB0190848294}
