@@ -82,16 +82,36 @@ namespace BWebServiceUtilities
             }
         }
 
-        public static void InjectHeadersIntoDictionary(HttpHeaders _Headers, HttpListenerContext _Context)
+        public static void InjectHeadersIntoDictionary(HttpHeaders _Headers, Dictionary<string, IEnumerable<string>> _Dictionary)
         {
-            if (_Headers != null && _Context != null)
+            if (_Headers != null && _Dictionary != null)
             {
                 foreach (var Header in _Headers)
                 {
+                    if (!_Dictionary.ContainsKey(Header.Key))
+                    {
+                        _Dictionary.Add(Header.Key, new List<string>());
+                    }
+
                     foreach (var Value in Header.Value)
                     {
-                        _Context.Request.Headers.Add(Header.Key, Value);
+                        ((List<string>)(_Dictionary[Header.Key])).Add(Value);
                     }
+                }
+            }
+        }
+
+        public static void InjectHeadersIntoDictionary(WebHeaderCollection _Headers, Dictionary<string, IEnumerable<string>> _Dictionary)
+        {
+            if (_Headers != null && _Dictionary != null)
+            {
+                foreach (var RHeader in _Headers.AllKeys)
+                {
+                    if (!_Dictionary.ContainsKey(RHeader))
+                    {
+                        _Dictionary.Add(RHeader, new List<string>());
+                    }
+                    ((List<string>)(_Dictionary[RHeader])).AddRange(_Headers.GetValues(RHeader));
                 }
             }
         }

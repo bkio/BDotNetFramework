@@ -239,14 +239,7 @@ namespace BWebServiceUtilities_GC
             {
                 _HttpRequestResponseCode = (int)_Response.StatusCode;
 
-                foreach (var RHeader in _Response.Headers.AllKeys)
-                {
-                    if (!_HttpRequestResponseHeaders.ContainsKey(RHeader))
-                    {
-                        _HttpRequestResponseHeaders.Add(RHeader, new List<string>());
-                    }
-                    ((List<string>)(_HttpRequestResponseHeaders[RHeader])).AddRange(_Response.Headers.GetValues(RHeader));
-                }
+                BWebUtilities.InjectHeadersIntoDictionary(_Response.Headers, _HttpRequestResponseHeaders);
 
                 _HttpRequestResponseContentType = GetEnumFromMimeString_GC(_Response.ContentType);
 
