@@ -25,6 +25,8 @@ namespace BWebServiceUtilities
 
     public static class BWebUtilities
     {
+        //Replicated method with BwebServiceUtilities-GC-CloudRun
+        //Change that too if there is any modification needed.
         public static string GetMimeStringFromEnum(EBResponseContentType ContentType)
         {
             switch (ContentType)
