@@ -7,6 +7,7 @@ using System.Text;
 using System.Collections.Generic;
 using BCommonUtilities;
 using BCloudServiceUtilities;
+using System.Linq;
 
 namespace BWebServiceUtilities
 {
@@ -58,27 +59,40 @@ namespace BWebServiceUtilities
             }
 
             if (Listener.Prefixes.Count == 0)
-                throw new ArgumentException("Invalid prefixes");
+                throw new ArgumentException("Invalid prefixes (Count 0)");
 
             PrefixesToListen = _PrefixesToListen;
-            
+
             Listener.Start();
         }
 
         private bool LookForListenersFromRequest(out BWebServiceBase _Callback, HttpListenerContext _Context)
         {
-            foreach (BWebPrefixStructure Prefix in PrefixesToListen)
+            KeyValuePair<string, Func<BWebServiceBase>> ShortestMatch;
+            int SortestLength = int.MaxValue;
+
+            foreach (var CurrentPrefixes in PrefixesToListen)
             {
-                if (Prefix != null)
+                if (CurrentPrefixes != null)
                 {
-                    if (Prefix.GetCallbackFromRequest(out Func<BWebServiceBase> _CallbackInitializer, out string _MatchedPrefix, _Context))
+                    if (CurrentPrefixes.GetCallbackFromRequest(out Func<BWebServiceBase> _CallbackInitializer, out string _MatchedPrefix, _Context))
                     {
-                        _Callback = _CallbackInitializer.Invoke();
-                        _Callback.InitializeWebService(_Context, _MatchedPrefix, TracingService);
-                        return true;
+                        if (_MatchedPrefix.Length < SortestLength)
+                        {
+                            SortestLength = _MatchedPrefix.Length;
+                            ShortestMatch = new KeyValuePair<string, Func<BWebServiceBase>>(_MatchedPrefix, _CallbackInitializer);
+                        }
                     }
                 }
             }
+
+            if (SortestLength < int.MaxValue)
+            {
+                _Callback = ShortestMatch.Value.Invoke();
+                _Callback.InitializeWebService(_Context, ShortestMatch.Key, TracingService);
+                return true;
+            }
+
             _Callback = null;
             return false;
         }
@@ -215,17 +229,10 @@ namespace BWebServiceUtilities
 
         public void Stop()
         {
-            try
+            if (Listener != null)
             {
-                if (Listener != null)
-                {
-                    Listener.Stop();
-                    Listener.Close();
-                }
-            }
-            catch
-            {
-                //Suppress any exceptions
+                try { Listener.Stop(); } catch (Exception) { }
+                try { Listener.Close(); } catch (Exception) { }
             }
         }
     }

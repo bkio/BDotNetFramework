@@ -1,6 +1,7 @@
 ﻿/// MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
 
 using System;
+using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using BCommonUtilities;
@@ -9,22 +10,32 @@ namespace BWebServiceUtilities
 {
     public class BWebPrefixStructure
     {
-        private readonly string[] Prefixes;
+        private readonly string[] Prefixes_SortedByLength;
         public string[] GetPrefixes()
         {
             //Return by value for encapsulation
-            return Prefixes != null ? (string[])Prefixes.Clone() : new string[] { };
+            return Prefixes_SortedByLength != null ? (string[])Prefixes_SortedByLength.Clone() : new string[] { };
         }
+
         public int GetPrefixesLength()
         {
-            return Prefixes != null ? Prefixes.Length : 0;
+            return Prefixes_SortedByLength != null ? Prefixes_SortedByLength.Length : 0;
         }
-        
+
+        public string GetLongestPrefix()
+        {
+            if (Prefixes_SortedByLength == null || Prefixes_SortedByLength.Length == 0) return null;
+            return Prefixes_SortedByLength[Prefixes_SortedByLength.Length - 1];
+        }
+
         private readonly Func<BWebServiceBase> ListenerInitializer;
 
         public BWebPrefixStructure(string[] _Prefixes, Func<BWebServiceBase> _ListenerInitializer)
         {
-            Prefixes = _Prefixes;
+            if (_Prefixes != null && _Prefixes.Length > 0)
+            {
+                Prefixes_SortedByLength = _Prefixes.OrderBy(x => x.Length).ToArray();
+            }
             ListenerInitializer = _ListenerInitializer;
         }
 
@@ -33,13 +44,14 @@ namespace BWebServiceUtilities
             _Initializer = null;
             _MatchedPrefix = null;
 
-            if (_Context == null || Prefixes == null || ListenerInitializer == null)
+            if (_Context == null || Prefixes_SortedByLength == null || Prefixes_SortedByLength.Length == 0 || ListenerInitializer == null)
             {
                 return false;
             }
             
-            foreach (string Prefix in Prefixes)
+            for (var i = (Prefixes_SortedByLength.Length - 1); i >= 0; i--)
             {
+                var Prefix = Prefixes_SortedByLength[i];
                 if (Regex.IsMatch(_Context.Request.RawUrl, BUtility.WildCardToRegular(Prefix)))
                 {
                     _MatchedPrefix = Prefix;
