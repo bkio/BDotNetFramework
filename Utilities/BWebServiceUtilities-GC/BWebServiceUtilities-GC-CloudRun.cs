@@ -293,24 +293,28 @@ namespace BWebServiceUtilities_GC
             Action<string> _ErrorMessageAction = null,
             bool _bWithAuthToken = true)
         {
-            using (var RequestStream = _Context.Request.InputStream)
+            using (var InputStream = _Context.Request.InputStream)
             {
-                var Result = InterServicesRequest(
-                    _FullEndpoint,
-                    null,
-                    _Context.Request.HttpMethod,
-                    GetEnumFromMimeString_GC(_Context.Request.ContentType),
-                    new BStringOrStream(RequestStream, _Context.Request.ContentLength64),
-                    _ErrorMessageAction,
-                    _bWithAuthToken,
-                    _Context);
+                using (var RequestStream = InputStream)
+                {
+                    var Result = InterServicesRequest(
+                        _FullEndpoint,
+                        null,
+                        _Context.Request.HttpMethod,
+                        GetEnumFromMimeString_GC(_Context.Request.ContentType),
+                        new BStringOrStream(RequestStream, _Context.Request.ContentLength64),
+                        _ErrorMessageAction,
+                        _bWithAuthToken,
+                        _Context);
 
                     return new BWebServiceResponse(
                         Result.ResponseCode,
                         Result.ResponseHeaders,
                         Result.Content,
                         Result.ContentType);
+                }
             }
+            
         }
 
         private static void AnalyzeResponse(

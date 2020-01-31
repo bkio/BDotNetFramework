@@ -43,7 +43,8 @@ namespace BSecretManagementService.WebServices
             }
 
             JObject ParsedBody;
-            using var ResponseReader = new StreamReader(Context.Request.InputStream);
+            using var InputStream = Context.Request.InputStream;
+            using var ResponseReader = new StreamReader(InputStream);
             try
             {
                 ParsedBody = JObject.Parse(ResponseReader.ReadToEnd());
