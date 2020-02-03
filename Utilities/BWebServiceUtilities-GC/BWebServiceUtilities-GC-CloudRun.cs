@@ -390,6 +390,7 @@ namespace BWebServiceUtilities_GC
         //Change that too if there is any modification needed.
         public static EBResponseContentType GetEnumFromMimeString_GC(string _ContentType)
         {
+            if (_ContentType == null || _ContentType.Length == 0) return EBResponseContentType.None;
             _ContentType = _ContentType.ToLower();
             switch (_ContentType)
             {
