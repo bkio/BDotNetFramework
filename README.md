@@ -1,4 +1,6 @@
-﻿# BDotNetFramework
+﻿MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
+ 
+ # BDotNetFramework
 
 BDotNetFramework is a microservice framework for .NET Core 3 and .NET Framework 4.7+ that abstracts many cloud features such as;
 
