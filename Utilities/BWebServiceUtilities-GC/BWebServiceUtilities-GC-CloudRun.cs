@@ -160,6 +160,17 @@ namespace BWebServiceUtilities_GC
             return true;
         }
 
+        public class InterServicesRequestRequest
+        {
+            public string DestinationServiceUrl;
+            public string RequestMethod;
+            public EBResponseContentType ContentType;
+            public Dictionary<string, IEnumerable<string>> Headers = null;
+            public BStringOrStream Content = null;
+            public bool bWithAuthToken = true;
+            public HttpListenerContext UseContextHeaders = null;
+            public IEnumerable<string> ExcludeHeaderKeysForRequest = null;
+        }
         public class InterServicesRequestResponse
         {
             public bool bSuccess = false;
@@ -176,15 +187,7 @@ namespace BWebServiceUtilities_GC
                 };
             }
         }
-        public static InterServicesRequestResponse InterServicesRequest(
-            string _DestinationServiceUrl,
-            Dictionary<string, IEnumerable<string>> _Headers,
-            string _RequestMethod,
-            EBResponseContentType _ContentType,
-            BStringOrStream _Content,
-            Action<string> _ErrorMessageAction = null,
-            bool _bWithAuthToken = true,
-            HttpListenerContext _UseContextHeaders = null)
+        public static InterServicesRequestResponse InterServicesRequest(InterServicesRequestRequest _Request, Action<string> _ErrorMessageAction)
         {
             var bHttpRequestSuccess = false;
             var HttpRequestResponseCode = 200;
@@ -192,46 +195,58 @@ namespace BWebServiceUtilities_GC
             BStringOrStream HttpRequestResponseContent = null;
             Dictionary<string, IEnumerable<string>> HttpRequestResponseHeaders = null;
 
-            var Request = (HttpWebRequest)WebRequest.Create(_DestinationServiceUrl);
-            Request.Method = _RequestMethod;
+            var Request = (HttpWebRequest)WebRequest.Create(_Request.DestinationServiceUrl);
+            Request.Method = _Request.RequestMethod;
             Request.ServerCertificateValidationCallback = (a, b, c, d) => true;
             Request.AllowAutoRedirect = false;
 
-            if (_bWithAuthToken)
+            if (_Request.bWithAuthToken)
             {
-                if (!AddAccessTokenForServiceExecution(Request, _DestinationServiceUrl, _ErrorMessageAction))
+                if (!AddAccessTokenForServiceExecution(Request, _Request.DestinationServiceUrl, _ErrorMessageAction))
                 {
                     return InterServicesRequestResponse.InternalErrorOccured("Request has failed due to an internal api gateway error.");
                 }
             }
 
-            if (_UseContextHeaders != null)
+            var ExcludeHeaderKeysForRequest = LowerContentOfStrings(_Request.ExcludeHeaderKeysForRequest);
+
+            if (_Request.UseContextHeaders != null)
             {
-                InsertHeadersFromContextInto(_UseContextHeaders, Request.Headers.Add);
+                InsertHeadersFromContextInto(_Request.UseContextHeaders, (string _Key, string _Value) =>
+                {
+                    if (ExcludeHeaderKeysForRequest != null && ExcludeHeaderKeysForRequest.Contains(_Key.ToLower())) return;
+
+                    Request.Headers.Add(_Key, _Value);
+                });
             }
-            if (_Headers != null)
+            if (_Request.Headers != null)
             {
-                InsertHeadersFromDictionaryInto(_Headers, Request.Headers.Add);
+                InsertHeadersFromDictionaryInto(_Request.Headers, (string _Key, string _Value) =>
+                {
+                    if (ExcludeHeaderKeysForRequest != null && ExcludeHeaderKeysForRequest.Contains(_Key.ToLower())) return;
+
+                    Request.Headers.Add(_Key, _Value);
+                });
             }
 
             try
             {
-                if (_RequestMethod != "GET" && _RequestMethod != "DELETE"
-                    && _Content != null && ((_Content.Type == EBStringOrStreamEnum.Stream && _Content.Stream != null) || (_Content.Type == EBStringOrStreamEnum.String && _Content.String != null && _Content.String.Length > 0)))
+                if (_Request.RequestMethod != "GET" && _Request.RequestMethod != "DELETE"
+                    && _Request.Content != null && ((_Request.Content.Type == EBStringOrStreamEnum.Stream && _Request.Content.Stream != null) || (_Request.Content.Type == EBStringOrStreamEnum.String && _Request.Content.String != null && _Request.Content.String.Length > 0)))
                 {
-                    Request.ContentType = GetMimeStringFromEnum_GC(_ContentType);
+                    Request.ContentType = GetMimeStringFromEnum_GC(_Request.ContentType);
 
                     using (var OStream = Request.GetRequestStream())
                     {
-                        if (_Content.Type == EBStringOrStreamEnum.Stream)
+                        if (_Request.Content.Type == EBStringOrStreamEnum.Stream)
                         {
-                            _Content.Stream.CopyTo(OStream);
+                            _Request.Content.Stream.CopyTo(OStream);
                         }
                         else
                         {
                             using (var RStream = new StreamWriter(OStream))
                             {
-                                RStream.Write(_Content.String);
+                                RStream.Write(_Request.Content.String);
                             }
                         }
                     }
@@ -268,13 +283,13 @@ namespace BWebServiceUtilities_GC
 
             if (!bHttpRequestSuccess)
             {
-                _ErrorMessageAction?.Invoke("Error: Request has failed due to an internal api gateway error. Service endpoint: " + _DestinationServiceUrl);
+                _ErrorMessageAction?.Invoke("Error: Request has failed due to an internal api gateway error. Service endpoint: " + _Request.DestinationServiceUrl);
                 return InterServicesRequestResponse.InternalErrorOccured("Request has failed due to an internal api gateway error.");
             }
 
-            if (_UseContextHeaders != null)
+            if (_Request.UseContextHeaders != null)
             {
-                InsertHeadersFromDictionaryIntoContext(HttpRequestResponseHeaders, _UseContextHeaders);
+                InsertHeadersFromDictionaryIntoContext(HttpRequestResponseHeaders, _Request.UseContextHeaders);
             }
 
             return new InterServicesRequestResponse()
@@ -287,6 +302,20 @@ namespace BWebServiceUtilities_GC
             };
         }
 
+        private static List<string> LowerContentOfStrings(IEnumerable<string> _Strings)
+        {
+            List<string> Lowered = null;
+            if (_Strings != null)
+            {
+                Lowered = new List<string>(_Strings.Count());
+                foreach (var ExcludeKey in _Strings)
+                {
+                    Lowered.Add(ExcludeKey.ToLower());
+                }
+            }
+            return Lowered;
+        }
+
         public static BWebServiceResponse RequestRedirection(
             HttpListenerContext _Context,
             string _FullEndpoint,
@@ -297,15 +326,15 @@ namespace BWebServiceUtilities_GC
             {
                 using (var RequestStream = InputStream)
                 {
-                    var Result = InterServicesRequest(
-                        _FullEndpoint,
-                        null,
-                        _Context.Request.HttpMethod,
-                        GetEnumFromMimeString_GC(_Context.Request.ContentType),
-                        new BStringOrStream(RequestStream, _Context.Request.ContentLength64),
-                        _ErrorMessageAction,
-                        _bWithAuthToken,
-                        _Context);
+                    var Result = InterServicesRequest(new InterServicesRequestRequest()
+                    {
+                        DestinationServiceUrl = _FullEndpoint,
+                        RequestMethod = _Context.Request.HttpMethod,
+                        ContentType = GetEnumFromMimeString_GC(_Context.Request.ContentType),
+                        Content = new BStringOrStream(RequestStream, _Context.Request.ContentLength64),
+                        bWithAuthToken = _bWithAuthToken,
+                        UseContextHeaders = _Context
+                    }, _ErrorMessageAction);
 
                     return new BWebServiceResponse(
                         Result.ResponseCode,

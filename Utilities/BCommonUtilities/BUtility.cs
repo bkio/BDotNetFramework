@@ -964,6 +964,7 @@ namespace BCommonUtilities
             Type = EBStringOrStreamEnum.Stream;
             Stream = _Stream;
             StreamLength = _StreamLength;
+            String = "";
         }
         public BStringOrStream(string _Str)
         {
@@ -977,13 +978,36 @@ namespace BCommonUtilities
             Stream = _Stream;
             StreamLength = _StreamLength;
             DestructorAction = _DestructorAction;
+            String = "";
         }
+
+        private BStringOrStream() {}
+
         ~BStringOrStream()
         {
             if (Type == EBStringOrStreamEnum.Stream)
             {
                 DestructorAction?.Invoke();
             }
+        }
+
+        public override string ToString()
+        {
+            if (Type == EBStringOrStreamEnum.Stream)
+            {
+                try
+                {
+                    using (var Reader = new StreamReader(Stream))
+                    {
+                        return Reader.ReadToEnd();
+                    }
+                }
+                catch (Exception)
+                {
+                    return "";
+                }
+            }
+            return String;
         }
     }
 
