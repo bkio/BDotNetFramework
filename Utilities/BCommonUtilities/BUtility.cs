@@ -9,6 +9,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace BCommonUtilities
@@ -172,6 +173,74 @@ namespace BCommonUtilities
                 HashCode = HashCode * -1521134295 + AsByteArray.ToString().GetHashCode();
             }
             return HashCode;
+        }
+    }
+
+    public class BPrimitiveType_JStringified
+    {
+        public const string KEY_VALUE_PRIMITIVE_TYPE_PROPERTY = "key-value-primitive-type";
+        public const string KEY_VALUE_STRINGIFIED_PROPERTY = "key-value-stringified";
+
+        [JsonProperty(KEY_VALUE_PRIMITIVE_TYPE_PROPERTY)]
+        public int KeyValuePrimitiveType;
+
+        [JsonProperty(KEY_VALUE_STRINGIFIED_PROPERTY)]
+        public string KeyValueStringified;
+
+        public BPrimitiveType GetKeyValuePrimitiveReference()
+        {
+            switch ((EBPrimitiveTypeEnum)KeyValuePrimitiveType)
+            {
+                case EBPrimitiveTypeEnum.ByteArray:
+                    return new BPrimitiveType(Convert.FromBase64String(KeyValueStringified));
+                case EBPrimitiveTypeEnum.Double:
+                    return new BPrimitiveType(double.Parse(KeyValueStringified));
+                case EBPrimitiveTypeEnum.Integer:
+                    return new BPrimitiveType(int.Parse(KeyValueStringified));
+                case EBPrimitiveTypeEnum.String:
+                    return new BPrimitiveType(KeyValueStringified);
+            }
+            return null;
+        }
+        public void SetKeyValuePrimitiveReference(BPrimitiveType _PrimitiveRef)
+        {
+            KeyValuePrimitiveType = (int)_PrimitiveRef.Type;
+            switch (_PrimitiveRef.Type)
+            {
+                case EBPrimitiveTypeEnum.ByteArray:
+                    KeyValueStringified = Convert.ToBase64String(_PrimitiveRef.AsByteArray);
+                    break;
+                case EBPrimitiveTypeEnum.Double:
+                    KeyValueStringified = "" + _PrimitiveRef.AsDouble;
+                    break;
+                case EBPrimitiveTypeEnum.Integer:
+                    KeyValueStringified = "" + _PrimitiveRef.AsInteger;
+                    break;
+                case EBPrimitiveTypeEnum.String:
+                    KeyValueStringified = _PrimitiveRef.AsString;
+                    break;
+            }
+        }
+
+        public BPrimitiveType_JStringified() { }
+        public BPrimitiveType_JStringified(BPrimitiveType _PrimitiveRef)
+        {
+            SetKeyValuePrimitiveReference(_PrimitiveRef);
+        }
+
+        public static BPrimitiveType_JStringified[] ConvertPrimitivesToPrimitiveTypeStructs(BPrimitiveType[] _Array)
+        {
+            if (_Array == null || _Array.Length == 0) return null;
+
+            var Result = new BPrimitiveType_JStringified[_Array.Length];
+
+            var i = 0;
+            foreach (var Element in _Array)
+            {
+                Result[i] = new BPrimitiveType_JStringified(Element);
+                i++;
+            }
+            return Result;
         }
     }
 
