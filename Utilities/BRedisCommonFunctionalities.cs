@@ -22,12 +22,15 @@ namespace BCloudServiceUtilities
 
         private readonly string ChildDescriptor;
 
+        protected readonly bool bFailoverMechanismEnabled = true;
+
         protected BRedisCommonFunctionalities(
             string _ChildDescriptor,
             string _RedisEndpoint,
             int _RedisPort,
             string _RedisPassword,
-            Action<string> _ErrorMessageAction)
+            bool _bFailoverMechanismEnabled = true,
+            Action<string> _ErrorMessageAction = null)
         {
             ChildDescriptor = _ChildDescriptor;
 
@@ -41,6 +44,8 @@ namespace BCloudServiceUtilities
                 _ErrorMessageAction?.Invoke(ChildDescriptor + "->Base->Constructor: " + e.Message + ", Trace: " + e.StackTrace);
                 return;
             }
+
+            bFailoverMechanismEnabled = _bFailoverMechanismEnabled;
 
             RedisConfig = new ConfigurationOptions
             {
@@ -63,7 +68,7 @@ namespace BCloudServiceUtilities
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     RedisConnection = ConnectionMultiplexer.Connect(RedisConfig);

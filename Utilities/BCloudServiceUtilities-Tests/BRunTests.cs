@@ -165,7 +165,9 @@ namespace BCloudServiceUtilitiesTest
                         RequiredEnvVars["REDIS_ENDPOINT"],
                         int.Parse(RequiredEnvVars["REDIS_PORT"]),
                         RequiredEnvVars["REDIS_PASSWORD"],
+                        true,
                         Console.WriteLine),
+                    true,
                     Console.WriteLine),
                 Comparator.AddLine);
             if (!MemTests_WithRedisPubSub.Start()) return false;
@@ -180,6 +182,7 @@ namespace BCloudServiceUtilitiesTest
                     new BPubSubServiceGC(
                         RequiredEnvVars["GC_PROJECT_ID"],
                         Console.WriteLine),
+                    true,
                     Console.WriteLine),
                 Comparator.AddLine);
             if (!MemTests_WithGCPubSub.Start()) return false;
@@ -198,6 +201,7 @@ namespace BCloudServiceUtilitiesTest
                         RequiredEnvVars["AWS_SECRET_KEY"],
                         RequiredEnvVars["AWS_REGION"],
                         Console.WriteLine),
+                    true,
                     Console.WriteLine),
                 Comparator.AddLine);
             if (!MemTests_WithAWSPubSub.Start()) return false;

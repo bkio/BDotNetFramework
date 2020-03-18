@@ -23,7 +23,8 @@ namespace BCloudServiceUtilities.PubSubServices
             string _RedisEndpoint,
             int _RedisPort,
             string _RedisPassword,
-            Action<string> _ErrorMessageAction = null) : base("BPubSubServiceRedis", _RedisEndpoint, _RedisPort, _RedisPassword, _ErrorMessageAction)
+            bool _bFailoverMechanismEnabled = true,
+            Action<string> _ErrorMessageAction = null) : base("BPubSubServiceRedis", _RedisEndpoint, _RedisPort, _RedisPassword, _bFailoverMechanismEnabled,  _ErrorMessageAction)
         {
         }
 
@@ -159,7 +160,7 @@ namespace BCloudServiceUtilities.PubSubServices
                 }
                 catch (Exception e)
                 {
-                    if (e is RedisException || e is TimeoutException)
+                    if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                     {
                         OnFailoverDetected(_ErrorMessageAction);
                         return CustomSubscribe(_CustomTopic, _OnMessage, _ErrorMessageAction);
@@ -220,7 +221,7 @@ namespace BCloudServiceUtilities.PubSubServices
                 }
                 catch (Exception e)
                 {
-                    if (e is RedisException || e is TimeoutException)
+                    if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                     {
                         OnFailoverDetected(_ErrorMessageAction);
                         return CustomPublish(_CustomTopic, _CustomMessage, _ErrorMessageAction);
@@ -275,7 +276,7 @@ namespace BCloudServiceUtilities.PubSubServices
                 }
                 catch (Exception e)
                 {
-                    if (e is RedisException || e is TimeoutException)
+                    if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                     {
                         OnFailoverDetected(_ErrorMessageAction);
                         DeleteCustomTopicGlobally(_CustomTopic, _ErrorMessageAction);

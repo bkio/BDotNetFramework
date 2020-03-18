@@ -29,7 +29,8 @@ namespace BCloudServiceUtilities.MemoryServices
             int _RedisPort,
             string _RedisPassword,
             IBPubSubServiceInterface _PubSubService,
-            Action<string> _ErrorMessageAction = null) : base("BMemoryServiceRedis", _RedisEndpoint, _RedisPort, _RedisPassword, _ErrorMessageAction)
+            bool _bFailoverMechanismEnabled = true,
+            Action<string> _ErrorMessageAction = null) : base("BMemoryServiceRedis", _RedisEndpoint, _RedisPort, _RedisPassword, _bFailoverMechanismEnabled, _ErrorMessageAction)
         {
             PubSubService = _PubSubService;
         }
@@ -119,7 +120,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     return SetKeyExpireTime(_QueryParameters, _TTL, _ErrorMessageAction);
@@ -157,7 +158,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     return GetKeyExpireTime(_QueryParameters, out _TTL, _ErrorMessageAction);
@@ -252,7 +253,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     return SetKeyValue(_QueryParameters, _KeyValues, _ErrorMessageAction, _bPublishChange);
@@ -345,7 +346,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     var Result = (RedisValue)RedisConnection.GetDatabase().ScriptEvaluate(Script,
@@ -391,7 +392,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     return GetKeyValue(_QueryParameters, _Key, _ErrorMessageAction);
@@ -452,7 +453,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     return GetKeysValues(_QueryParameters, _Keys, _ErrorMessageAction);
@@ -503,7 +504,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     return GetAllKeyValues(_QueryParameters, _ErrorMessageAction);
@@ -567,7 +568,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     return DeleteKey(_QueryParameters, _Key, _ErrorMessageAction, _bPublishChange);
@@ -618,7 +619,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     return DeleteAllKeys(_QueryParameters, _bWaitUntilCompletion, _ErrorMessageAction, _bPublishChange);
@@ -665,7 +666,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     return GetKeys(_QueryParameters, _ErrorMessageAction);
@@ -726,7 +727,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     return GetKeysCount(_QueryParameters, _ErrorMessageAction);
@@ -789,7 +790,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     IncrementKeyValues(_QueryParameters, _KeysAndIncrementByValues, _ErrorMessageAction, _bPublishChange);
@@ -869,7 +870,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     return IncrementKeyByValueAndGet(_QueryParameters, _KeyValue, _ErrorMessageAction, _bPublishChange);
@@ -984,7 +985,7 @@ namespace BCloudServiceUtilities.MemoryServices
                 }
                 catch (Exception e)
                 {
-                    if (e is RedisException || e is TimeoutException)
+                    if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                     {
                         OnFailoverDetected(_ErrorMessageAction);
                         return PushToList(_bToTail, _QueryParameters, _ListName, _Values, _bPushIfListExists, _ErrorMessageAction, _bAsync, _bPublishChange);
@@ -1016,7 +1017,7 @@ namespace BCloudServiceUtilities.MemoryServices
                 }
                 catch (Exception e)
                 {
-                    if (e is RedisException || e is TimeoutException)
+                    if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                     {
                         OnFailoverDetected(_ErrorMessageAction);
                         return PushToList(_bToTail, _QueryParameters, _ListName, _Values, _bPushIfListExists, _ErrorMessageAction, _bAsync, _bPublishChange);
@@ -1131,7 +1132,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     return PopFromList(_bFromTail, _QueryParameters, _ListName, _ErrorMessageAction, _bPublishChange);
@@ -1249,7 +1250,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     return GetAllElementsOfList(_QueryParameters, _ListName, _ErrorMessageAction);
@@ -1304,7 +1305,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     return EmptyList(_QueryParameters, _ListName, _bWaitUntilCompletion, _ErrorMessageAction);
@@ -1370,7 +1371,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     EmptyListAndSublists(_QueryParameters, _ListName, _SublistPrefix, _bWaitUntilCompletion, _ErrorMessageAction, _bPublishChange);
@@ -1411,7 +1412,7 @@ namespace BCloudServiceUtilities.MemoryServices
             }
             catch (Exception e)
             {
-                if (e is RedisException || e is TimeoutException)
+                if (bFailoverMechanismEnabled && (e is RedisException || e is TimeoutException))
                 {
                     OnFailoverDetected(_ErrorMessageAction);
                     return ListSize(_QueryParameters, _ListName, _ErrorMessageAction);

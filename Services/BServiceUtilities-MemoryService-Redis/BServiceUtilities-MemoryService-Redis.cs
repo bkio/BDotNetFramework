@@ -19,7 +19,7 @@ namespace BServiceUtilities
         /// </summary>
         public IBMemoryServiceInterface MemoryService = null;
 
-        public bool WithMemoryService(IBPubSubServiceInterface _WithPubSubService = null)
+        public bool WithMemoryService(bool _bFailoverMechanismEnabled = true, IBPubSubServiceInterface _WithPubSubService = null)
         {
             /*
             * Memory service initialization
@@ -38,6 +38,7 @@ namespace BServiceUtilities
                 RedisPort,
                 RequiredEnvironmentVariables["REDIS_PASSWORD"],
                 _WithPubSubService,
+                _bFailoverMechanismEnabled,
                 (string Message) =>
                 {
                     LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, Message), ProgramID, "Initialization");

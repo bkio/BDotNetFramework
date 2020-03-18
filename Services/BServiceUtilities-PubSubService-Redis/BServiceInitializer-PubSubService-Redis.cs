@@ -19,7 +19,7 @@ namespace BServiceUtilities
         /// </summary>
         public IBPubSubServiceInterface PubSubService = null;
 
-        public bool WithPubSubService()
+        public bool WithPubSubService(bool _bFailoverMechanismEnabled = true)
         {
             /*
             * Pub/Sub service initialization
@@ -37,6 +37,7 @@ namespace BServiceUtilities
                 RequiredEnvironmentVariables["REDIS_ENDPOINT"],
                 RedisPort,
                 RequiredEnvironmentVariables["REDIS_PASSWORD"],
+                _bFailoverMechanismEnabled,
                 (string Message) =>
                 {
                     LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, Message), ProgramID, "Initialization");

@@ -19,7 +19,7 @@ namespace BServiceUtilities
         /// </summary>
         public IBPubSubServiceInterface PubSubService = null;
 
-        public bool WithPubSubService()
+        public bool WithPubSubService(bool _bFailoverMechanismEnabled = true)
         {
             /*
             * Pub/Sub service initialization
