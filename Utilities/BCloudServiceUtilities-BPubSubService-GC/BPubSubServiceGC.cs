@@ -405,6 +405,12 @@ namespace BCloudServiceUtilities.PubSubServices
                             }
                             catch (Exception e)
                             {
+                                if (e is RpcException && (e as RpcException).StatusCode == StatusCode.DeadlineExceeded)
+                                {
+                                    Thread.Sleep(1000);
+                                    continue;
+                                }
+
                                 Response = null;
 
                                 _ErrorMessageAction?.Invoke("BPubSubServiceGC->CustomSubscribe: " + e.Message + ", Trace: " + e.StackTrace);
