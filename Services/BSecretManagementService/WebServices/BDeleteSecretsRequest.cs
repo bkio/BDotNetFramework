@@ -105,6 +105,7 @@ namespace BSecretManagementService.WebServices
             }
 
             WaitUntilSignal.WaitOne();
+            WaitUntilSignal.Close();
 
             var ResultObject = new JObject
             {

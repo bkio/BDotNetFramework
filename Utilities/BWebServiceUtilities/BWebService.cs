@@ -236,15 +236,4 @@ namespace BWebServiceUtilities
             }
         }
     }
-
-    public class CDefaultService
-    {
-        public static BWebServiceResponse OnRequest(HttpListenerContext _Context, Action<string> _ErrorMessage)
-        {
-            return new BWebServiceResponse(
-                BWebResponse.Status_OK_Code,
-                new BStringOrStream("Copyright Burak Kara, All rights reserved."),
-                EBResponseContentType.TextHtml);
-        }
-    }
 }
