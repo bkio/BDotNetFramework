@@ -1,11 +1,13 @@
 ﻿/// MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
 
 using System;
+using System.Buffers.Text;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Web;
 using BCommonUtilities;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.PubSub.V1;
@@ -136,11 +138,11 @@ namespace BCloudServiceUtilities.PubSubServices
 
         private static string GetGoogleFriendlyTopicName(string Input)
         {
-            return Base32.Encode(Encoding.UTF8.GetBytes(Input)).ToLower();
+            return HttpUtility.UrlEncode(Input);
         }
         private static string GetTopicNameFromGoogleFriendlyName(string Input)
         {
-            return Encoding.UTF8.GetString(Base32.Decode(Input.ToUpper()));
+            return HttpUtility.UrlDecode(Input);
         }
 
         private bool GetPublisher(out PublisherServiceApiClient Result, TopicName GoogleFriendlyTopicName, Action<string> _ErrorMessageAction = null)
