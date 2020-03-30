@@ -241,11 +241,11 @@ namespace BCloudServiceUtilities.FileServices
             if (!bExists)
             {
                 _ErrorMessageAction?.Invoke("BFileServiceGC->DownloadFile: File does not exist in the File Service.");
-                return false;
+                return true;
             }
 
             DownloadObjectOptions DOO = null;
-            if (_StartIndex > 0 || _Size > 0)
+            if (_Size > 0)
             {
                 DOO = new DownloadObjectOptions()
                 {
