@@ -7,7 +7,6 @@ using System.Text;
 using System.Collections.Generic;
 using BCommonUtilities;
 using BCloudServiceUtilities;
-using System.Linq;
 
 namespace BWebServiceUtilities
 {
@@ -68,8 +67,8 @@ namespace BWebServiceUtilities
 
         private bool LookForListenersFromRequest(out BWebServiceBase _Callback, HttpListenerContext _Context)
         {
-            KeyValuePair<string, Func<BWebServiceBase>> ShortestMatch;
-            int SortestLength = int.MaxValue;
+            KeyValuePair<string, Func<BWebServiceBase>> LongestMatch;
+            int LongestLength = 0;
 
             foreach (var CurrentPrefixes in PrefixesToListen)
             {
@@ -77,19 +76,19 @@ namespace BWebServiceUtilities
                 {
                     if (CurrentPrefixes.GetCallbackFromRequest(out Func<BWebServiceBase> _CallbackInitializer, out string _MatchedPrefix, _Context))
                     {
-                        if (_MatchedPrefix.Length < SortestLength)
+                        if (_MatchedPrefix.Length > LongestLength)
                         {
-                            SortestLength = _MatchedPrefix.Length;
-                            ShortestMatch = new KeyValuePair<string, Func<BWebServiceBase>>(_MatchedPrefix, _CallbackInitializer);
+                            LongestLength = _MatchedPrefix.Length;
+                            LongestMatch = new KeyValuePair<string, Func<BWebServiceBase>>(_MatchedPrefix, _CallbackInitializer);
                         }
                     }
                 }
             }
 
-            if (SortestLength < int.MaxValue)
+            if (LongestLength > 0)
             {
-                _Callback = ShortestMatch.Value.Invoke();
-                _Callback.InitializeWebService(_Context, ShortestMatch.Key, TracingService);
+                _Callback = LongestMatch.Value.Invoke();
+                _Callback.InitializeWebService(_Context, LongestMatch.Key, TracingService);
                 return true;
             }
 
