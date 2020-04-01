@@ -14,6 +14,8 @@ namespace BWebServiceUtilities
                     return Error_BadRequest_ContentType;
                 case 500:
                     return Error_InternalError_ContentType;
+                case 409:
+                    return Error_Conflict_ContentType;
                 case 405:
                     return Error_MethodNotAllowed_ContentType;
                 case 404:
@@ -36,6 +38,8 @@ namespace BWebServiceUtilities
                     return Error_NotImplemented_String(_Message);
                 case 500:
                     return Error_InternalError_String(_Message);
+                case 409:
+                    return Error_Conflict_String(_Message);
                 case 405:
                     return Error_MethodNotAllowed_String(_Message);
                 case 404:
@@ -62,6 +66,13 @@ namespace BWebServiceUtilities
         public static string Error_InternalError_String(string Message) { return "{\"result\":\"failure\",\"message\":\"Internal Server Error. " + Message + "\"}"; }
         public static readonly int Error_InternalError_Code = 500;
         public static BWebServiceResponse InternalError(string Message) { return new BWebServiceResponse(Error_InternalError_Code, new BStringOrStream(Error_InternalError_String(Message)), Error_InternalError_ContentType); }
+
+        //
+
+        public static readonly EBResponseContentType Error_Conflict_ContentType = EBResponseContentType.JSON;
+        public static string Error_Conflict_String(string Message) { return "{\"result\":\"failure\",\"message\":\"Conflict. " + Message + "\"}"; }
+        public static readonly int Error_Conflict_Code = 409;
+        public static BWebServiceResponse Conflict(string Message) { return new BWebServiceResponse(Error_Conflict_Code, new BStringOrStream(Error_Conflict_String(Message)), Error_Conflict_ContentType); }
 
         //
 
