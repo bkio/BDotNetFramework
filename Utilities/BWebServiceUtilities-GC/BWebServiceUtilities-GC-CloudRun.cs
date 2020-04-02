@@ -202,6 +202,14 @@ namespace BWebServiceUtilities_GC
 
             if (_Request.bWithAuthToken)
             {
+                //If context-headers already contain authorization; we must rename it to client-authorization to prevent override.
+                if (_Request.UseContextHeaders != null 
+                    && BWebUtilities.DoesContextContainHeader(out List<string> AuthorizationHeaderValues, out string CaseSensitive_FoundHeaderKey,_Request.UseContextHeaders, "authorization")
+                    && BUtility.CheckAndGetFirstStringFromList(AuthorizationHeaderValues, out string ClientAuthorization))
+                {
+                    _Request.UseContextHeaders.Request.Headers.Remove(CaseSensitive_FoundHeaderKey);
+                    _Request.UseContextHeaders.Request.Headers.Add("client-authorization", ClientAuthorization);
+                }
                 if (!AddAccessTokenForServiceExecution(Request, _Request.DestinationServiceUrl, _ErrorMessageAction))
                 {
                     return InterServicesRequestResponse.InternalErrorOccured("Request has failed due to an internal api gateway error.");

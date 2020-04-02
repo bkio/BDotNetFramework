@@ -469,6 +469,20 @@ namespace BCommonUtilities
             return true;
         }
 
+        public static bool CheckAndGetFirstStringFromList(List<string> _List, out string _First)
+        {
+            bool bResult = _List != null && _List.Count > 0 && _List[0] != null && _List[0].Length > 0;
+            if (bResult)
+            {
+                _First = _List[0];
+            }
+            else
+            {
+                _First = null;
+            }
+            return bResult;
+        }
+
         /// <summary>
         /// 
         /// <para>StringToIPAddress:</para>

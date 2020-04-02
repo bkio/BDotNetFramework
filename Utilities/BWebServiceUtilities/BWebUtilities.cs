@@ -120,23 +120,26 @@ namespace BWebServiceUtilities
             }
         }
 
-        public static bool DoesContextContainHeader(out List<string> HeaderValues, HttpListenerContext Context, string HeaderKey)
+        public static bool DoesContextContainHeader(out List<string> _HeaderValues, out string _CaseSensitive_FoundHeaderKey, HttpListenerContext _Context, string _HeaderKey)
         {
-            HeaderKey = HeaderKey.ToLower();
-            HeaderValues = new List<string>();
+            _CaseSensitive_FoundHeaderKey = null;
 
-            foreach (var RequestKey in Context.Request.Headers.AllKeys)
+            _HeaderKey = _HeaderKey.ToLower();
+            _HeaderValues = new List<string>();
+
+            foreach (var RequestKey in _Context.Request.Headers.AllKeys)
             {
                 string Key = RequestKey.ToLower();
-                if (Key == HeaderKey)
+                if (Key == _HeaderKey)
                 {
-                    foreach (var HeaderValue in Context.Request.Headers.GetValues(RequestKey))
+                    _CaseSensitive_FoundHeaderKey = RequestKey;
+                    foreach (var HeaderValue in _Context.Request.Headers.GetValues(RequestKey))
                     {
-                        HeaderValues.Add(HeaderValue);
+                        _HeaderValues.Add(HeaderValue);
                     }
                 }
             }
-            return HeaderValues.Count > 0;
+            return _HeaderValues.Count > 0;
         }
 
         public static string ReplaceHostPart(string Source, string NewHostname)
