@@ -190,7 +190,7 @@ namespace BWebServiceUtilities_GC
         public static InterServicesRequestResponse InterServicesRequest(InterServicesRequestRequest _Request, Action<string> _ErrorMessageAction)
         {
             var bHttpRequestSuccess = false;
-            var HttpRequestResponseCode = 200;
+            var HttpRequestResponseCode = 500;
             var HttpRequestResponseContentType = EBResponseContentType.None;
             BStringOrStream HttpRequestResponseContent = null;
             Dictionary<string, IEnumerable<string>> HttpRequestResponseHeaders = null;

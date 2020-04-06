@@ -471,7 +471,11 @@ namespace BCloudServiceUtilities.MemoryServices
                 int j = 0;
                 foreach (var _Key in _Keys)
                 {
-                    Results[_Key] = ConvertRedisValueToPrimitiveType(ScriptEvaluationResult[j++]);
+                    var AsPrimitive = ConvertRedisValueToPrimitiveType(ScriptEvaluationResult[j++]);
+                    if (AsPrimitive != null)
+                    {
+                        Results[_Key] = AsPrimitive;
+                    }
                 }
             }
             else
@@ -525,7 +529,11 @@ namespace BCloudServiceUtilities.MemoryServices
             {
                 if (Entry != null)
                 {
-                    Result[i++] = new Tuple<string, BPrimitiveType>(Entry.Name.ToString(), ConvertRedisValueToPrimitiveType(Entry.Value));
+                    var AsPrimitive = ConvertRedisValueToPrimitiveType(Entry.Value);
+                    if (AsPrimitive != null)
+                    {
+                        Result[i++] = new Tuple<string, BPrimitiveType>(Entry.Name.ToString(), AsPrimitive);
+                    }
                 }
             }
 
@@ -1129,6 +1137,7 @@ namespace BCloudServiceUtilities.MemoryServices
                     return null;
                 }
                 PoppedAsPrimitive = ConvertRedisValueToPrimitiveType(PoppedValue);
+                if (PoppedAsPrimitive == null) return null;
             }
             catch (Exception e)
             {
@@ -1267,7 +1276,11 @@ namespace BCloudServiceUtilities.MemoryServices
             int i = 0;
             foreach (RedisValue Value in ReturnedValues)
             {
-                Result[i++] = ConvertRedisValueToPrimitiveType(Value);
+                var AsPrimitive = ConvertRedisValueToPrimitiveType(Value);
+                if (AsPrimitive != null)
+                {
+                    Result[i++] = AsPrimitive;
+                }
             }
 
             return Result;
