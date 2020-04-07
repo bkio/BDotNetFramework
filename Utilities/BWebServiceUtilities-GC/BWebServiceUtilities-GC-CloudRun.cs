@@ -328,7 +328,8 @@ namespace BWebServiceUtilities_GC
             HttpListenerContext _Context,
             string _FullEndpoint,
             Action<string> _ErrorMessageAction = null,
-            bool _bWithAuthToken = true)
+            bool _bWithAuthToken = true,
+            IEnumerable<string> _ExcludeHeaderKeysForRequest = null)
         {
             using (var InputStream = _Context.Request.InputStream)
             {
@@ -341,7 +342,8 @@ namespace BWebServiceUtilities_GC
                         ContentType = GetEnumFromMimeString_GC(_Context.Request.ContentType),
                         Content = new BStringOrStream(RequestStream, _Context.Request.ContentLength64),
                         bWithAuthToken = _bWithAuthToken,
-                        UseContextHeaders = _Context
+                        UseContextHeaders = _Context,
+                        ExcludeHeaderKeysForRequest = _ExcludeHeaderKeysForRequest
                     }, _ErrorMessageAction);
 
                     return new BWebServiceResponse(
