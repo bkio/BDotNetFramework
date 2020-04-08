@@ -189,10 +189,7 @@ namespace BWebServiceUtilities
                             {
                                 try
                                 {
-                                    var InternalErrorResponse = BWebResponse.InternalError("An unexpected internal error has occured: " + e.Message);
-                                    var Buffer = Encoding.UTF8.GetBytes(InternalErrorResponse.ResponseContent.String);
-                                    Context.Response.ContentLength64 = Buffer.Length;
-                                    Context.Response.OutputStream.Write(Buffer, 0, Buffer.Length);
+                                    WriteInternalError(Context.Response, "An unexpected internal error has occured: " + e.Message);
                                 }
                                 catch (Exception) { }
 
