@@ -109,7 +109,7 @@ namespace BCloudServiceUtilities.PubSubServices
                     _ErrorMessageAction?.Invoke("BPubSubServiceAWS->EnsureQueueExists->Callback: " + e.Message + ", Trace: " + e.StackTrace);
                     if (e.InnerException != null && e.InnerException != e)
                     {
-                        _ErrorMessageAction?.Invoke("BPubSubServiceAWS->EnsureQueueExists->Inner: " + e.InnerException.Message + ", Trace: " + e.StackTrace);
+                        _ErrorMessageAction?.Invoke("BPubSubServiceAWS->EnsureQueueExists->Inner: " + e.InnerException.Message + ", Trace: " + e.InnerException.StackTrace);
                     }
                 }
             }
@@ -168,7 +168,7 @@ namespace BCloudServiceUtilities.PubSubServices
                     _ErrorMessageAction?.Invoke("BPubSubServiceAWS->Subscribe->Callback: " + e.Message + ", Trace: " + e.StackTrace);
                     if (e.InnerException != null && e.InnerException != e)
                     {
-                        _ErrorMessageAction?.Invoke("BPubSubServiceAWS->Subscribe->Callback->Inner: " + e.InnerException.Message + ", Trace: " + e.StackTrace);
+                        _ErrorMessageAction?.Invoke("BPubSubServiceAWS->Subscribe->Callback->Inner: " + e.InnerException.Message + ", Trace: " + e.InnerException.StackTrace);
                     }
                 }
 
@@ -236,7 +236,7 @@ namespace BCloudServiceUtilities.PubSubServices
                                 _ErrorMessageAction?.Invoke("BPubSubServiceAWS->CustomSubscribe: " + e.Message + ", Trace: " + e.StackTrace);
                                 if (e.InnerException != null && e.InnerException != e)
                                 {
-                                    _ErrorMessageAction?.Invoke("BPubSubServiceAWS->CustomSubscribe->Inner: " + e.InnerException.Message + ", Trace: " + e.StackTrace);
+                                    _ErrorMessageAction?.Invoke("BPubSubServiceAWS->CustomSubscribe->Inner: " + e.InnerException.Message + ", Trace: " + e.InnerException.StackTrace);
                                 }
                             }
 
@@ -293,7 +293,7 @@ namespace BCloudServiceUtilities.PubSubServices
                                 _ErrorMessageAction?.Invoke("BPubSubServiceAWS->CustomSubscribe: " + e.Message + ", Trace: " + e.StackTrace);
                                 if (e.InnerException != null && e.InnerException != e)
                                 {
-                                    _ErrorMessageAction?.Invoke("BPubSubServiceAWS->CustomSubscribe->Inner: " + e.InnerException.Message + ", Trace: " + e.StackTrace);
+                                    _ErrorMessageAction?.Invoke("BPubSubServiceAWS->CustomSubscribe->Inner: " + e.InnerException.Message + ", Trace: " + e.InnerException.StackTrace);
                                 }
                             }
                         }
@@ -361,7 +361,7 @@ namespace BCloudServiceUtilities.PubSubServices
                         _ErrorMessageAction?.Invoke("BPubSubServiceAWS->CustomPublish: " + e.Message + ", Trace: " + e.StackTrace);
                         if (e.InnerException != null && e.InnerException != e)
                         {
-                            _ErrorMessageAction?.Invoke("BPubSubServiceAWS->CustomPublish->Inner: " + e.InnerException.Message + ", Trace: " + e.StackTrace);
+                            _ErrorMessageAction?.Invoke("BPubSubServiceAWS->CustomPublish->Inner: " + e.InnerException.Message + ", Trace: " + e.InnerException.StackTrace);
                         }
                         return false;
                     }
@@ -426,7 +426,7 @@ namespace BCloudServiceUtilities.PubSubServices
                     _ErrorMessageAction?.Invoke("BPubSubServiceAWS->DeleteCustomTopicGlobally->Callback: " + e.Message + ", Trace: " + e.StackTrace);
                     if (e.InnerException != null && e.InnerException != e)
                     {
-                        _ErrorMessageAction?.Invoke("BPubSubServiceAWS->DeleteCustomTopicGlobally->Inner: " + e.InnerException.Message + ", Trace: " + e.StackTrace);
+                        _ErrorMessageAction?.Invoke("BPubSubServiceAWS->DeleteCustomTopicGlobally->Inner: " + e.InnerException.Message + ", Trace: " + e.InnerException.StackTrace);
                     }
                 }
             }

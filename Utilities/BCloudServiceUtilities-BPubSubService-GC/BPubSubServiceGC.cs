@@ -418,7 +418,7 @@ namespace BCloudServiceUtilities.PubSubServices
                                 _ErrorMessageAction?.Invoke("BPubSubServiceGC->CustomSubscribe: " + e.Message + ", Trace: " + e.StackTrace);
                                 if (e.InnerException != null && e.InnerException != e)
                                 {
-                                    _ErrorMessageAction?.Invoke("BPubSubServiceGC->CustomSubscribe->Inner: " + e.InnerException.Message + ", Trace: " + e.StackTrace);
+                                    _ErrorMessageAction?.Invoke("BPubSubServiceGC->CustomSubscribe->Inner: " + e.InnerException.Message + ", Trace: " + e.InnerException.StackTrace);
                                 }
                             }
 
@@ -476,7 +476,7 @@ namespace BCloudServiceUtilities.PubSubServices
                                         _ErrorMessageAction?.Invoke("BPubSubServiceGC->CustomSubscribe: " + e.Message + ", Trace: " + e.StackTrace);
                                         if (e.InnerException != null && e.InnerException != e)
                                         {
-                                            _ErrorMessageAction?.Invoke("BPubSubServiceGC->CustomSubscribe->Inner: " + e.InnerException.Message + ", Trace: " + e.StackTrace);
+                                            _ErrorMessageAction?.Invoke("BPubSubServiceGC->CustomSubscribe->Inner: " + e.InnerException.Message + ", Trace: " + e.InnerException.StackTrace);
                                         }
                                     }
                                 }
@@ -682,7 +682,7 @@ namespace BCloudServiceUtilities.PubSubServices
                                         _ErrorMessageAction?.Invoke("BPubSubServiceGC->DeleteCustomTopicGlobally: " + e.Message + ", Trace: " + e.StackTrace);
                                         if (e.InnerException != null && e.InnerException != e)
                                         {
-                                            _ErrorMessageAction?.Invoke("BPubSubServiceGC->DeleteCustomTopicGlobally->Inner: " + e.InnerException.Message + ", Trace: " + e.StackTrace);
+                                            _ErrorMessageAction?.Invoke("BPubSubServiceGC->DeleteCustomTopicGlobally->Inner: " + e.InnerException.Message + ", Trace: " + e.InnerException.StackTrace);
                                         }
                                     }
                                 }
