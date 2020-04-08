@@ -187,20 +187,30 @@ namespace BWebServiceUtilities
                             }
                             catch (Exception e)
                             {
-                                _ServerLogAction?.Invoke("Uncaught exception-2: " + e.Message + ", trace: " + e.StackTrace);
+                                try
+                                {
+                                    var InternalErrorResponse = BWebResponse.InternalError("An unexpected internal error has occured: " + e.Message);
+                                    var Buffer = Encoding.UTF8.GetBytes(InternalErrorResponse.ResponseContent.String);
+                                    Context.Response.ContentLength64 = Buffer.Length;
+                                    Context.Response.OutputStream.Write(Buffer, 0, Buffer.Length);
+                                }
+                                catch (Exception) { }
+
+                                _ServerLogAction?.Invoke("Uncaught exception-B: " + e.Message + ", trace: " + e.StackTrace);
                             }
                             finally
                             {
                                 //Always close the stream
                                 try { Context.Response.OutputStream.Close(); } catch (Exception) { }
                                 try { Context.Response.OutputStream.Dispose(); } catch (Exception) { }
+                                try { Context.Response.Close(); } catch (Exception) { }
                             }
                         });
                     }
                 }
                 catch (Exception e)
                 {
-                    _ServerLogAction?.Invoke("Uncaught exception-1: " + e.Message + ", trace: " + e.StackTrace);
+                    _ServerLogAction?.Invoke("Uncaught exception-A: " + e.Message + ", trace: " + e.StackTrace);
                 }
             });
         }
