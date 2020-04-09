@@ -200,7 +200,7 @@ namespace BWebServiceUtilities
                                 //Always close the stream
                                 try { Context.Response.OutputStream.Close(); } catch (Exception) { }
                                 try { Context.Response.OutputStream.Dispose(); } catch (Exception) { }
-                                try { Context.Response.Close(); } catch (Exception) { }
+                                //try { Context.Response.Close(); } catch (Exception) { }
                             }
                         });
                     }
