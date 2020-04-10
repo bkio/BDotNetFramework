@@ -39,6 +39,8 @@ namespace BCommonUtilities
         private readonly Thread DisposerThread = null;
         private void DisposerThreadRunnable()
         {
+            Thread.CurrentThread.IsBackground = true;
+
             while (bRunning)
             {
                 Thread.Sleep(2500);

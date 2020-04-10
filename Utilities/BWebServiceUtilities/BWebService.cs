@@ -61,8 +61,6 @@ namespace BWebServiceUtilities
                 throw new ArgumentException("Invalid prefixes (Count 0)");
 
             PrefixesToListen = _PrefixesToListen;
-
-            Listener.Start();
         }
 
         private bool LookForListenersFromRequest(out BWebServiceBase _Callback, HttpListenerContext _Context)
@@ -98,116 +96,171 @@ namespace BWebServiceUtilities
 
         public void Run(Action<string> _ServerLogAction = null)
         {
+            var bStartSucceed = new BValue<bool>(false);
+            var WaitForFirstSuccess = new ManualResetEvent(false);
             BTaskWrapper.Run(() =>
             {
-                Thread.CurrentThread.IsBackground = true;
-
-                _ServerLogAction?.Invoke("BWebserver->Run: Server is running.");
-                try
+                var WaitForException = new ManualResetEvent(false);
+                int FailureCount = 0;
+                do
                 {
-                    while (Listener.IsListening)
+                    try
                     {
-                        var Context = Listener.GetContext();
-
-                        BTaskWrapper.Run(() =>
+                        lock (Listener)
                         {
-                            Thread.CurrentThread.IsBackground = true;
+                            Listener.Start();
+                        }
 
-                            try
+                        bStartSucceed.Set(true);
+                        WaitForFirstSuccess.Set();
+
+                        FailureCount = 0;
+
+                        WaitForException.WaitOne();
+                    }
+                    catch (Exception e)
+                    {
+                        _ServerLogAction?.Invoke("BWebService->Run->HttpListener->Start: " + e.Message + ", trace: " + e.Message);
+                        WaitForException.Set();
+                        Thread.Sleep(1000);
+                    }
+
+                } while (++FailureCount < 10);
+
+                WaitForFirstSuccess.Set(); //When exhausted
+            });
+            WaitForFirstSuccess.WaitOne();
+            if (!bStartSucceed.Get())
+            {
+                _ServerLogAction?.Invoke("BWebService->Run: HttpListener.Start() has failed.");
+                return;
+            }
+
+            BTaskWrapper.Run(() =>
+            {
+                _ServerLogAction?.Invoke("BWebserver->Run: Server is running.");
+
+                while (Listener.IsListening)
+                {
+                    HttpListenerContext Context = null;
+
+                    int FailureCount = 0;
+                    bool bSuccess;
+                    do
+                    {
+                        try
+                        {
+                            lock (Listener)
                             {
-                                Context.Response.AddHeader("Access-Control-Allow-Origin", "*");
+                                Context = Listener.GetContext();
+                            }
+                            bSuccess = true;
+                            FailureCount = 0;
+                        }
+                        catch (Exception e)
+                        {
+                            _ServerLogAction?.Invoke("BWebService->Run->HttpListener->GetContext: " + e.Message + ", trace: " + e.Message);
+                            bSuccess = false;
+                            Thread.Sleep(1000);
+                        }
 
-                                if (Context.Request.HttpMethod == "OPTIONS")
+                    } while (!bSuccess && ++FailureCount < 10);
+
+                    if (Context == null) continue;
+
+                    BTaskWrapper.Run(() =>
+                    {
+                        if (Context == null) return;
+                        try
+                        {
+                            Context.Response.AddHeader("Access-Control-Allow-Origin", "*");
+
+                            if (Context.Request.HttpMethod == "OPTIONS")
+                            {
+                                Context.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, api-key, token, auto-close-response");
+                                Context.Response.AddHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+                                Context.Response.AddHeader("Access-Control-Max-Age", "-1");
+                                Context.Response.StatusCode = BWebResponse.Status_OK_Code;
+                            }
+                            else
+                            {
+                                if (PrefixesToListen == null)
                                 {
-                                    Context.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, api-key, token, auto-close-response");
-                                    Context.Response.AddHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-                                    Context.Response.AddHeader("Access-Control-Max-Age", "-1");
-                                    Context.Response.StatusCode = BWebResponse.Status_OK_Code;
+                                    _ServerLogAction?.Invoke("BWebserver->Run: PrefixesToListen is null.");
+                                    WriteInternalError(Context.Response, "Code: WS-PTLN.");
+                                    return;
                                 }
-                                else
+                                if (!LookForListenersFromRequest(out BWebServiceBase _Callback, Context))
                                 {
-                                    if (PrefixesToListen == null)
-                                    {
-                                        _ServerLogAction?.Invoke("BWebserver->Run: PrefixesToListen is null.");
-                                        WriteInternalError(Context.Response, "Code: WS-PTLN.");
-                                        return;
-                                    }
-                                    if (!LookForListenersFromRequest(out BWebServiceBase _Callback, Context))
-                                    {
-                                        _ServerLogAction?.Invoke("BWebserver->Run: Request is not being listened. Request: " + Context.Request.RawUrl);
-                                        WriteNotFound(Context.Response, "Request is not being listened.");
-                                        return;
-                                    }
+                                    _ServerLogAction?.Invoke("BWebserver->Run: Request is not being listened. Request: " + Context.Request.RawUrl);
+                                    WriteNotFound(Context.Response, "Request is not being listened.");
+                                    return;
+                                }
 
-                                    var Response = _Callback.OnRequest(Context, _ServerLogAction);
+                                var Response = _Callback.OnRequest(Context, _ServerLogAction);
 
-                                    Context.Response.StatusCode = Response.StatusCode;
+                                Context.Response.StatusCode = Response.StatusCode;
 
-                                    foreach (var CurrentHeader in Response.Headers)
+                                foreach (var CurrentHeader in Response.Headers)
+                                {
+                                    foreach (var Value in CurrentHeader.Value)
                                     {
-                                        foreach (var Value in CurrentHeader.Value)
-                                        {
-                                            Context.Response.AppendHeader(CurrentHeader.Key, Value);
-                                        }
+                                        Context.Response.AppendHeader(CurrentHeader.Key, Value);
                                     }
+                                }
                                     
-                                    Context.Response.ContentType = BWebUtilities.GetMimeStringFromEnum(Response.ResponseContentType);
+                                Context.Response.ContentType = BWebUtilities.GetMimeStringFromEnum(Response.ResponseContentType);
 
-                                    if (Response.ResponseContent.Type == EBStringOrStreamEnum.String)
+                                if (Response.ResponseContent.Type == EBStringOrStreamEnum.String)
+                                {
+                                    byte[] Buffer = Encoding.UTF8.GetBytes(Response.ResponseContent.String);
+                                    if (Buffer != null)
                                     {
-                                        byte[] Buffer = Encoding.UTF8.GetBytes(Response.ResponseContent.String);
-                                        if (Buffer != null)
+                                        Context.Response.ContentLength64 = Buffer.Length;
+                                        if (Buffer.Length > 0)
                                         {
-                                            Context.Response.ContentLength64 = Buffer.Length;
-                                            if (Buffer.Length > 0)
-                                            {
-                                                Context.Response.OutputStream.Write(Buffer, 0, Buffer.Length);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            Context.Response.ContentLength64 = 0;
+                                            Context.Response.OutputStream.Write(Buffer, 0, Buffer.Length);
                                         }
                                     }
                                     else
                                     {
-                                        if (Response.ResponseContent.Stream != null && Response.ResponseContent.StreamLength > 0)
-                                        {
-                                            Context.Response.ContentLength64 = Response.ResponseContent.StreamLength;
-                                            Response.ResponseContent.Stream.CopyTo(Context.Response.OutputStream);
-                                        }
-                                        else
-                                        {
-                                            _ServerLogAction?.Invoke("BWebserver->Error: Response is stream, but stream object is " + (Response.ResponseContent.Stream == null ? "null" : "valid") + " and content length is " + Response.ResponseContent.StreamLength);
-                                            WriteInternalError(Context.Response, "Code: WS-STRMINV.");
-                                            return;
-                                        }
+                                        Context.Response.ContentLength64 = 0;
+                                    }
+                                }
+                                else
+                                {
+                                    if (Response.ResponseContent.Stream != null && Response.ResponseContent.StreamLength > 0)
+                                    {
+                                        Context.Response.ContentLength64 = Response.ResponseContent.StreamLength;
+                                        Response.ResponseContent.Stream.CopyTo(Context.Response.OutputStream);
+                                    }
+                                    else
+                                    {
+                                        _ServerLogAction?.Invoke("BWebserver->Error: Response is stream, but stream object is " + (Response.ResponseContent.Stream == null ? "null" : "valid") + " and content length is " + Response.ResponseContent.StreamLength);
+                                        WriteInternalError(Context.Response, "Code: WS-STRMINV.");
+                                        return;
                                     }
                                 }
                             }
-                            catch (Exception e)
+                        }
+                        catch (Exception e)
+                        {
+                            try
                             {
-                                try
-                                {
-                                    WriteInternalError(Context.Response, "An unexpected internal error has occured: " + e.Message);
-                                }
-                                catch (Exception) { }
+                                WriteInternalError(Context.Response, "An unexpected internal error has occured: " + e.Message);
+                            }
+                            catch (Exception) { }
 
-                                _ServerLogAction?.Invoke("Uncaught exception-B: " + e.Message + ", trace: " + e.StackTrace);
-                            }
-                            finally
-                            {
-                                //Always close the stream
-                                try { Context.Response.OutputStream.Close(); } catch (Exception) { }
-                                try { Context.Response.OutputStream.Dispose(); } catch (Exception) { }
-                                //try { Context.Response.Close(); } catch (Exception) { }
-                            }
-                        });
-                    }
-                }
-                catch (Exception e)
-                {
-                    _ServerLogAction?.Invoke("Uncaught exception-A: " + e.Message + ", trace: " + e.StackTrace);
+                            _ServerLogAction?.Invoke("Uncaught exception in the request handle: " + e.Message + ", trace: " + e.StackTrace);
+                        }
+                        finally
+                        {
+                            //Always close the stream
+                            try { Context.Response.OutputStream.Close(); } catch (Exception) { }
+                            try { Context.Response.OutputStream.Dispose(); } catch (Exception) { }
+                            //try { Context.Response.Close(); } catch (Exception) { }
+                        }
+                    });
                 }
             });
         }
