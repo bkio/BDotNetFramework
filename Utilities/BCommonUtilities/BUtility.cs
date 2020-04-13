@@ -1035,33 +1035,76 @@ namespace BCommonUtilities
     {
         private readonly Action DestructorAction;
 
-        public Stream Stream { get; }
-        public long StreamLength { get; }
+        public Stream Stream 
+        {
+            get
+            {
+                if (Type == EBStringOrStreamEnum.String)
+                {
+                    var Streamified = new MemoryStream();
+                    using (var Writer = new StreamWriter(Streamified))
+                    {
+                        Writer.Write(StringValue);
+                    }
+                    return Streamified;
+                }
+                return StreamValue;
+            }
+        }
+        public long StreamLength 
+        { 
+            get
+            {
+                if (Type == EBStringOrStreamEnum.String)
+                {
+                    return StringValue.Length;
+                }
+                return StreamLengthValue;
+            }
+        }
 
-        public string String { get; }
+        private readonly string StringValue = "";
+        private readonly Stream StreamValue = null;
+        private readonly long StreamLengthValue = 0;
+        public string String 
+        { 
+            get
+            {
+                if (Type == EBStringOrStreamEnum.Stream)
+                {
+                    string Stringified;
+                    using (var Reader = new StreamReader(Stream))
+                    {
+                        Stringified = Reader.ReadToEnd();
+                    }
+                    return Stringified;
+                }
+                return StringValue;
+            }
+        }
 
         public EBStringOrStreamEnum Type { get; }
         
         public BStringOrStream(Stream _Stream, long _StreamLength)
         {
             Type = EBStringOrStreamEnum.Stream;
-            Stream = _Stream;
-            StreamLength = _StreamLength;
-            String = "";
+            StreamValue = _Stream;
+            StreamLengthValue = _StreamLength;
+            StringValue = "";
         }
         public BStringOrStream(string _Str)
         {
             Type = EBStringOrStreamEnum.String;
-            String = _Str;
+            StringValue = _Str;
         }
 
         public BStringOrStream(Stream _Stream, long _StreamLength, Action _DestructorAction)
         {
             Type = EBStringOrStreamEnum.Stream;
-            Stream = _Stream;
-            StreamLength = _StreamLength;
+            StreamValue = _Stream;
+            StreamLengthValue = _StreamLength;
             DestructorAction = _DestructorAction;
-            String = "";
+            StringValue = "";
         }
 
         private BStringOrStream() {}
@@ -1078,16 +1121,9 @@ namespace BCommonUtilities
         {
             if (Type == EBStringOrStreamEnum.Stream)
             {
-                try
+                using (var Reader = new StreamReader(StreamValue))
                 {
-                    using (var Reader = new StreamReader(Stream))
-                    {
-                        return Reader.ReadToEnd();
-                    }
-                }
-                catch (Exception)
-                {
-                    return "";
+                    return Reader.ReadToEnd();
                 }
             }
             return String;
