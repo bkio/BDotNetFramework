@@ -32,7 +32,7 @@ namespace BCommonUtilities
             return Instance;
         }
 
-        private readonly List<Task> CreatedTasks = new List<Task>();
+        private readonly List<Tuple<Task, CancellationTokenSource>> CreatedTasks = new List<Tuple<Task, CancellationTokenSource>>();
         private readonly object CreatedTasks_Lock = new object();
         private bool bRunning = true;
 
@@ -56,10 +56,16 @@ namespace BCommonUtilities
                         {
                             if (CurrentTask != null)
                             {
-                                if (CurrentTask.IsCanceled || CurrentTask.IsCompleted || CurrentTask.IsFaulted)
+                                if (CurrentTask.Item1.IsCanceled || CurrentTask.Item1.IsCompleted || CurrentTask.Item1.IsFaulted)
                                 {
+                                    try
+                                    {
+                                        CurrentTask.Item2?.Dispose();
+                                    }
+                                    catch (Exception) { }
+
                                     CreatedTasks.RemoveAt(i);
-                                    CurrentTask.Dispose();
+                                    CurrentTask.Item1.Dispose();
                                 }
                                 bCheckSucceed = true;
                             }
@@ -75,13 +81,20 @@ namespace BCommonUtilities
             }
         }
 
-        public static void Run(Action _Action)
+        public static void Run(Action _Action, CancellationTokenSource _CancellationTokenSource = null)
         {
             if (_Action != null)
             {
                 lock (Get().CreatedTasks_Lock)
                 {
-                    Get().CreatedTasks.Add(Task.Run(_Action));
+                    if (_CancellationTokenSource != null)
+                    {
+                        Get().CreatedTasks.Add(new Tuple<Task, CancellationTokenSource>(Task.Run(_Action, _CancellationTokenSource.Token), _CancellationTokenSource));
+                    }
+                    else
+                    {
+                        Get().CreatedTasks.Add(new Tuple<Task, CancellationTokenSource>(Task.Run(_Action), null));
+                    }
                 }
             }
         }
