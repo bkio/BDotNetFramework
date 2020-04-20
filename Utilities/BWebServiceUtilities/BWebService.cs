@@ -192,6 +192,11 @@ namespace BWebServiceUtilities
                                 }
                                 if (!LookForListenersFromRequest(out BWebServiceBase _Callback, Context))
                                 {
+                                    if (Context.Request.RawUrl == "/ping")
+                                    {
+                                        WriteOK(Context.Response, "pong");
+                                        return;
+                                    }
                                     _ServerLogAction?.Invoke("BWebserver->Run: Request is not being listened. Request: " + Context.Request.RawUrl);
                                     WriteNotFound(Context.Response, "Request is not being listened.");
                                     return;
@@ -282,6 +287,16 @@ namespace BWebServiceUtilities
 
             _WriteTo.ContentType = BWebUtilities.GetMimeStringFromEnum(BWebResponse.Error_NotFound_ContentType);
             _WriteTo.StatusCode = BWebResponse.Error_NotFound_Code;
+            _WriteTo.ContentLength64 = Buff.Length;
+            _WriteTo.OutputStream.Write(Buff, 0, Buff.Length);
+        }
+        private static void WriteOK(HttpListenerResponse _WriteTo, string _CustomMessage)
+        {
+            string Resp = BWebResponse.Status_Success_String(_CustomMessage);
+            byte[] Buff = Encoding.UTF8.GetBytes(Resp);
+
+            _WriteTo.ContentType = BWebUtilities.GetMimeStringFromEnum(BWebResponse.Status_Success_ContentType);
+            _WriteTo.StatusCode = BWebResponse.Status_OK_Code;
             _WriteTo.ContentLength64 = Buff.Length;
             _WriteTo.OutputStream.Write(Buff, 0, Buff.Length);
         }
