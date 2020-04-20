@@ -192,7 +192,7 @@ namespace BWebServiceUtilities
                                 }
                                 if (!LookForListenersFromRequest(out BWebServiceBase _Callback, Context))
                                 {
-                                    if (Context.Request.RawUrl == "/ping")
+                                    if (Context.Request.RawUrl.EndsWith("/ping"))
                                     {
                                         WriteOK(Context.Response, "pong");
                                         return;
