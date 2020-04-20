@@ -118,7 +118,7 @@ namespace BWebServiceUtilities_GC
                                     {
                                         ReadResponseTask.Wait();
 
-                                        if (Response.StatusCode != HttpStatusCode.OK)
+                                        if ((int)Response.StatusCode >= 400)
                                         {
                                             throw new Exception("Request returned: " + Response.StatusCode + ", with content: " + ReadResponseTask.Result);
                                         }
@@ -190,7 +190,7 @@ namespace BWebServiceUtilities_GC
         public static InterServicesRequestResponse InterServicesRequest(InterServicesRequestRequest _Request, Action<string> _ErrorMessageAction)
         {
             var bHttpRequestSuccess = false;
-            var HttpRequestResponseCode = 500;
+            var HttpRequestResponseCode = BWebResponse.Error_InternalError_Code;
             var HttpRequestResponseContentType = EBResponseContentType.None;
             BStringOrStream HttpRequestResponseContent = null;
             Dictionary<string, IEnumerable<string>> HttpRequestResponseHeaders = null;
@@ -203,8 +203,8 @@ namespace BWebServiceUtilities_GC
             if (_Request.bWithAuthToken)
             {
                 //If context-headers already contain authorization; we must rename it to client-authorization to prevent override.
-                if (_Request.UseContextHeaders != null 
-                    && BWebUtilities.DoesContextContainHeader(out List<string> AuthorizationHeaderValues, out string CaseSensitive_FoundHeaderKey,_Request.UseContextHeaders, "authorization")
+                if (_Request.UseContextHeaders != null
+                    && BWebUtilities.DoesContextContainHeader(out List<string> AuthorizationHeaderValues, out string CaseSensitive_FoundHeaderKey, _Request.UseContextHeaders, "authorization")
                     && BUtility.CheckAndGetFirstStringFromList(AuthorizationHeaderValues, out string ClientAuthorization))
                 {
                     _Request.UseContextHeaders.Request.Headers.Remove(CaseSensitive_FoundHeaderKey);
@@ -353,7 +353,7 @@ namespace BWebServiceUtilities_GC
                         Result.ContentType);
                 }
             }
-            
+
         }
 
         private static void AnalyzeResponse(
@@ -366,7 +366,7 @@ namespace BWebServiceUtilities_GC
             Action<string> _ErrorMessageAction)
         {
             _bHttpRequestSuccess = false;
-            _HttpRequestResponseCode = 200;
+            _HttpRequestResponseCode = BWebResponse.Error_InternalError_Code;
             _HttpRequestResponseContentType = EBResponseContentType.None;
             _HttpRequestResponseContent = null;
             _HttpRequestResponseHeaders = new Dictionary<string, IEnumerable<string>>();
