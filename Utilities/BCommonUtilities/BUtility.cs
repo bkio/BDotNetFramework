@@ -286,14 +286,34 @@ namespace BCommonUtilities
 
     public static class BUtility
     {
-        public static string TrimEnd(this string _Source, string _Value)
+        public static string TrimStart(this string _Target, string _TrimString)
         {
-            if (!_Source.EndsWith(_Value))
-                return _Source;
+            if (string.IsNullOrEmpty(_TrimString)) return _Target;
 
-            return _Source.Remove(_Source.LastIndexOf(_Value));
+            string Result = _Target;
+            while (Result.StartsWith(_TrimString))
+            {
+                Result = Result.Substring(_TrimString.Length);
+            }
+
+            return Result;
         }
+        public static string TrimEnd(this string _Target, string _TrimString)
+        {
+            if (string.IsNullOrEmpty(_TrimString)) return _Target;
 
+            string Result = _Target;
+            while (Result.EndsWith(_TrimString))
+            {
+                Result = Result.Substring(0, Result.Length - _TrimString.Length);
+            }
+
+            return Result;
+        }
+        public static string Trim(this string _Target, string _TrimString)
+        {
+            return _Target.TrimStart(_TrimString).TrimEnd(_TrimString);
+        }
 
         //Option based; in the second array, it is sufficient for one of the elements to exists in environment variable to succeed.
         public static bool GetEnvironmentVariables(
