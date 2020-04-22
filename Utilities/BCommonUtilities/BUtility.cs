@@ -196,7 +196,7 @@ namespace BCommonUtilities
                 case EBPrimitiveTypeEnum.Double:
                     return new BPrimitiveType(double.Parse(KeyValueStringified));
                 case EBPrimitiveTypeEnum.Integer:
-                    return new BPrimitiveType(int.Parse(KeyValueStringified));
+                    return new BPrimitiveType(long.Parse(KeyValueStringified));
                 case EBPrimitiveTypeEnum.String:
                     return new BPrimitiveType(KeyValueStringified);
             }

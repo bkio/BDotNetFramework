@@ -61,7 +61,7 @@ namespace BCloudServiceUtilities.MemoryServices
             {
                 if (AsDouble % 1 == 0)
                 {
-                    return new BPrimitiveType((int)AsDouble);
+                    return new BPrimitiveType((long)AsDouble);
                 }
                 return new BPrimitiveType(AsDouble);
             }
