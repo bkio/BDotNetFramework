@@ -109,8 +109,8 @@ namespace BCommonUtilities
             AsString = _Str;
         }
 
-        public int AsInteger { get; }
-        public BPrimitiveType(int _Int)
+        public long AsInteger { get; }
+        public BPrimitiveType(long _Int)
         {
             Type = EBPrimitiveTypeEnum.Integer;
             AsInteger = _Int;

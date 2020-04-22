@@ -213,7 +213,7 @@ namespace BCloudServiceUtilities.DatabaseServices
                 case JTokenType.Integer:
                     return new Value()
                     {
-                        IntegerValue = (int)_Value
+                        IntegerValue = (long)_Value
                     };
                 case JTokenType.Float:
                     return new Value()
@@ -283,7 +283,7 @@ namespace BCloudServiceUtilities.DatabaseServices
                 case EBPrimitiveTypeEnum.Double:
                     return _Primitive.AsDouble == (double)_Token;
                 case EBPrimitiveTypeEnum.Integer:
-                    return _Primitive.AsInteger == (int)_Token;
+                    return _Primitive.AsInteger == (long)_Token;
                 case EBPrimitiveTypeEnum.ByteArray:
                     return Convert.ToBase64String(_Primitive.AsByteArray) == (string)_Token;
                 default:
@@ -512,27 +512,27 @@ namespace BCloudServiceUtilities.DatabaseServices
                                     case EBPrimitiveTypeEnum.Integer:
                                         if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeEquals)
                                         {
-                                            bConditionSatisfied = (int)ReturnedPreOperationObject[BuiltCondition.Item1] == BuiltCondition.Item2.Item2.AsInteger;
+                                            bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] == BuiltCondition.Item2.Item2.AsInteger;
                                         }
                                         else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeNotEquals)
                                         {
-                                            bConditionSatisfied = (int)ReturnedPreOperationObject[BuiltCondition.Item1] != BuiltCondition.Item2.Item2.AsInteger;
+                                            bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] != BuiltCondition.Item2.Item2.AsInteger;
                                         }
                                         else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeGreater)
                                         {
-                                            bConditionSatisfied = (int)ReturnedPreOperationObject[BuiltCondition.Item1] > BuiltCondition.Item2.Item2.AsInteger;
+                                            bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] > BuiltCondition.Item2.Item2.AsInteger;
                                         }
                                         else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeGreaterOrEqual)
                                         {
-                                            bConditionSatisfied = (int)ReturnedPreOperationObject[BuiltCondition.Item1] >= BuiltCondition.Item2.Item2.AsInteger;
+                                            bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] >= BuiltCondition.Item2.Item2.AsInteger;
                                         }
                                         else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeLess)
                                         {
-                                            bConditionSatisfied = (int)ReturnedPreOperationObject[BuiltCondition.Item1] < BuiltCondition.Item2.Item2.AsInteger;
+                                            bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] < BuiltCondition.Item2.Item2.AsInteger;
                                         }
                                         else
                                         {
-                                            bConditionSatisfied = (int)ReturnedPreOperationObject[BuiltCondition.Item1] <= BuiltCondition.Item2.Item2.AsInteger;
+                                            bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] <= BuiltCondition.Item2.Item2.AsInteger;
                                         }
                                         break;
                                     case EBPrimitiveTypeEnum.ByteArray:

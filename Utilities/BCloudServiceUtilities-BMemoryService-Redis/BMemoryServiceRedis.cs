@@ -51,7 +51,7 @@ namespace BCloudServiceUtilities.MemoryServices
         {
             if (_Input.IsNullOrEmpty) return null;
             if (_Input.IsInteger &&
-                _Input.TryParse(out int AsInteger))
+                _Input.TryParse(out long AsInteger))
             {
                 return new BPrimitiveType(AsInteger);
             }
