@@ -178,8 +178,8 @@ namespace BCommonUtilities
 
     public class BPrimitiveType_JStringified
     {
-        public const string KEY_VALUE_PRIMITIVE_TYPE_PROPERTY = "key-value-primitive-type";
-        public const string KEY_VALUE_STRINGIFIED_PROPERTY = "key-value-stringified";
+        public const string KEY_VALUE_PRIMITIVE_TYPE_PROPERTY = "keyValuePrimitiveType";
+        public const string KEY_VALUE_STRINGIFIED_PROPERTY = "keyValueStringified";
 
         [JsonProperty(KEY_VALUE_PRIMITIVE_TYPE_PROPERTY)]
         public int KeyValuePrimitiveType;
