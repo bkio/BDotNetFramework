@@ -689,7 +689,7 @@ namespace BCloudServiceUtilities.DatabaseServices
             }
             if (RetryCount > MAX_RETRY_NUMBER)
             {
-                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->DeleteItem: Too much contention on these datastore entities; tried 5 times and exhausted. Key: " + _KeyValue.AsString);
+                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->PutOrUpdateItem: Too much contention on these datastore entities or service unavailable; tried 5 times and exhausted. Key: " + _KeyValue.AsString);
             }
             return false;
         }
@@ -865,7 +865,7 @@ namespace BCloudServiceUtilities.DatabaseServices
             }
             if (RetryCount > MAX_RETRY_NUMBER)
             {
-                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->DeleteItem: Too much contention on these datastore entities; tried 5 times and exhausted. Key: " + _KeyValue.AsString);
+                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->AddElementsToArrayItem: Too much contention on these datastore entities or service unavailable; tried 5 times and exhausted. Key: " + _KeyValue.AsString);
             }
             return false;
         }
@@ -1009,7 +1009,7 @@ namespace BCloudServiceUtilities.DatabaseServices
             }
             if (RetryCount > MAX_RETRY_NUMBER)
             {
-                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->DeleteItem: Too much contention on these datastore entities; tried 5 times and exhausted. Key: " + _KeyValue.AsString);
+                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->RemoveElementsFromArrayItem: Too much contention on these datastore entities or service unavailable; tried 5 times and exhausted. Key: " + _KeyValue.AsString);
             }
             return false;
         }
@@ -1108,7 +1108,7 @@ namespace BCloudServiceUtilities.DatabaseServices
             }
             if (RetryCount > MAX_RETRY_NUMBER)
             {
-                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->DeleteItem: Too much contention on these datastore entities; tried 5 times and exhausted. Key: " + _KeyValue.AsString);
+                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->IncrementOrDecrementItemValue: Too much contention on these datastore entities or service unavailable; tried 5 times and exhausted. Key: " + _KeyValue.AsString);
             }
             return false;
         }
@@ -1175,7 +1175,7 @@ namespace BCloudServiceUtilities.DatabaseServices
             }
             if (RetryCount > MAX_RETRY_NUMBER)
             {
-                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->DeleteItem: Too much contention on these datastore entities; tried 5 times and exhausted. Key: " + _KeyValue.AsString);
+                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->DeleteItem: Too much contention on these datastore entities or service unavailable; tried 5 times and exhausted. Key: " + _KeyValue.AsString);
             }
             return false;
         }
