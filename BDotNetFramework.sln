@@ -87,6 +87,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BWebServiceUtilities-GC", "
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Services\BServiceUtilities-FileService-GC\BServiceUtilities-FileService-GC.projitems*{12da451b-d5b9-453b-8b07-fffccba7742e}*SharedItemsImports = 5
+		Services\BServiceUtilities-TracingService-GC\BServiceUtilities-TracingService-GC.projitems*{12da451b-d5b9-453b-8b07-fffccba7742e}*SharedItemsImports = 5
+		Services\BServiceUtilities\BServiceUtilities.projitems*{12da451b-d5b9-453b-8b07-fffccba7742e}*SharedItemsImports = 5
 		Services\BServiceUtilities-TracingService-Zipkin\BServiceUtilities-TracingService-Zipkin.projitems*{18afc8bd-2d17-40f0-b02c-34f67c5a7d79}*SharedItemsImports = 13
 		Services\BServiceUtilities-FileService-AWS\BServiceUtilities-FileService-AWS.projitems*{1c6c3236-f3d0-41d7-8e27-25fc29439511}*SharedItemsImports = 13
 		Services\BServiceUtilities-PubSubService-GC\BServiceUtilities-PubSubService-GC.projitems*{1ce00f9b-1598-40bc-80b0-a184d2a68246}*SharedItemsImports = 13

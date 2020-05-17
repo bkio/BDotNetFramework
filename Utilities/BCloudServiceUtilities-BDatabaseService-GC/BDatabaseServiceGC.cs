@@ -8,6 +8,7 @@ using Google.Cloud.Datastore.V1;
 using Grpc.Auth;
 using Newtonsoft.Json.Linq;
 using BCommonUtilities;
+using System.Threading;
 
 namespace BCloudServiceUtilities.DatabaseServices
 {
@@ -327,7 +328,7 @@ namespace BCloudServiceUtilities.DatabaseServices
                     _ErrorMessageAction?.Invoke("BDatabaseServiceGC->GetItem: Exception: " + e.Message);
                     return false;
                 }
-                
+
                 if (ReturnedEntity != null)
                 {
                     _Result = FromEntityToJson(ReturnedEntity);
@@ -438,24 +439,15 @@ namespace BCloudServiceUtilities.DatabaseServices
                 NewItem.Remove(_KeyName);
             }
 
-            if (LoadStoreAndGetKindKeyFactory(_Table, out KeyFactory Factory, _ErrorMessageAction))
+            int RetryCount = 0;
+            while (++RetryCount <= MAX_RETRY_NUMBER)
             {
-                JObject ReturnedPreOperationObject = null;
-                using (DatastoreTransaction Transaction = DSDB.BeginTransaction())
+                if (LoadStoreAndGetKindKeyFactory(_Table, out KeyFactory Factory, _ErrorMessageAction))
                 {
-                    if (_PutOrUpdateItemType == EBPutOrUpdateItemType.UpdateItem)
+                    JObject ReturnedPreOperationObject = null;
+                    using (DatastoreTransaction Transaction = DSDB.BeginTransaction())
                     {
-                        if (!GetItemInTransaction(Transaction, Factory, _KeyName, _KeyValue, out ReturnedPreOperationObject, _ErrorMessageAction))
-                        {
-                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->PutOrUpdateItem: GetItemInTransaction failed.");
-                            return false;
-                        }
-                    }
-
-                    if (_ConditionExpression != null)
-                    {
-                        //If it's PutItem, GetItemInTransaction has not been called yet.
-                        if (_PutOrUpdateItemType == EBPutOrUpdateItemType.PutItem)
+                        if (_PutOrUpdateItemType == EBPutOrUpdateItemType.UpdateItem)
                         {
                             if (!GetItemInTransaction(Transaction, Factory, _KeyName, _KeyValue, out ReturnedPreOperationObject, _ErrorMessageAction))
                             {
@@ -464,222 +456,240 @@ namespace BCloudServiceUtilities.DatabaseServices
                             }
                         }
 
-                        var BuiltCondition = _ConditionExpression.GetBuiltCondition();
-                        if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeEquals
-                            || _ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeNotEquals
-                            || _ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeGreater
-                            || _ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeGreaterOrEqual
-                            || _ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeLess
-                            || _ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeLessOrEqual)
+                        if (_ConditionExpression != null)
                         {
-                            if (BuiltCondition.Item1 == null || BuiltCondition.Item2 == null || BuiltCondition.Item2.Item1 == null || BuiltCondition.Item2.Item2 == null)
+                            //If it's PutItem, GetItemInTransaction has not been called yet.
+                            if (_PutOrUpdateItemType == EBPutOrUpdateItemType.PutItem)
                             {
-                                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->PutOrUpdateItem: Invalid condition expression.");
-                                return false;
-                            }
-
-                            bool bConditionSatisfied = false;
-                            if (ReturnedPreOperationObject != null && ReturnedPreOperationObject.ContainsKey(BuiltCondition.Item1))
-                            {
-                                switch (BuiltCondition.Item2.Item2.Type)
+                                if (!GetItemInTransaction(Transaction, Factory, _KeyName, _KeyValue, out ReturnedPreOperationObject, _ErrorMessageAction))
                                 {
-                                    case EBPrimitiveTypeEnum.Double:
-                                        if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeEquals)
-                                        {
-                                            bConditionSatisfied = (double)ReturnedPreOperationObject[BuiltCondition.Item1] == BuiltCondition.Item2.Item2.AsDouble;
-                                        }
-                                        else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeNotEquals)
-                                        {
-                                            bConditionSatisfied = (double)ReturnedPreOperationObject[BuiltCondition.Item1] != BuiltCondition.Item2.Item2.AsDouble;
-                                        }
-                                        else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeGreater)
-                                        {
-                                            bConditionSatisfied = (double)ReturnedPreOperationObject[BuiltCondition.Item1] > BuiltCondition.Item2.Item2.AsDouble;
-                                        }
-                                        else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeGreaterOrEqual)
-                                        {
-                                            bConditionSatisfied = (double)ReturnedPreOperationObject[BuiltCondition.Item1] >= BuiltCondition.Item2.Item2.AsDouble;
-                                        }
-                                        else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeLess)
-                                        {
-                                            bConditionSatisfied = (double)ReturnedPreOperationObject[BuiltCondition.Item1] < BuiltCondition.Item2.Item2.AsDouble;
-                                        }
-                                        else
-                                        {
-                                            bConditionSatisfied = (double)ReturnedPreOperationObject[BuiltCondition.Item1] <= BuiltCondition.Item2.Item2.AsDouble;
-                                        }
-                                        break;
-                                    case EBPrimitiveTypeEnum.Integer:
-                                        if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeEquals)
-                                        {
-                                            bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] == BuiltCondition.Item2.Item2.AsInteger;
-                                        }
-                                        else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeNotEquals)
-                                        {
-                                            bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] != BuiltCondition.Item2.Item2.AsInteger;
-                                        }
-                                        else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeGreater)
-                                        {
-                                            bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] > BuiltCondition.Item2.Item2.AsInteger;
-                                        }
-                                        else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeGreaterOrEqual)
-                                        {
-                                            bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] >= BuiltCondition.Item2.Item2.AsInteger;
-                                        }
-                                        else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeLess)
-                                        {
-                                            bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] < BuiltCondition.Item2.Item2.AsInteger;
-                                        }
-                                        else
-                                        {
-                                            bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] <= BuiltCondition.Item2.Item2.AsInteger;
-                                        }
-                                        break;
-                                    case EBPrimitiveTypeEnum.ByteArray:
-                                        var First = (string)ReturnedPreOperationObject[BuiltCondition.Item1];
-                                        var Second = Convert.ToBase64String(BuiltCondition.Item2.Item2.AsByteArray);
-
-                                        if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeEquals)
-                                        {
-                                            bConditionSatisfied = First == Second;
-                                        }
-                                        else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeNotEquals)
-                                        {
-                                            bConditionSatisfied = First != Second;
-                                        }
-                                        else
-                                        {
-                                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->PutOrUpdateItem: Invalid condition expression.");
-                                            return false;
-                                        }
-                                        break;
-                                    default:
-                                        First = (string)ReturnedPreOperationObject[BuiltCondition.Item1];
-                                        Second = BuiltCondition.Item2.Item2.AsString;
-
-                                        if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeEquals)
-                                        {
-                                            bConditionSatisfied = First == Second;
-                                        }
-                                        else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeNotEquals)
-                                        {
-                                            bConditionSatisfied = First != Second;
-                                        }
-                                        else
-                                        {
-                                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->PutOrUpdateItem: Invalid condition expression.");
-                                            return false;
-                                        }
-                                        break;
+                                    _ErrorMessageAction?.Invoke("BDatabaseServiceGC->PutOrUpdateItem: GetItemInTransaction failed.");
+                                    return false;
                                 }
                             }
 
-                            if (!bConditionSatisfied)
+                            var BuiltCondition = _ConditionExpression.GetBuiltCondition();
+                            if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeEquals
+                                || _ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeNotEquals
+                                || _ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeGreater
+                                || _ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeGreaterOrEqual
+                                || _ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeLess
+                                || _ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeLessOrEqual)
                             {
-                                return false;
-                            }
-                        }
-                        else
-                        {
-                            if (BuiltCondition.Item1 == null)
-                            {
-                                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->PutOrUpdateItem: Invalid condition expression.");
-                                return false;
-                            }
-
-                            bool bConditionSatisfied = false;
-
-                            if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeNotExist)
-                            {
-                                bConditionSatisfied = true;
-
-                                if (ReturnedPreOperationObject != null)
+                                if (BuiltCondition.Item1 == null || BuiltCondition.Item2 == null || BuiltCondition.Item2.Item1 == null || BuiltCondition.Item2.Item2 == null)
                                 {
-                                    if (BuiltCondition.Item1 == _KeyName || ReturnedPreOperationObject.ContainsKey(BuiltCondition.Item1))
+                                    _ErrorMessageAction?.Invoke("BDatabaseServiceGC->PutOrUpdateItem: Invalid condition expression.");
+                                    return false;
+                                }
+
+                                bool bConditionSatisfied = false;
+                                if (ReturnedPreOperationObject != null && ReturnedPreOperationObject.ContainsKey(BuiltCondition.Item1))
+                                {
+                                    switch (BuiltCondition.Item2.Item2.Type)
                                     {
-                                        bConditionSatisfied = false;
+                                        case EBPrimitiveTypeEnum.Double:
+                                            if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeEquals)
+                                            {
+                                                bConditionSatisfied = (double)ReturnedPreOperationObject[BuiltCondition.Item1] == BuiltCondition.Item2.Item2.AsDouble;
+                                            }
+                                            else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeNotEquals)
+                                            {
+                                                bConditionSatisfied = (double)ReturnedPreOperationObject[BuiltCondition.Item1] != BuiltCondition.Item2.Item2.AsDouble;
+                                            }
+                                            else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeGreater)
+                                            {
+                                                bConditionSatisfied = (double)ReturnedPreOperationObject[BuiltCondition.Item1] > BuiltCondition.Item2.Item2.AsDouble;
+                                            }
+                                            else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeGreaterOrEqual)
+                                            {
+                                                bConditionSatisfied = (double)ReturnedPreOperationObject[BuiltCondition.Item1] >= BuiltCondition.Item2.Item2.AsDouble;
+                                            }
+                                            else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeLess)
+                                            {
+                                                bConditionSatisfied = (double)ReturnedPreOperationObject[BuiltCondition.Item1] < BuiltCondition.Item2.Item2.AsDouble;
+                                            }
+                                            else
+                                            {
+                                                bConditionSatisfied = (double)ReturnedPreOperationObject[BuiltCondition.Item1] <= BuiltCondition.Item2.Item2.AsDouble;
+                                            }
+                                            break;
+                                        case EBPrimitiveTypeEnum.Integer:
+                                            if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeEquals)
+                                            {
+                                                bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] == BuiltCondition.Item2.Item2.AsInteger;
+                                            }
+                                            else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeNotEquals)
+                                            {
+                                                bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] != BuiltCondition.Item2.Item2.AsInteger;
+                                            }
+                                            else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeGreater)
+                                            {
+                                                bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] > BuiltCondition.Item2.Item2.AsInteger;
+                                            }
+                                            else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeGreaterOrEqual)
+                                            {
+                                                bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] >= BuiltCondition.Item2.Item2.AsInteger;
+                                            }
+                                            else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeLess)
+                                            {
+                                                bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] < BuiltCondition.Item2.Item2.AsInteger;
+                                            }
+                                            else
+                                            {
+                                                bConditionSatisfied = (long)ReturnedPreOperationObject[BuiltCondition.Item1] <= BuiltCondition.Item2.Item2.AsInteger;
+                                            }
+                                            break;
+                                        case EBPrimitiveTypeEnum.ByteArray:
+                                            var First = (string)ReturnedPreOperationObject[BuiltCondition.Item1];
+                                            var Second = Convert.ToBase64String(BuiltCondition.Item2.Item2.AsByteArray);
+
+                                            if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeEquals)
+                                            {
+                                                bConditionSatisfied = First == Second;
+                                            }
+                                            else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeNotEquals)
+                                            {
+                                                bConditionSatisfied = First != Second;
+                                            }
+                                            else
+                                            {
+                                                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->PutOrUpdateItem: Invalid condition expression.");
+                                                return false;
+                                            }
+                                            break;
+                                        default:
+                                            First = (string)ReturnedPreOperationObject[BuiltCondition.Item1];
+                                            Second = BuiltCondition.Item2.Item2.AsString;
+
+                                            if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeEquals)
+                                            {
+                                                bConditionSatisfied = First == Second;
+                                            }
+                                            else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeNotEquals)
+                                            {
+                                                bConditionSatisfied = First != Second;
+                                            }
+                                            else
+                                            {
+                                                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->PutOrUpdateItem: Invalid condition expression.");
+                                                return false;
+                                            }
+                                            break;
                                     }
                                 }
-                            }
-                            else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeExists)
-                            {
-                                if (ReturnedPreOperationObject != null)
+
+                                if (!bConditionSatisfied)
                                 {
-                                    if (BuiltCondition.Item1 == _KeyName || ReturnedPreOperationObject.ContainsKey(BuiltCondition.Item1))
-                                    {
-                                        bConditionSatisfied = true;
-                                    }
+                                    return false;
                                 }
                             }
-
-                            if (!bConditionSatisfied)
+                            else
                             {
-                                return false;
+                                if (BuiltCondition.Item1 == null)
+                                {
+                                    _ErrorMessageAction?.Invoke("BDatabaseServiceGC->PutOrUpdateItem: Invalid condition expression.");
+                                    return false;
+                                }
+
+                                bool bConditionSatisfied = false;
+
+                                if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeNotExist)
+                                {
+                                    bConditionSatisfied = true;
+
+                                    if (ReturnedPreOperationObject != null)
+                                    {
+                                        if (BuiltCondition.Item1 == _KeyName || ReturnedPreOperationObject.ContainsKey(BuiltCondition.Item1))
+                                        {
+                                            bConditionSatisfied = false;
+                                        }
+                                    }
+                                }
+                                else if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.AttributeExists)
+                                {
+                                    if (ReturnedPreOperationObject != null)
+                                    {
+                                        if (BuiltCondition.Item1 == _KeyName || ReturnedPreOperationObject.ContainsKey(BuiltCondition.Item1))
+                                        {
+                                            bConditionSatisfied = true;
+                                        }
+                                    }
+                                }
+
+                                if (!bConditionSatisfied)
+                                {
+                                    return false;
+                                }
                             }
                         }
-                    }
 
-                    if (_PutOrUpdateItemType == EBPutOrUpdateItemType.UpdateItem)
-                    {
-                        if (ReturnedPreOperationObject != null)
+                        if (_PutOrUpdateItemType == EBPutOrUpdateItemType.UpdateItem)
                         {
-                            var CopyObject = new JObject(ReturnedPreOperationObject);
-                            CopyObject.Merge(NewItem, new JsonMergeSettings
+                            if (ReturnedPreOperationObject != null)
                             {
-                                MergeArrayHandling = MergeArrayHandling.Replace
-                            });
-                            NewItem = CopyObject;
-                        }
-                    }
-
-                    if (_ReturnItemBehaviour == EBReturnItemBehaviour.ReturnAllOld)
-                    {
-                        if (ReturnedPreOperationObject == null)
-                        {
-                            if (!GetItemInTransaction(Transaction, Factory, _KeyName, _KeyValue, out _ReturnItem, _ErrorMessageAction))
-                            {
-                                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->PutOrUpdateItem: GetItemInTransaction failed.");
-                                return false;
-                            }
-                            if (_ReturnItem == null)
-                            {
-                                _ReturnItem = new JObject();
+                                var CopyObject = new JObject(ReturnedPreOperationObject);
+                                CopyObject.Merge(NewItem, new JsonMergeSettings
+                                {
+                                    MergeArrayHandling = MergeArrayHandling.Replace
+                                });
+                                NewItem = CopyObject;
                             }
                         }
-                        else
+
+                        if (_ReturnItemBehaviour == EBReturnItemBehaviour.ReturnAllOld)
                         {
-                            _ReturnItem = ReturnedPreOperationObject;
+                            if (ReturnedPreOperationObject == null)
+                            {
+                                if (!GetItemInTransaction(Transaction, Factory, _KeyName, _KeyValue, out _ReturnItem, _ErrorMessageAction))
+                                {
+                                    _ErrorMessageAction?.Invoke("BDatabaseServiceGC->PutOrUpdateItem: GetItemInTransaction failed.");
+                                    return false;
+                                }
+                                if (_ReturnItem == null)
+                                {
+                                    _ReturnItem = new JObject();
+                                }
+                            }
+                            else
+                            {
+                                _ReturnItem = ReturnedPreOperationObject;
+                            }
+                        }
+
+                        var ItemAsEntity = FromJsonToEntity(Factory, _KeyName, _KeyValue, NewItem);
+
+                        try
+                        {
+                            Transaction.Upsert(ItemAsEntity);
+                        }
+                        catch (Exception e)
+                        {
+                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->PutOrUpdateItem->Transaction.Upsert: Exception: " + e.Message + ", Trace: " + e.StackTrace);
+                            return false;
+                        }
+
+                        try
+                        {
+                            Transaction.Commit();
+                        }
+                        catch (Exception e)
+                        {
+                            if (CheckForRetriability(e)) continue;
+                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->PutOrUpdateItem->Transaction.Commit: Table: " + _Table + ", Key: " + _KeyValue.ToString() + ", Exception: " + e.Message + ", Trace: " + e.StackTrace);
+                            return false;
+                        }
+
+                        if (_ReturnItemBehaviour == EBReturnItemBehaviour.ReturnAllNew)
+                        {
+                            GetItem(_Table, _KeyName, _KeyValue, null, out _ReturnItem, _ErrorMessageAction);
                         }
                     }
-
-                    var ItemAsEntity = FromJsonToEntity(Factory, _KeyName, _KeyValue, NewItem);
-
-                    try
-                    {
-                        Transaction.Upsert(ItemAsEntity);
-                    }
-                    catch (Exception e)
-                    {
-                        _ErrorMessageAction?.Invoke("BDatabaseServiceGC->PutOrUpdateItem->Transaction.Upsert: Exception: " + e.Message + ", Trace: " + e.StackTrace);
-                        return false;
-                    }
-
-                    try
-                    {
-                        Transaction.Commit();
-                    }
-                    catch (Exception e)
-                    {
-                        _ErrorMessageAction?.Invoke("BDatabaseServiceGC->PutOrUpdateItem->Transaction.Commit: Table: " + _Table + ", Key: " + _KeyValue.ToString() + ", Exception: " + e.Message + ", Trace: " + e.StackTrace);
-                        return false;
-                    }
-
-                    if (_ReturnItemBehaviour == EBReturnItemBehaviour.ReturnAllNew)
-                    {
-                        GetItem(_Table, _KeyName, _KeyValue, null, out _ReturnItem, _ErrorMessageAction);
-                    }
+                    return true;
                 }
-                return true;
+            }
+            if (RetryCount > MAX_RETRY_NUMBER)
+            {
+                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->DeleteItem: Too much contention on these datastore entities; tried 5 times and exhausted. Key: " + _KeyValue.AsString);
             }
             return false;
         }
@@ -721,132 +731,141 @@ namespace BCloudServiceUtilities.DatabaseServices
                 }
             }
 
-            if (LoadStoreAndGetKindKeyFactory(_Table, out KeyFactory Factory, _ErrorMessageAction))
+            int RetryCount = 0;
+            while (++RetryCount <= MAX_RETRY_NUMBER)
             {
-                JObject ReturnedPreOperationObject = null;
-                using (DatastoreTransaction Transaction = DSDB.BeginTransaction())
+                if (LoadStoreAndGetKindKeyFactory(_Table, out KeyFactory Factory, _ErrorMessageAction))
                 {
-                    if (!GetItemInTransaction(Transaction, Factory, _KeyName, _KeyValue, out ReturnedPreOperationObject, _ErrorMessageAction))
+                    JObject ReturnedPreOperationObject = null;
+                    using (DatastoreTransaction Transaction = DSDB.BeginTransaction())
                     {
-                        _ErrorMessageAction?.Invoke("BDatabaseServiceGC->AddElementsToArrayItem: GetItemInTransaction failed.");
-                        return false;
-                    }
-                    
-                    JArray ItemAsArray = null;
-
-                    if (ReturnedPreOperationObject != null && ReturnedPreOperationObject.ContainsKey(_ElementName))
-                    {
-                        if (ReturnedPreOperationObject[_ElementName].Type != JTokenType.Array)
+                        if (!GetItemInTransaction(Transaction, Factory, _KeyName, _KeyValue, out ReturnedPreOperationObject, _ErrorMessageAction))
                         {
-                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->AddElementsToArrayItem: Item is not an array.");
+                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->AddElementsToArrayItem: GetItemInTransaction failed.");
                             return false;
                         }
-                        ItemAsArray = (JArray)ReturnedPreOperationObject[_ElementName];
-                    }
 
-                    if (_ConditionExpression != null)
-                    {
-                        if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.ArrayElementNotExist)
+                        JArray ItemAsArray = null;
+
+                        if (ReturnedPreOperationObject != null && ReturnedPreOperationObject.ContainsKey(_ElementName))
                         {
-                            var BuiltCondition = _ConditionExpression.GetBuiltCondition();
-
-                            if (BuiltCondition.Item2 == null || BuiltCondition.Item2.Item2 == null)
+                            if (ReturnedPreOperationObject[_ElementName].Type != JTokenType.Array)
                             {
-                                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->AddElementsToArrayItem: Invalid condition expression.");
+                                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->AddElementsToArrayItem: Item is not an array.");
                                 return false;
                             }
+                            ItemAsArray = (JArray)ReturnedPreOperationObject[_ElementName];
+                        }
 
-                            if (ItemAsArray != null)
+                        if (_ConditionExpression != null)
+                        {
+                            if (_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.ArrayElementNotExist)
                             {
-                                foreach (var CurTok in ItemAsArray)
+                                var BuiltCondition = _ConditionExpression.GetBuiltCondition();
+
+                                if (BuiltCondition.Item2 == null || BuiltCondition.Item2.Item2 == null)
                                 {
-                                    if (CompareJTokenWithBPrimitive(CurTok, BuiltCondition.Item2.Item2))
+                                    _ErrorMessageAction?.Invoke("BDatabaseServiceGC->AddElementsToArrayItem: Invalid condition expression.");
+                                    return false;
+                                }
+
+                                if (ItemAsArray != null)
+                                {
+                                    foreach (var CurTok in ItemAsArray)
                                     {
-                                        return false;
+                                        if (CompareJTokenWithBPrimitive(CurTok, BuiltCondition.Item2.Item2))
+                                        {
+                                            return false;
+                                        }
                                     }
                                 }
                             }
+                            else
+                            {
+                                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->AddElementsToArrayItem: Condition is not valid for this operation.");
+                                return false;
+                            }
+                        }
+
+                        if (_ReturnItemBehaviour == EBReturnItemBehaviour.ReturnAllOld)
+                        {
+                            if (ReturnedPreOperationObject != null)
+                            {
+                                _ReturnItem = new JObject(ReturnedPreOperationObject);
+                            }
+                            else
+                            {
+                                _ReturnItem = new JObject();
+                            }
+                        }
+
+                        if (ItemAsArray == null)
+                        {
+                            ItemAsArray = new JArray();
+                            foreach (var _ElementValueEntry in _ElementValueEntries)
+                            {
+                                ItemAsArray.Add(FromBPrimitiveTypeToJToken(_ElementValueEntry));
+                            }
                         }
                         else
                         {
-                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->AddElementsToArrayItem: Condition is not valid for this operation.");
+                            foreach (var _ElementValueEntry in _ElementValueEntries)
+                            {
+                                ItemAsArray.Add(FromBPrimitiveTypeToJToken(_ElementValueEntry));
+                            }
+                        }
+
+                        if (ReturnedPreOperationObject == null)
+                        {
+                            ReturnedPreOperationObject = new JObject()
+                            {
+                                [_ElementName] = ItemAsArray
+                            };
+                        }
+                        else
+                        {
+                            ReturnedPreOperationObject[_ElementName] = ItemAsArray;
+                        }
+
+                        //Key will be recreated by FromJsonToEntity
+                        if (ReturnedPreOperationObject.ContainsKey(_KeyName))
+                        {
+                            ReturnedPreOperationObject.Remove(_KeyName);
+                        }
+
+                        var ItemAsEntity = FromJsonToEntity(Factory, _KeyName, _KeyValue, ReturnedPreOperationObject);
+                        try
+                        {
+                            Transaction.Upsert(ItemAsEntity);
+                        }
+                        catch (Exception e)
+                        {
+                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->AddElementsToArrayItem: Exception: " + e.Message + ", Trace: " + e.StackTrace);
                             return false;
                         }
-                    }
 
-                    if (_ReturnItemBehaviour == EBReturnItemBehaviour.ReturnAllOld)
-                    {
-                        if (ReturnedPreOperationObject != null)
+                        try
                         {
-                            _ReturnItem = new JObject(ReturnedPreOperationObject);
+                            Transaction.Commit();
                         }
-                        else
+                        catch (Exception e)
                         {
-                            _ReturnItem = new JObject();
+                            if (CheckForRetriability(e)) continue;
+                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->AddElementsToArrayItem: Exception: " + e.Message + ", Trace: " + e.StackTrace);
+                            return false;
                         }
-                    }
 
-                    if (ItemAsArray == null)
-                    {
-                        ItemAsArray = new JArray();
-                        foreach (var _ElementValueEntry in _ElementValueEntries)
+                        if (_ReturnItemBehaviour == EBReturnItemBehaviour.ReturnAllNew)
                         {
-                            ItemAsArray.Add(FromBPrimitiveTypeToJToken(_ElementValueEntry));
+                            GetItem(_Table, _KeyName, _KeyValue, null, out _ReturnItem, _ErrorMessageAction);
                         }
                     }
-                    else
-                    {
-                        foreach (var _ElementValueEntry in _ElementValueEntries)
-                        {
-                            ItemAsArray.Add(FromBPrimitiveTypeToJToken(_ElementValueEntry));
-                        }
-                    }
-
-                    if (ReturnedPreOperationObject == null)
-                    {
-                        ReturnedPreOperationObject = new JObject()
-                        {
-                            [_ElementName] = ItemAsArray
-                        };
-                    }
-                    else
-                    {
-                        ReturnedPreOperationObject[_ElementName] = ItemAsArray;
-                    }
-
-                    //Key will be recreated by FromJsonToEntity
-                    if (ReturnedPreOperationObject.ContainsKey(_KeyName))
-                    {
-                        ReturnedPreOperationObject.Remove(_KeyName);
-                    }
-
-                    var ItemAsEntity = FromJsonToEntity(Factory, _KeyName, _KeyValue, ReturnedPreOperationObject);
-                    try
-                    {
-                        Transaction.Upsert(ItemAsEntity);
-                    }
-                    catch (Exception e)
-                    {
-                        _ErrorMessageAction?.Invoke("BDatabaseServiceGC->AddElementsToArrayItem: Exception: " + e.Message + ", Trace: " + e.StackTrace);
-                        return false;
-                    }
-
-                    try
-                    {
-                        Transaction.Commit();
-                    }
-                    catch (Exception e)
-                    {
-                        _ErrorMessageAction?.Invoke("BDatabaseServiceGC->AddElementsToArrayItem: Exception: " + e.Message + ", Trace: " + e.StackTrace);
-                        return false;
-                    }
-
-                    if (_ReturnItemBehaviour == EBReturnItemBehaviour.ReturnAllNew)
-                    {
-                        GetItem(_Table, _KeyName, _KeyValue, null, out _ReturnItem, _ErrorMessageAction);
-                    }
+                    return true;
                 }
-                return true;
+            }
+            if (RetryCount > MAX_RETRY_NUMBER)
+            {
+                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->DeleteItem: Too much contention on these datastore entities; tried 5 times and exhausted. Key: " + _KeyValue.AsString);
             }
             return false;
         }
@@ -887,101 +906,110 @@ namespace BCloudServiceUtilities.DatabaseServices
                 }
             }
 
-            if (LoadStoreAndGetKindKeyFactory(_Table, out KeyFactory Factory, _ErrorMessageAction))
+            int RetryCount = 0;
+            while (++RetryCount <= MAX_RETRY_NUMBER)
             {
-                JObject ReturnedPreOperationObject = null;
-                using (DatastoreTransaction Transaction = DSDB.BeginTransaction())
+                if (LoadStoreAndGetKindKeyFactory(_Table, out KeyFactory Factory, _ErrorMessageAction))
                 {
-                    if (!GetItemInTransaction(Transaction, Factory, _KeyName, _KeyValue, out ReturnedPreOperationObject, _ErrorMessageAction))
+                    JObject ReturnedPreOperationObject = null;
+                    using (DatastoreTransaction Transaction = DSDB.BeginTransaction())
                     {
-                        _ErrorMessageAction?.Invoke("BDatabaseServiceGC->RemoveElementsFromArrayItem: GetItemInTransaction failed.");
-                        return false;
-                    }
-
-                    if (ReturnedPreOperationObject == null)
-                    {
-                        //Does not exist
-                        return true;
-                    }
-
-                    JArray ItemAsArray = null;
-
-                    if (ReturnedPreOperationObject.ContainsKey(_ElementName))
-                    {
-                        if (ReturnedPreOperationObject[_ElementName].Type != JTokenType.Array)
+                        if (!GetItemInTransaction(Transaction, Factory, _KeyName, _KeyValue, out ReturnedPreOperationObject, _ErrorMessageAction))
                         {
-                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->RemoveElementsFromArrayItem: Item is not an array.");
+                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->RemoveElementsFromArrayItem: GetItemInTransaction failed.");
                             return false;
                         }
-                        ItemAsArray = (JArray)ReturnedPreOperationObject[_ElementName];
-                        if (ItemAsArray == null)
+
+                        if (ReturnedPreOperationObject == null)
                         {
-                            //Does not exist as an array
+                            //Does not exist
                             return true;
                         }
-                    }
 
-                    if (_ReturnItemBehaviour == EBReturnItemBehaviour.ReturnAllOld)
-                    {
-                        if (ReturnedPreOperationObject != null)
-                        {
-                            _ReturnItem = new JObject(ReturnedPreOperationObject);
-                        }
-                    }
+                        JArray ItemAsArray = null;
 
-                    var NewArray = new JArray();
-                    foreach (var CurToken in ItemAsArray)
-                    {
-                        bool bFound = false;
-                        foreach (var _ElementValueEntry in _ElementValueEntries)
+                        if (ReturnedPreOperationObject.ContainsKey(_ElementName))
                         {
-                            if (CompareJTokenWithBPrimitive(CurToken, _ElementValueEntry))
+                            if (ReturnedPreOperationObject[_ElementName].Type != JTokenType.Array)
                             {
-                                bFound = true;
-                                break;
+                                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->RemoveElementsFromArrayItem: Item is not an array.");
+                                return false;
+                            }
+                            ItemAsArray = (JArray)ReturnedPreOperationObject[_ElementName];
+                            if (ItemAsArray == null)
+                            {
+                                //Does not exist as an array
+                                return true;
                             }
                         }
-                        if (!bFound)
+
+                        if (_ReturnItemBehaviour == EBReturnItemBehaviour.ReturnAllOld)
                         {
-                            NewArray.Add(CurToken);
+                            if (ReturnedPreOperationObject != null)
+                            {
+                                _ReturnItem = new JObject(ReturnedPreOperationObject);
+                            }
+                        }
+
+                        var NewArray = new JArray();
+                        foreach (var CurToken in ItemAsArray)
+                        {
+                            bool bFound = false;
+                            foreach (var _ElementValueEntry in _ElementValueEntries)
+                            {
+                                if (CompareJTokenWithBPrimitive(CurToken, _ElementValueEntry))
+                                {
+                                    bFound = true;
+                                    break;
+                                }
+                            }
+                            if (!bFound)
+                            {
+                                NewArray.Add(CurToken);
+                            }
+                        }
+                        ItemAsArray = NewArray;
+                        ReturnedPreOperationObject[_ElementName] = ItemAsArray;
+
+                        //Key will be recreated by FromJsonToEntity
+                        if (ReturnedPreOperationObject.ContainsKey(_KeyName))
+                        {
+                            ReturnedPreOperationObject.Remove(_KeyName);
+                        }
+
+                        var ItemAsEntity = FromJsonToEntity(Factory, _KeyName, _KeyValue, ReturnedPreOperationObject);
+                        try
+                        {
+                            Transaction.Upsert(ItemAsEntity);
+                        }
+                        catch (Exception e)
+                        {
+                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->RemoveElementsFromArrayItem: Exception: " + e.Message + ", Trace: " + e.StackTrace);
+                            return false;
+                        }
+
+                        try
+                        {
+                            Transaction.Commit();
+                        }
+                        catch (Exception e)
+                        {
+                            if (CheckForRetriability(e)) continue;
+                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->RemoveElementsFromArrayItem: Exception: " + e.Message + ", Trace: " + e.StackTrace);
+                            return false;
+                        }
+
+                        if (_ReturnItemBehaviour == EBReturnItemBehaviour.ReturnAllNew)
+                        {
+                            GetItem(_Table, _KeyName, _KeyValue, null, out _ReturnItem, _ErrorMessageAction);
                         }
                     }
-                    ItemAsArray = NewArray;
-                    ReturnedPreOperationObject[_ElementName] = ItemAsArray;
-
-                    //Key will be recreated by FromJsonToEntity
-                    if (ReturnedPreOperationObject.ContainsKey(_KeyName))
-                    {
-                        ReturnedPreOperationObject.Remove(_KeyName);
-                    }
-
-                    var ItemAsEntity = FromJsonToEntity(Factory, _KeyName, _KeyValue, ReturnedPreOperationObject);
-                    try
-                    {
-                        Transaction.Upsert(ItemAsEntity);
-                    }
-                    catch (Exception e)
-                    {
-                        _ErrorMessageAction?.Invoke("BDatabaseServiceGC->RemoveElementsFromArrayItem: Exception: " + e.Message + ", Trace: " + e.StackTrace);
-                        return false;
-                    }
-
-                    try
-                    {
-                        Transaction.Commit();
-                    }
-                    catch (Exception e)
-                    {
-                        _ErrorMessageAction?.Invoke("BDatabaseServiceGC->RemoveElementsFromArrayItem: Exception: " + e.Message + ", Trace: " + e.StackTrace);
-                        return false;
-                    }
-
-                    if (_ReturnItemBehaviour == EBReturnItemBehaviour.ReturnAllNew)
-                    {
-                        GetItem(_Table, _KeyName, _KeyValue, null, out _ReturnItem, _ErrorMessageAction);
-                    }
+                    return true;
                 }
-                return true;
+            }
+            if (RetryCount > MAX_RETRY_NUMBER)
+            {
+                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->DeleteItem: Too much contention on these datastore entities; tried 5 times and exhausted. Key: " + _KeyValue.AsString);
             }
             return false;
         }
@@ -1007,71 +1035,80 @@ namespace BCloudServiceUtilities.DatabaseServices
         {
             _NewValue = _IncrementOrDecrementBy;
 
-            if (LoadStoreAndGetKindKeyFactory(_Table, out KeyFactory Factory, _ErrorMessageAction))
+            int RetryCount = 0;
+            while (++RetryCount <= MAX_RETRY_NUMBER)
             {
-                using (DatastoreTransaction Transaction = DSDB.BeginTransaction())
+                if (LoadStoreAndGetKindKeyFactory(_Table, out KeyFactory Factory, _ErrorMessageAction))
                 {
-                    if (!GetItemInTransaction(Transaction, Factory, _KeyName, _KeyValue, out JObject ReturnItem, _ErrorMessageAction))
+                    using (DatastoreTransaction Transaction = DSDB.BeginTransaction())
                     {
-                        _ErrorMessageAction?.Invoke("BDatabaseServiceGC->IncrementOrDecrementItemValue: GetItemInTransaction failed.");
-                        return false;
-                    }
+                        if (!GetItemInTransaction(Transaction, Factory, _KeyName, _KeyValue, out JObject ReturnItem, _ErrorMessageAction))
+                        {
+                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->IncrementOrDecrementItemValue: GetItemInTransaction failed.");
+                            return false;
+                        }
 
-                    if (ReturnItem != null
-                        && ReturnItem.ContainsKey(_ValueAttribute))
-                    {
-                        _NewValue = (double)ReturnItem[_ValueAttribute];
-                        if (_bDecrement)
+                        if (ReturnItem != null
+                            && ReturnItem.ContainsKey(_ValueAttribute))
                         {
-                            _NewValue -= _IncrementOrDecrementBy;
-                        }
-                        else
-                        {
-                            _NewValue += _IncrementOrDecrementBy;
-                        }
-                        ReturnItem[_ValueAttribute] = _NewValue;
-                    }
-                    else
-                    {
-                        if (ReturnItem == null)
-                        {
-                            ReturnItem = new JObject()
+                            _NewValue = (double)ReturnItem[_ValueAttribute];
+                            if (_bDecrement)
                             {
-                                [_ValueAttribute] = _IncrementOrDecrementBy
-                            };
+                                _NewValue -= _IncrementOrDecrementBy;
+                            }
+                            else
+                            {
+                                _NewValue += _IncrementOrDecrementBy;
+                            }
+                            ReturnItem[_ValueAttribute] = _NewValue;
                         }
                         else
                         {
-                            ReturnItem[_ValueAttribute] = _IncrementOrDecrementBy;
+                            if (ReturnItem == null)
+                            {
+                                ReturnItem = new JObject()
+                                {
+                                    [_ValueAttribute] = _IncrementOrDecrementBy
+                                };
+                            }
+                            else
+                            {
+                                ReturnItem[_ValueAttribute] = _IncrementOrDecrementBy;
+                            }
+                        }
+
+                        if (ReturnItem.ContainsKey(_KeyName))
+                        {
+                            ReturnItem.Remove(_KeyName);
+                        }
+
+                        try
+                        {
+                            Transaction.Upsert(FromJsonToEntity(Factory, _KeyName, _KeyValue, ReturnItem));
+                        }
+                        catch (Exception e)
+                        {
+                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->IncrementOrDecrementItemValue: Exception: " + e.Message + ", Trace: " + e.StackTrace);
+                            return false;
+                        }
+
+                        try
+                        {
+                            Transaction.Commit();
+                        }
+                        catch (Exception e)
+                        {
+                            if (CheckForRetriability(e)) continue;
+                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->IncrementOrDecrementItemValue: Exception: " + e.Message + ", Trace: " + e.StackTrace);
+                            return false;
                         }
                     }
-
-                    if (ReturnItem.ContainsKey(_KeyName))
-                    {
-                        ReturnItem.Remove(_KeyName);
-                    }
-
-                    try
-                    {
-                        Transaction.Upsert(FromJsonToEntity(Factory, _KeyName, _KeyValue, ReturnItem));
-                    }
-                    catch (Exception e)
-                    {
-                        _ErrorMessageAction?.Invoke("BDatabaseServiceGC->IncrementOrDecrementItemValue: Exception: " + e.Message + ", Trace: " + e.StackTrace);
-                        return false;
-                    }
-
-                    try
-                    {
-                        Transaction.Commit();
-                    }
-                    catch (Exception e)
-                    {
-                        _ErrorMessageAction?.Invoke("BDatabaseServiceGC->IncrementOrDecrementItemValue: Exception: " + e.Message + ", Trace: " + e.StackTrace);
-                        return false;
-                    }
+                    return true;
                 }
-                return true;
+            }
+            if (RetryCount > MAX_RETRY_NUMBER)
+            {
+                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->DeleteItem: Too much contention on these datastore entities; tried 5 times and exhausted. Key: " + _KeyValue.AsString);
             }
             return false;
         }
@@ -1096,40 +1133,49 @@ namespace BCloudServiceUtilities.DatabaseServices
         {
             _ReturnItem = null;
 
-            if (LoadStoreAndGetKindKeyFactory(_Table, out KeyFactory Factory, _ErrorMessageAction))
+            int RetryCount = 0;
+            while (++RetryCount <= MAX_RETRY_NUMBER)
             {
-                using (DatastoreTransaction Transaction = DSDB.BeginTransaction())
+                if (LoadStoreAndGetKindKeyFactory(_Table, out KeyFactory Factory, _ErrorMessageAction))
                 {
-                    if (_ReturnItemBehaviour == EBReturnItemBehaviour.ReturnAllOld)
+                    using (DatastoreTransaction Transaction = DSDB.BeginTransaction())
                     {
-                        if (!GetItemInTransaction(Transaction, Factory, _KeyName, _KeyValue, out _ReturnItem, _ErrorMessageAction))
+                        if (_ReturnItemBehaviour == EBReturnItemBehaviour.ReturnAllOld)
                         {
-                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->DeleteItem: GetItemInTransaction failed.");
+                            if (!GetItemInTransaction(Transaction, Factory, _KeyName, _KeyValue, out _ReturnItem, _ErrorMessageAction))
+                            {
+                                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->DeleteItem: GetItemInTransaction failed.");
+                                return false;
+                            }
+                        }
+
+                        try
+                        {
+                            Transaction.Delete(Factory.CreateKey(GetFinalKeyFromNameValue(_KeyName, _KeyValue)));
+                        }
+                        catch (Exception e)
+                        {
+                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->DeleteItem: Exception: " + e.Message + ", Trace: " + e.StackTrace);
+                            return false;
+                        }
+
+                        try
+                        {
+                            Transaction.Commit();
+                        }
+                        catch (Exception e)
+                        {
+                            if (CheckForRetriability(e)) continue;
+                            _ErrorMessageAction?.Invoke("BDatabaseServiceGC->DeleteItem: Exception: " + e.Message + ", Trace: " + e.StackTrace);
                             return false;
                         }
                     }
-
-                    try
-                    {
-                        Transaction.Delete(Factory.CreateKey(GetFinalKeyFromNameValue(_KeyName, _KeyValue)));
-                    }
-                    catch (Exception e)
-                    {
-                        _ErrorMessageAction?.Invoke("BDatabaseServiceGC->DeleteItem: Exception: " + e.Message + ", Trace: " + e.StackTrace);
-                        return false;
-                    }
-
-                    try
-                    {
-                        Transaction.Commit();
-                    }
-                    catch (Exception e)
-                    {
-                        _ErrorMessageAction?.Invoke("BDatabaseServiceGC->DeleteItem: Exception: " + e.Message + ", Trace: " + e.StackTrace);
-                        return false;
-                    }
+                    return true;
                 }
-                return true;
+            }
+            if (RetryCount > MAX_RETRY_NUMBER)
+            {
+                _ErrorMessageAction?.Invoke("BDatabaseServiceGC->DeleteItem: Too much contention on these datastore entities; tried 5 times and exhausted. Key: " + _KeyValue.AsString);
             }
             return false;
         }
@@ -1321,6 +1367,22 @@ namespace BCloudServiceUtilities.DatabaseServices
         public BDatabaseAttributeCondition BuildArrayElementNotExistCondition(BPrimitiveType ArrayElement)
         {
             return new BArrayElementNotExistConditionDatastore(ArrayElement);
+        }
+
+        private const int MAX_RETRY_NUMBER = 5;
+        private bool CheckForRetriability(Exception e)
+        {
+            if (e is Grpc.Core.RpcException)
+            {
+                var AsRpcException = e as Grpc.Core.RpcException;
+                if (AsRpcException.StatusCode == Grpc.Core.StatusCode.Aborted 
+                    || AsRpcException.StatusCode == Grpc.Core.StatusCode.Unavailable)
+                {
+                    Thread.Sleep(2000);
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
