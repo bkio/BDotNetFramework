@@ -465,6 +465,7 @@ namespace BCloudServiceUtilities.MemoryServices
                 }
             }
 
+            bool bNonNullValueFound = false;
             if (ScriptEvaluationResult != null && 
                 ScriptEvaluationResult.Length == _Keys.Count)
             {
@@ -472,9 +473,10 @@ namespace BCloudServiceUtilities.MemoryServices
                 foreach (var _Key in _Keys)
                 {
                     var AsPrimitive = ConvertRedisValueToPrimitiveType(ScriptEvaluationResult[j++]);
+                    Results[_Key] = AsPrimitive;
                     if (AsPrimitive != null)
                     {
-                        Results[_Key] = AsPrimitive;
+                        bNonNullValueFound = true;
                     }
                 }
             }
@@ -483,7 +485,7 @@ namespace BCloudServiceUtilities.MemoryServices
                 _ErrorMessageAction?.Invoke("BMemoryServiceRedis->GetKeysValues: redis.call returned null or result length is not equal to keys length.");
                 return null;
             }
-            return Results;
+            return bNonNullValueFound ? Results : null;
         }
 
         /// <summary>
