@@ -1378,7 +1378,7 @@ namespace BCloudServiceUtilities.DatabaseServices
                 if (AsRpcException.StatusCode == Grpc.Core.StatusCode.Aborted 
                     || AsRpcException.StatusCode == Grpc.Core.StatusCode.Unavailable)
                 {
-                    Thread.Sleep(2000);
+                    Thread.Sleep(5000);
                     return true;
                 }
             }
