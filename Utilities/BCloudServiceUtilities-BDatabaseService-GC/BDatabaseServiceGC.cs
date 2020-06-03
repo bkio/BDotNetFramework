@@ -333,7 +333,7 @@ namespace BCloudServiceUtilities.DatabaseServices
                 {
                     _Result = FromEntityToJson(ReturnedEntity);
                     AddKeyToJson(_Result, _KeyName, _KeyValue);
-                    BUtility.SortJObject(_Result, true);
+                    BUtility.ConvertRoundFloatToIntAllInJObject(_Result);
                 }
                 return true;
             }
@@ -364,7 +364,7 @@ namespace BCloudServiceUtilities.DatabaseServices
             {
                 _Result = FromEntityToJson(ReturnedEntity);
                 AddKeyToJson(_Result, _KeyName, _KeyValue);
-                BUtility.SortJObject(_Result, true);
+                BUtility.ConvertRoundFloatToIntAllInJObject(_Result);
             }
             return true;
         }
@@ -1227,7 +1227,7 @@ namespace BCloudServiceUtilities.DatabaseServices
                             }
 
                             AddKeyToJson(AsJson, KeyName, new BPrimitiveType(KeyValue));
-                            BUtility.SortJObject(AsJson, true);
+                            BUtility.ConvertRoundFloatToIntAllInJObject(AsJson);
 
                             _ReturnItem.Add(AsJson);
                         }

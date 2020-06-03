@@ -190,7 +190,7 @@ namespace BCloudServiceUtilities.DatabaseServices
                             //Convert to string and parse as JObject
                             _Result = JObject.Parse(ReturnedDocument.ToJson());
                             AddKeyToJson(_Result, _KeyName, _KeyValue);
-                            BUtility.SortJObject(_Result, true);
+                            BUtility.ConvertRoundFloatToIntAllInJObject(_Result);
                         }
                     }
                 }
@@ -328,7 +328,7 @@ namespace BCloudServiceUtilities.DatabaseServices
                             {
                                 //Convert to string and parse as JObject
                                 _ReturnItem = JObject.Parse(ReturnedDocument.ToJson());
-                                BUtility.SortJObject(_ReturnItem, true);
+                                BUtility.ConvertRoundFloatToIntAllInJObject(_ReturnItem);
                                 return true;
                             }
                             else
@@ -477,7 +477,7 @@ namespace BCloudServiceUtilities.DatabaseServices
                             {
                                 //Convert to string and parse as JObject
                                 _ReturnItem = JObject.Parse(ReturnedDocument.ToJson());
-                                BUtility.SortJObject(_ReturnItem, true);
+                                BUtility.ConvertRoundFloatToIntAllInJObject(_ReturnItem);
                                 return true;
                             }
                             else
@@ -685,7 +685,7 @@ namespace BCloudServiceUtilities.DatabaseServices
                         if (Response != null && Response.Attributes != null)
                         {
                             _ReturnItem = JObject.Parse(Document.FromAttributeMap(Response.Attributes).ToJson());
-                            BUtility.SortJObject(_ReturnItem, true);
+                            BUtility.ConvertRoundFloatToIntAllInJObject(_ReturnItem);
                         }
                         else
                         {
@@ -848,7 +848,7 @@ namespace BCloudServiceUtilities.DatabaseServices
                         if (Response != null && Response.Attributes != null)
                         {
                             _ReturnItem = JObject.Parse(Document.FromAttributeMap(Response.Attributes).ToJson());
-                            BUtility.SortJObject(_ReturnItem, true);
+                            BUtility.ConvertRoundFloatToIntAllInJObject(_ReturnItem);
                         }
                         else
                         {
@@ -1033,7 +1033,7 @@ namespace BCloudServiceUtilities.DatabaseServices
                         {
                             //Convert to string and parse as JObject
                             _ReturnItem = JObject.Parse(ReturnedDocument.ToJson());
-                            BUtility.SortJObject(_ReturnItem, true);
+                            BUtility.ConvertRoundFloatToIntAllInJObject(_ReturnItem);
                             return true;
                         }
                         else
@@ -1103,7 +1103,7 @@ namespace BCloudServiceUtilities.DatabaseServices
                                 foreach (var Document in DocumentList)
                                 {
                                     var CreatedJson = JObject.Parse(Document.ToJson());
-                                    BUtility.SortJObject(CreatedJson, true);
+                                    BUtility.ConvertRoundFloatToIntAllInJObject(CreatedJson);
                                     TempResults.Add(CreatedJson);
                                 }
                             }

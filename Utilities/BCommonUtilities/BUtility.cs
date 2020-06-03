@@ -377,6 +377,56 @@ namespace BCommonUtilities
             return true;
         }
 
+        public static void ConvertRoundFloatToIntAllInJObject(JObject _Object)
+        {
+            if (_Object == null) return;
+
+            var Props = _Object.Properties().ToList();
+            for (var i = 0; i < Props.Count; i++)
+            {
+                var Prop = Props[i];
+
+                if (Prop.Value is JObject)
+                {
+                    ConvertRoundFloatToIntAllInJObject((JObject)Prop.Value);
+                }
+                else if (Prop.Value is JArray)
+                {
+                    ConvertRoundFloatToIntAllInJArray((JArray)Prop.Value);
+                }
+                else if (Prop.Value.Type == JTokenType.Float)
+                {
+                    var Value = (double)Prop;
+                    if (Value == Math.Floor(Value))
+                    {
+                        Props[i].Value = (long)Value;
+                    }
+                }
+            }
+        }
+        public static void ConvertRoundFloatToIntAllInJArray(JArray _Array)
+        {
+            if (_Array == null) return;
+
+            if (_Array.Count > 0)
+            {
+                var Props = _Array.ToList();
+                for (var i = 0; i < Props.Count; i++)
+                {
+                    var Prop = Props[i];
+
+                    if (Prop.Type == JTokenType.Float)
+                    {
+                        var Value = (double)Prop;
+                        if (Value == Math.Floor(Value))
+                        {
+                            Props[i] = (long)Value;
+                        }
+                    }
+                }
+            }
+        }
+
         public static void SortJObject(JObject _Object, bool bConvertRoundFloatToInt = false)
         {
             if (_Object == null) return;
