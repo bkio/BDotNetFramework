@@ -415,7 +415,15 @@ namespace BCommonUtilities
                 {
                     var Prop = Props[i];
 
-                    if (Prop.Type == JTokenType.Float)
+                    if (Prop is JObject)
+                    {
+                        ConvertRoundFloatToIntAllInJObject((JObject)Prop);
+                    }
+                    else if (Prop is JArray)
+                    {
+                        ConvertRoundFloatToIntAllInJArray((JArray)Prop);
+                    }
+                    else if (Prop.Type == JTokenType.Float)
                     {
                         var Value = (double)Prop;
                         if (Value == Math.Floor(Value))
@@ -487,6 +495,14 @@ namespace BCommonUtilities
                 foreach (var Prop in Props.OrderBy(P => P.ToString()))
                 {
                     _Array.Add(Prop);
+                    if (Prop is JObject)
+                    {
+                        SortJObject((JObject)Prop, bConvertRoundFloatToInt);
+                    }
+                    else if (Prop is JArray)
+                    {
+                        SortJArray((JArray)Prop, bConvertRoundFloatToInt);
+                    }
                 }
             }
         }
