@@ -177,8 +177,9 @@ namespace BWebServiceUtilities
 
                             if (Context.Request.HttpMethod == "OPTIONS")
                             {
-                                Context.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, api-key, token, auto-close-response");
-                                Context.Response.AddHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+                                Context.Response.AddHeader("Access-Control-Allow-Headers", "*");
+                                Context.Response.AddHeader("Access-Control-Allow-Credentials", "true");
+                                Context.Response.AddHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH");
                                 Context.Response.AddHeader("Access-Control-Max-Age", "-1");
                                 Context.Response.StatusCode = BWebResponse.Status_OK_Code;
                             }
