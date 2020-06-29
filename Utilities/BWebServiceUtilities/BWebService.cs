@@ -173,14 +173,14 @@ namespace BWebServiceUtilities
                         if (Context == null) return;
                         try
                         {
-                            Context.Response.AddHeader("Access-Control-Allow-Origin", "*");
+                            Context.Response.AppendHeader("Access-Control-Allow-Origin", "*");
 
                             if (Context.Request.HttpMethod == "OPTIONS")
                             {
-                                Context.Response.AddHeader("Access-Control-Allow-Headers", "*");
-                                Context.Response.AddHeader("Access-Control-Allow-Credentials", "true");
-                                Context.Response.AddHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH");
-                                Context.Response.AddHeader("Access-Control-Max-Age", "-1");
+                                Context.Response.AppendHeader("Access-Control-Allow-Headers", "*");
+                                Context.Response.AppendHeader("Access-Control-Allow-Credentials", "true");
+                                Context.Response.AppendHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH");
+                                Context.Response.AppendHeader("Access-Control-Max-Age", "-1");
                                 Context.Response.StatusCode = BWebResponse.Status_OK_Code;
                             }
                             else
@@ -211,7 +211,10 @@ namespace BWebServiceUtilities
                                 {
                                     foreach (var Value in CurrentHeader.Value)
                                     {
-                                        Context.Response.AppendHeader(CurrentHeader.Key, Value);
+                                        if (CurrentHeader.Key.ToLower() != "access-control-allow-origin")
+                                        {
+                                            Context.Response.AppendHeader(CurrentHeader.Key, Value);
+                                        }
                                     }
                                 }
                                     
