@@ -64,6 +64,13 @@ namespace BWebServiceUtilities
             }
         }
 
+        public static readonly EBResponseContentType Error_InternalError_ContentType = EBResponseContentType.JSON;
+        public static string Error_InternalError_String(string _Message) { return "{\"result\":\"failure\",\"message\":\"Internal Server Error. " + _Message + "\"}"; }
+        public static readonly int Error_InternalError_Code = 500;
+        public static BWebServiceResponse InternalError(string _Message) { return new BWebServiceResponse(Error_InternalError_Code, new BStringOrStream(Error_InternalError_String(_Message)), Error_InternalError_ContentType); }
+
+        //
+
         public static readonly EBResponseContentType Error_NotImplemented_ContentType = EBResponseContentType.JSON;
         public static string Error_NotImplemented_String(string _Message) { return "{\"result\":\"failure\",\"message\":\"Not Implemented. " + _Message + "\"}"; }
         public static readonly int Error_NotImplemented_Code = 501;
@@ -71,10 +78,10 @@ namespace BWebServiceUtilities
 
         //
 
-        public static readonly EBResponseContentType Error_InternalError_ContentType = EBResponseContentType.JSON;
-        public static string Error_InternalError_String(string _Message) { return "{\"result\":\"failure\",\"message\":\"Internal Server Error. " + _Message + "\"}"; }
-        public static readonly int Error_InternalError_Code = 500;
-        public static BWebServiceResponse InternalError(string _Message) { return new BWebServiceResponse(Error_InternalError_Code, new BStringOrStream(Error_InternalError_String(_Message)), Error_InternalError_ContentType); }
+        public static readonly EBResponseContentType Error_ServiceUnavailable_ContentType = EBResponseContentType.JSON;
+        public static string Error_ServiceUnavailable_String(string _Message) { return "{\"result\":\"failure\",\"message\":\"Service unavailable. " + _Message + " Please retry later." + "\"}"; }
+        public static readonly int Error_ServiceUnavailable_Code = 503;
+        public static BWebServiceResponse ServiceUnavailable(string _Message) { return new BWebServiceResponse(Error_ServiceUnavailable_Code, new BStringOrStream(Error_ServiceUnavailable_String(_Message)), Error_ServiceUnavailable_ContentType); }
 
         //
 
