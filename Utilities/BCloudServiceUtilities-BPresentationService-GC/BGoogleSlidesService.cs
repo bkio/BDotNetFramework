@@ -21,6 +21,8 @@ namespace BCloudServiceUtilities
         /// </summary>
         private readonly bool bInitializationSucceed;
 
+        private readonly string ProgramUniqueID;
+
         private readonly string ProjectID;
 
         private readonly ServiceAccountCredential Credential;
@@ -30,14 +32,17 @@ namespace BCloudServiceUtilities
         /// <para>BGoogleSlidesService: Parametered Constructor</para>
         /// 
         /// <para>Parameters:</para>
+        /// <para><paramref name="_ProgramUniqueID"/>           Program Unique ID</para>
         /// <para><paramref name="_ProjectID"/>                 GC Project ID</para>
         /// <para><paramref name="_ErrorMessageAction"/>        Error messages will be pushed to this action</para>
         /// 
         /// </summary>
         public BGoogleSlidesService(
+            string _ProgramUniqueID,
             string _ProjectID,
             Action<string> _ErrorMessageAction = null)
         {
+            ProgramUniqueID = _ProgramUniqueID;
             ProjectID = _ProjectID;
             try
             {
@@ -101,7 +106,7 @@ namespace BCloudServiceUtilities
             return new SlidesService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = Credential,
-                ApplicationName = "Presentify3D"
+                ApplicationName = ProgramUniqueID
             });
         }
 

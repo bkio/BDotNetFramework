@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>BCloudServiceUtilities_BVMService_GC</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Apis.Compute.v1" Version="1.48.0.1989" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BCloudServiceUtilities\BCloudServiceUtilities.csproj" />
+  </ItemGroup>
+
+</Project>
