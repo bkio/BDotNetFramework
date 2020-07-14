@@ -12,6 +12,8 @@ using Google.Apis.Services;
 using Newtonsoft.Json.Linq;
 using BCommonUtilities;
 using System.Linq;
+using System.Net.NetworkInformation;
+using NetworkInterface = Google.Apis.Compute.v1.Data.NetworkInterface;
 
 namespace BCloudServiceUtilities.VMServices
 {
@@ -186,6 +188,26 @@ namespace BCloudServiceUtilities.VMServices
                                     DiskSizeGb = _DiskSizeGB
                                 },
                                 Type = "PERSISTENT"
+                            }
+                        },
+                        NetworkInterfaces = new List<NetworkInterface>()
+                        {
+                            new NetworkInterface()
+                            {
+                                AccessConfigs = new List<AccessConfig>()
+                                {
+                                    new AccessConfig()
+                                    {
+                                        Kind = "compute#accessConfig",
+                                        Name = "External NAT",
+                                        NetworkTier = "PREMIUM",
+                                        Type = "ONE_TO_ONE_NAT"
+                                    }
+                                },
+                                Kind = "compute#networkInterface",
+                                Name = "nic0",
+                                Network = "projects/" + ProjectID + "/global/networks/default",
+                                Subnetwork = "projects/" + ProjectID + "/regions/" + ZoneName.Substring(0, ZoneName.LastIndexOf('-')) + "/subnetworks/default"
                             }
                         },
                         Tags = new Tags()
