@@ -156,6 +156,8 @@ namespace BCloudServiceUtilities.VMServices
                 return false;
             }
 
+            RandomFirewallTag = "a-" /*Has to start with a letter*/ + RandomFirewallTag;
+
             try
             {
                 using (var Service = GetService())
