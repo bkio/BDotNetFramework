@@ -11,6 +11,7 @@ using Google.Apis.Requests;
 using Google.Apis.Services;
 using Newtonsoft.Json.Linq;
 using BCommonUtilities;
+using System.Linq;
 
 namespace BCloudServiceUtilities.VMServices
 {
@@ -131,6 +132,191 @@ namespace BCloudServiceUtilities.VMServices
         public bool HasInitializationSucceed()
         {
             return bInitializationSucceed;
+        }
+
+        
+        public bool CreateInstance(
+            string _UniqueInstanceName,
+            string _Description,
+            string _MachineType,
+            long _DiskSizeGB,
+            int _GpuCount,
+            string _GpuName,
+            string _OSSourceImageURL,
+            EBVMDiskType _DiskType,
+            EBVMOSType _OSType,
+            IDictionary<string, string> _Labels,
+            BVMNetworkFirewall _FirewallSettings,
+            string _OptionalStartupScript = null,
+            Action<string> _ErrorMessageAction = null)
+        {
+            if (!BUtility.CalculateStringMD5(BUtility.RandomString(32, true), out string RandomFirewallTag, _ErrorMessageAction))
+            {
+                _ErrorMessageAction?.Invoke("BVMServiceGC->CreateInstance: Firewall tag MD5 generation has failed.");
+                return false;
+            }
+
+            try
+            {
+                using (var Service = GetService())
+                {
+                    var NewInstance = new Instance()
+                    {
+                        Name = _UniqueInstanceName,
+                        Description = _Description,
+                        DeletionProtection = false,
+                        Zone = "projects/" + ProjectID + "/zones" + ZoneName,
+                        Labels = _Labels,
+                        MachineType = "projects/" + ProjectID + "/zones" + ZoneName + "/machineTypes/" + _MachineType,
+                        Disks = new List<AttachedDisk>()
+                        {
+                            new AttachedDisk()
+                            {
+                                AutoDelete = true,
+                                Boot = true,
+                                Kind = "compute#attachedDisk",
+                                DeviceName = _UniqueInstanceName,
+                                Mode = "READ_WRITE",
+                                InitializeParams = new AttachedDiskInitializeParams()
+                                {
+                                    SourceImage = _OSSourceImageURL,
+                                    DiskType = "projects/" + ProjectID + "/zones" + ZoneName + "/diskTypes/" + (_DiskType == EBVMDiskType.SSD ? "pd-ssd" : "pd-standard"),
+                                    DiskSizeGb = _DiskSizeGB
+                                },
+                                Type = "PERSISTENT"
+                            }
+                        },
+                        Tags = new Tags()
+                        {
+                            Items = new List<string>()
+                            {
+                                RandomFirewallTag
+                            }
+                        },
+                        Metadata = new Metadata()
+                        {
+                            Kind = "compute#metadata",
+                            Items = new List<Metadata.ItemsData>()
+                        }
+                    };
+
+                    if (_OptionalStartupScript != null)
+                    {
+                        NewInstance.Metadata.Items.Add(new Metadata.ItemsData()
+                        {
+                            Key = _OSType == EBVMOSType.Linux ? "startup-script" : "windows-startup-script-ps1",
+                            Value = _OptionalStartupScript
+                        });
+                    }
+                    
+                    if (_GpuCount > 0)
+                    {
+                        if (NewInstance.GuestAccelerators == null)
+                        {
+                            NewInstance.GuestAccelerators = new List<AcceleratorConfig>();
+                        }
+                        NewInstance.GuestAccelerators.Add(
+                            new AcceleratorConfig()
+                            {
+                                AcceleratorCount = _GpuCount,
+                                AcceleratorType = "projects/" + ProjectID + "/zones" + ZoneName + "/acceleratorTypes/" + _GpuName
+                            });
+                    }
+
+                    if (_OSType == EBVMOSType.Windows)
+                    {
+                        if (NewInstance.Disks[0].GuestOsFeatures == null)
+                        {
+                            NewInstance.Disks[0].GuestOsFeatures = new List<GuestOsFeature>();
+                        }
+
+                        if (!NewInstance.Disks[0].GuestOsFeatures.Any(Item => Item.Type == "VIRTIO_SCSI_MULTIQUEUE"))
+                            NewInstance.Disks[0].GuestOsFeatures.Add(new GuestOsFeature() { Type = "VIRTIO_SCSI_MULTIQUEUE" });
+
+                        if (!NewInstance.Disks[0].GuestOsFeatures.Any(Item => Item.Type == "WINDOWS"))
+                            NewInstance.Disks[0].GuestOsFeatures.Add(new GuestOsFeature() { Type = "WINDOWS" });
+
+                        if (!NewInstance.Disks[0].GuestOsFeatures.Any(Item => Item.Type == "MULTI_IP_SUBNET"))
+                            NewInstance.Disks[0].GuestOsFeatures.Add(new GuestOsFeature() { Type = "MULTI_IP_SUBNET" });
+
+                        if (!NewInstance.Disks[0].GuestOsFeatures.Any(Item => Item.Type == "UEFI_COMPATIBLE"))
+                            NewInstance.Disks[0].GuestOsFeatures.Add(new GuestOsFeature() { Type = "UEFI_COMPATIBLE" });
+                    }
+
+                    var NewFirewall = new Firewall()
+                    {
+                        Kind = "compute#firewall",
+                        Name = RandomFirewallTag,
+                        Priority = 1000,
+                        Direction = "INGRESS",
+                        SelfLink = "projects/" + ProjectID + "/global/firewalls/" + RandomFirewallTag,
+                        Network = "projects/" + ProjectID + "/global/networks/default",
+                        SourceRanges = new List<string>(),
+                        TargetTags = new List<string>()
+                        {
+                            RandomFirewallTag
+                        },
+                        Allowed = new List<Firewall.AllowedData>()
+                    };
+                    if (_FirewallSettings.bOpenAll)
+                    {
+                        NewFirewall.Allowed.Add(new Firewall.AllowedData()
+                        {
+                            IPProtocol = "tcp"
+                        });
+                        NewFirewall.Allowed.Add(new Firewall.AllowedData()
+                        {
+                            IPProtocol = "udp"
+                        });
+                    }
+                    else
+                    {
+                        foreach (var Current in _FirewallSettings.OpenPorts)
+                        {
+                            string[] OpenFor;
+                            if (Current.OpenFor == BVMNetworkFirewall.EVMNetworkFirewallPortProtocol.TCP)
+                                OpenFor = new string[] { "tcp" };
+                            else if (Current.OpenFor == BVMNetworkFirewall.EVMNetworkFirewallPortProtocol.UDP)
+                                OpenFor = new string[] { "udp" };
+                            else
+                                OpenFor = new string[] { "tcp", "udp" };
+
+                            var PortList = new List<string>()
+                            {
+                                Current.FromPortInclusive + "-" + Current.ToPortInclusive
+                            };
+                            foreach (var OFor in OpenFor)
+                            {
+                                NewFirewall.Allowed.Add(new Firewall.AllowedData()
+                                {
+                                    IPProtocol = OFor,
+                                    Ports = PortList
+                                });
+                            }
+                        }
+                    }
+
+                    var FirewallCreationResult = Service.Firewalls.Insert(NewFirewall, ProjectID).Execute();
+                    if (FirewallCreationResult == null || (FirewallCreationResult.HttpErrorStatusCode.HasValue && FirewallCreationResult.HttpErrorStatusCode.Value >= 400))
+                    {
+                        _ErrorMessageAction?.Invoke("BVMServiceGC->CreateInstance: Firewall creation has failed: " + (FirewallCreationResult == null ? "Result is null." : FirewallCreationResult.HttpErrorMessage));
+                        return false;
+                    }
+
+                    var VMCreationResult = Service.Instances.Insert(NewInstance, ProjectID, ZoneName).Execute();
+                    if (VMCreationResult == null || (VMCreationResult.HttpErrorStatusCode.HasValue && VMCreationResult.HttpErrorStatusCode.Value >= 400))
+                    {
+                        _ErrorMessageAction?.Invoke("BVMServiceGC->CreateInstance: VM creation has failed: " + (VMCreationResult == null ? "Result is null." : VMCreationResult.HttpErrorMessage));
+                        return false;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _ErrorMessageAction?.Invoke("BVMServiceGC->CreateInstance: " + e.Message + ", Trace: " + e.StackTrace);
+                return false;
+            }
+            return true;
         }
 
         private InstanceList GetInstanceList(Action<string> _ErrorMessageAction = null)
