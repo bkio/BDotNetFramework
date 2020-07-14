@@ -199,6 +199,18 @@ namespace BCloudServiceUtilities.VMServices
                         {
                             Kind = "compute#metadata",
                             Items = new List<Metadata.ItemsData>()
+                        },
+                        ShieldedInstanceConfig = new ShieldedInstanceConfig() 
+                        { 
+                            EnableVtpm = true,
+                            EnableSecureBoot = false,
+                            EnableIntegrityMonitoring = true
+                        },
+                        Scheduling = new Scheduling()
+                        {
+                            AutomaticRestart = true,
+                            Preemptible = false,
+                            OnHostMaintenance = "TERMINATE"
                         }
                     };
 
