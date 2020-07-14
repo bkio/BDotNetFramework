@@ -167,9 +167,9 @@ namespace BCloudServiceUtilities.VMServices
                         Name = _UniqueInstanceName,
                         Description = _Description,
                         DeletionProtection = false,
-                        Zone = "projects/" + ProjectID + "/zones" + ZoneName,
+                        Zone = "projects/" + ProjectID + "/zones/" + ZoneName,
                         Labels = _Labels,
-                        MachineType = "projects/" + ProjectID + "/zones" + ZoneName + "/machineTypes/" + _MachineType,
+                        MachineType = "projects/" + ProjectID + "/zones/" + ZoneName + "/machineTypes/" + _MachineType,
                         Disks = new List<AttachedDisk>()
                         {
                             new AttachedDisk()
@@ -182,7 +182,7 @@ namespace BCloudServiceUtilities.VMServices
                                 InitializeParams = new AttachedDiskInitializeParams()
                                 {
                                     SourceImage = _OSSourceImageURL,
-                                    DiskType = "projects/" + ProjectID + "/zones" + ZoneName + "/diskTypes/" + (_DiskType == EBVMDiskType.SSD ? "pd-ssd" : "pd-standard"),
+                                    DiskType = "projects/" + ProjectID + "/zones/" + ZoneName + "/diskTypes/" + (_DiskType == EBVMDiskType.SSD ? "pd-ssd" : "pd-standard"),
                                     DiskSizeGb = _DiskSizeGB
                                 },
                                 Type = "PERSISTENT"
@@ -221,7 +221,7 @@ namespace BCloudServiceUtilities.VMServices
                             new AcceleratorConfig()
                             {
                                 AcceleratorCount = _GpuCount,
-                                AcceleratorType = "projects/" + ProjectID + "/zones" + ZoneName + "/acceleratorTypes/" + _GpuName
+                                AcceleratorType = "projects/" + ProjectID + "/zones/" + ZoneName + "/acceleratorTypes/" + _GpuName
                             });
                     }
 
