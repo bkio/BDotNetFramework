@@ -83,6 +83,7 @@ namespace BCloudServiceUtilities
         /// <para><paramref name="_Labels"/>                        Labels of the instance</para>
         /// <para><paramref name="_FirewallSettings"/>              Firewall settings of the instance</para>
         /// <para><paramref name="_OptionalStartupScript"/>         Startup script: For linux it is a regular shell script. For Windows it is powershell script.</para>
+        /// <para><paramref name="_ErrorCode"/>                     Http error code</para>
         /// <para><paramref name="_ErrorMessageAction"/>            Error messages will be pushed to this action</para>
         /// 
         /// <returns>Returns: Success or not</returns>
@@ -100,7 +101,8 @@ namespace BCloudServiceUtilities
             EBVMOSType _OSType,
             System.Collections.Generic.IDictionary<string, string> _Labels,
             BVMNetworkFirewall _FirewallSettings,
-            string _OptionalStartupScript = null,
+            string _OptionalStartupScript,
+            out int _ErrorCode,
             Action<string> _ErrorMessageAction = null);
 
         /// <summary>

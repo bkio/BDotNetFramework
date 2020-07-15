@@ -136,7 +136,6 @@ namespace BCloudServiceUtilities.VMServices
             return bInitializationSucceed;
         }
 
-        
         public bool CreateInstance(
             string _UniqueInstanceName,
             string _Description,
@@ -149,9 +148,12 @@ namespace BCloudServiceUtilities.VMServices
             EBVMOSType _OSType,
             IDictionary<string, string> _Labels,
             BVMNetworkFirewall _FirewallSettings,
-            string _OptionalStartupScript = null,
+            string _OptionalStartupScript,
+            out int _ErrorCode,
             Action<string> _ErrorMessageAction = null)
         {
+            _ErrorCode = 400;
+
             if (!BUtility.CalculateStringMD5(BUtility.RandomString(32, true), out string RandomFirewallTag, _ErrorMessageAction))
             {
                 _ErrorMessageAction?.Invoke("BVMServiceGC->CreateInstance: Firewall tag MD5 generation has failed.");
@@ -336,6 +338,7 @@ namespace BCloudServiceUtilities.VMServices
                     if (FirewallCreationResult == null || (FirewallCreationResult.HttpErrorStatusCode.HasValue && FirewallCreationResult.HttpErrorStatusCode.Value >= 400))
                     {
                         _ErrorMessageAction?.Invoke("BVMServiceGC->CreateInstance: Firewall creation has failed: " + (FirewallCreationResult == null ? "Result is null." : FirewallCreationResult.HttpErrorMessage));
+                        _ErrorCode = FirewallCreationResult.HttpErrorStatusCode.Value;
                         return false;
                     }
 
@@ -343,6 +346,7 @@ namespace BCloudServiceUtilities.VMServices
                     if (VMCreationResult == null || (VMCreationResult.HttpErrorStatusCode.HasValue && VMCreationResult.HttpErrorStatusCode.Value >= 400))
                     {
                         _ErrorMessageAction?.Invoke("BVMServiceGC->CreateInstance: VM creation has failed: " + (VMCreationResult == null ? "Result is null." : VMCreationResult.HttpErrorMessage));
+                        _ErrorCode = VMCreationResult.HttpErrorStatusCode.Value;
                         return false;
                     }
                 }
@@ -698,29 +702,33 @@ namespace BCloudServiceUtilities.VMServices
         {
             EBVMInstanceStatus CurrentInstanceStatus = EBVMInstanceStatus.None;
 
-            bool bFirstTime = true;
-
             List<EBVMInstanceStatus> Conditions = new List<EBVMInstanceStatus>(_OrStatus);
 
-            while (!Conditions.Contains(CurrentInstanceStatus))
+            int LocalErrorRetryCount = 0;
+            do
             {
-                Instance FoundInstance = FindInstanceByUniqueName(_UniqueInstanceName, _ErrorMessageAction);
+                var FoundInstance = FindInstanceByUniqueName(_UniqueInstanceName, _ErrorMessageAction);
                 if (FoundInstance != null)
                 {
                     if (GetInstanceStatus(_UniqueInstanceName, out CurrentInstanceStatus, _ErrorMessageAction))
                     {
-                        if (bFirstTime)
-                        {
-                            bFirstTime = false;
-                            continue;
-                        }
-                        Thread.Sleep(2000);
+                        if (Conditions.Contains(CurrentInstanceStatus)) return true;
                     }
-                    else return false;
+                    else
+                    {
+                        if (++LocalErrorRetryCount < 5 && ThreadSleep(2000)) continue;
+                        return false;
+                    }
                 }
-                else return false;
-            }
-            return false;
+                else
+                {
+                    if (++LocalErrorRetryCount < 5 && ThreadSleep(2000)) continue;
+                    return false;
+                }
+            } while (!Conditions.Contains(CurrentInstanceStatus) && ThreadSleep(2000));
+
+            return true;
         }
+        private bool ThreadSleep(int _MS) { Thread.Sleep(_MS); return true; }
     }
 }
