@@ -490,10 +490,7 @@ namespace BCloudServiceUtilities.VMServices
             }
             else
             {
-                if (RequestedList != null)
-                {
-                    _ErrorMessageAction?.Invoke("ComputeEngine->ListInstances: Result is empty: " + RequestedList.ToString());
-                }
+                if (RequestedList != null) return Result;
                 else
                 {
                     _ErrorMessageAction?.Invoke("ComputeEngine->ListInstances: Result is null.");
