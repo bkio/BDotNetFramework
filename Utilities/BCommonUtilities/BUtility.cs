@@ -1038,12 +1038,13 @@ namespace BCommonUtilities
                 }
                 foreach (DirectoryInfo _Directory in DirInfo.GetDirectories())
                 {
-                    try
-                    {
-                        _Directory.Delete(true);
-                    }
-                    catch (Exception) { }
+                    DeleteFolderContent(_Directory.FullName);
                 }
+                try
+                {
+                    DirInfo.Delete();
+                }
+                catch (Exception) { }
             }
             catch (Exception) { }
         }
