@@ -35,8 +35,31 @@ namespace BCloudServiceUtilities.PubSubServices
         private readonly Dictionary<string, PublisherServiceApiClient> PublisherTopicDictionary = new Dictionary<string, PublisherServiceApiClient>();
         private readonly List<BTuple<string, SubscriberServiceApiClient, SubscriptionName>> SubscriberTopicList = new List<BTuple<string, SubscriberServiceApiClient, SubscriptionName>>();
         private readonly Dictionary<SubscriptionName, BTuple<Thread, BValue<bool>>> SubscriberThreadsDictionary = new Dictionary<SubscriptionName, BTuple<Thread, BValue<bool>>>();
-        private readonly object PublisherTopicDictionaryLock = new object();
-        private readonly object SubscriberTopicListLock = new object();
+        private readonly Dictionary<string, object> PublisherTopicDictionaryLock = new Dictionary<string, object>();
+        private object LockablePublisherTopicDictionaryObject(string _Topic)
+        {
+            lock (PublisherTopicDictionaryLock)
+            {
+                if (!PublisherTopicDictionaryLock.ContainsKey(_Topic))
+                {
+                    PublisherTopicDictionaryLock.Add(_Topic, new object());
+                }
+                return PublisherTopicDictionaryLock[_Topic];
+            }
+        }
+        private readonly Dictionary<string, object> SubscriberTopicListLock = new Dictionary<string, object>();
+        private object LockableSubscriberTopicListObject(string _Topic)
+        {
+            lock (SubscriberTopicListLock)
+            {
+                if (!SubscriberTopicListLock.ContainsKey(_Topic))
+                {
+                    SubscriberTopicListLock.Add(_Topic, new object());
+                }
+                return SubscriberTopicListLock[_Topic];
+            }
+        }
+
         private readonly object SubscriberThreadsDictionaryLock = new object();
 
         /// <summary>
@@ -147,7 +170,7 @@ namespace BCloudServiceUtilities.PubSubServices
 
         private bool GetPublisher(out PublisherServiceApiClient Result, TopicName GoogleFriendlyTopicName, Action<string> _ErrorMessageAction = null)
         {
-            lock (PublisherTopicDictionaryLock)
+            lock (LockablePublisherTopicDictionaryObject(GoogleFriendlyTopicName.TopicId))
             {
                 if (PublisherTopicDictionary.ContainsKey(GoogleFriendlyTopicName.TopicId))
                 {
@@ -180,7 +203,7 @@ namespace BCloudServiceUtilities.PubSubServices
 
         private bool GetSubscriber(out SubscriberServiceApiClient APIClientVar, out SubscriptionName SubscriptionNameVar, string GoogleFriendlyTopicName, Action<string> _ErrorMessageAction = null)
         {
-            lock (SubscriberTopicListLock)
+            lock (LockableSubscriberTopicListObject(GoogleFriendlyTopicName))
             {
                 APIClientVar = null;
                 SubscriptionNameVar = null;
@@ -567,7 +590,7 @@ namespace BCloudServiceUtilities.PubSubServices
                     {
                         if (e is RpcException && (e as RpcException).Status.StatusCode == StatusCode.NotFound)
                         {
-                            lock (PublisherTopicDictionaryLock)
+                            lock (LockablePublisherTopicDictionaryObject(_CustomTopic))
                             {
                                 PublisherTopicDictionary.Remove(TopicInstance.TopicId);
                             }
@@ -623,7 +646,7 @@ namespace BCloudServiceUtilities.PubSubServices
                 var SubscriptionToBeRemoved = new List<BTuple<SubscriberServiceApiClient, SubscriptionName>>();
                 var IndicesToBeRemoved = new List<int>();
 
-                lock (SubscriberTopicListLock)
+                lock (LockableSubscriberTopicListObject(_CustomTopic))
                 {
                     int i = 0;
                     foreach (var SubscriberTopic in SubscriberTopicList)
@@ -689,7 +712,7 @@ namespace BCloudServiceUtilities.PubSubServices
                             }
                         }
                     
-                        lock (PublisherTopicDictionaryLock)
+                        lock (LockablePublisherTopicDictionaryObject(_CustomTopic))
                         {
                             if (PublisherTopicDictionary.ContainsKey(_CustomTopic))
                             {
