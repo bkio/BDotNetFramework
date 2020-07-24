@@ -138,7 +138,7 @@ namespace BWebServiceUtilities
 
             BTaskWrapper.Run(() =>
             {
-                _ServerLogAction?.Invoke("BWebserver->Run: Server is running.");
+                _ServerLogAction?.Invoke("BWebserver->Run: Server is running. Listening port " + ServerPort);
 
                 while (Listener.IsListening)
                 {
