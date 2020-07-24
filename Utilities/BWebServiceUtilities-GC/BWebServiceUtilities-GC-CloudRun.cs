@@ -210,10 +210,13 @@ namespace BWebServiceUtilities_GC
                     _Request.UseContextHeaders.Request.Headers.Remove(CaseSensitive_FoundHeaderKey);
                     _Request.UseContextHeaders.Request.Headers.Add("client-authorization", ClientAuthorization);
                 }
+#if (Debug || DEBUG)
+#else
                 if (!AddAccessTokenForServiceExecution(Request, _Request.DestinationServiceUrl, _ErrorMessageAction))
                 {
                     return InterServicesRequestResponse.InternalErrorOccured("Request has failed due to an internal api gateway error.");
                 }
+#endif
             }
 
             var ExcludeHeaderKeysForRequest = LowerContentOfStrings(_Request.ExcludeHeaderKeysForRequest);
