@@ -853,5 +853,66 @@ namespace BCloudServiceUtilities.FileServices
             }
             return true;
         }
+
+        /// <summary>
+        ///
+        /// <para>CreateFilePubSubNotification:</para>
+        ///
+        /// <para>Creates file based pub/sub notification</para>
+        ///
+        /// <para>Check <seealso cref="IBFileServiceInterface.CreateFilePubSubNotification"/> for detailed documentation</para>
+        ///
+        /// </summary>
+        public bool CreateFilePubSubNotification(string _BucketName, string _TopicName, string _PathPrefixToListen, List<EBFilePubSubNotificationEventType> _EventsToListen, Action<string> _ErrorMessageAction = null)
+        {
+            if (S3Client == null)
+            {
+                _ErrorMessageAction?.Invoke("BFileServiceAWS->CreateFilePubSubNotification: S3Client is null.");
+                return false;
+            }
+
+            var EventTypes = new List<EventType>();
+            if (_EventsToListen.Contains(EBFilePubSubNotificationEventType.Uploaded))
+                EventTypes.Add("ObjectCreatedAll");
+            if (_EventsToListen.Contains(EBFilePubSubNotificationEventType.Deleted))
+                EventTypes.Add("ObjectRemovedAll");
+
+            PutBucketNotificationRequest Request = new PutBucketNotificationRequest
+            {
+                BucketName = _BucketName,
+                TopicConfigurations = new List<TopicConfiguration>()
+                {
+                    new TopicConfiguration()
+                    {
+                        Topic = _TopicName,
+                        Filter = new Filter()
+                        {
+                            S3KeyFilter = new S3KeyFilter()
+                            {
+                                FilterRules = new List<FilterRule>()
+                                {
+                                    new FilterRule("prefix", _PathPrefixToListen)
+                                }
+                            }
+                        },
+                        Events = EventTypes
+                    }
+                }
+            };
+
+            try
+            {
+                using (var CreatedTask = S3Client.PutBucketNotificationAsync(Request))
+                {
+                    CreatedTask.Wait();
+                }
+            }
+            catch (Exception e)
+            {
+                _ErrorMessageAction?.Invoke("BFileServiceAWS->CreateFilePubSubNotification: " + e.Message + ", Trace: " + e.StackTrace);
+                return false;
+            }
+            return true;
+        }
     }
 }

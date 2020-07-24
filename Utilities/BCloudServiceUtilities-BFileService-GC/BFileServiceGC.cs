@@ -134,7 +134,7 @@ namespace BCloudServiceUtilities.FileServices
                 _ErrorMessageAction?.Invoke("BFileServiceGC->CopyFile: GSClient is null.");
                 return false;
             }
-
+            
             PredefinedObjectAcl CloudTypePublicity;
             if (_RemoteFileReadAccess == EBRemoteFileReadPublicity.PublicRead)
             {
@@ -826,6 +826,46 @@ namespace BCloudServiceUtilities.FileServices
             if (AllObjects.Count > 0)
             {
                 _FileKeys = AllObjects;
+            }
+            return true;
+        }
+
+        /// <summary>
+        ///
+        /// <para>CreateFilePubSubNotification:</para>
+        ///
+        /// <para>Creates file based pub/sub notification</para>
+        ///
+        /// <para>Check <seealso cref="IBFileServiceInterface.CreateFilePubSubNotification"/> for detailed documentation</para>
+        ///
+        /// </summary>
+        public bool CreateFilePubSubNotification(string _BucketName, string _TopicName, string _PathPrefixToListen, List<EBFilePubSubNotificationEventType> _EventsToListen, Action<string> _ErrorMessageAction = null)
+        {
+            var EventTypes = new List<string>();
+            if (_EventsToListen.Contains(EBFilePubSubNotificationEventType.Uploaded))
+                EventTypes.Add("OBJECT_FINALIZE");
+            if (_EventsToListen.Contains(EBFilePubSubNotificationEventType.Deleted))
+                EventTypes.Add("OBJECT_DELETE");
+
+            try
+            {
+                var Created = GSClient.CreateNotification(_BucketName, new Google.Apis.Storage.v1.Data.Notification()
+                {
+                    PayloadFormat = "JSON_API_V1",
+                    Topic = "//pubsub.googleapis.com/projects/" + ProjectID + "/topics/" + _TopicName,
+                    EventTypes = EventTypes,
+                    ObjectNamePrefix = _PathPrefixToListen
+                });
+                if (Created == null)
+                {
+                    _ErrorMessageAction?.Invoke("BFileServiceGC->CreateFilePubSubNotification: Notification could not be created.");
+                    return false;
+                }
+            }
+            catch (Exception e)
+            {
+                _ErrorMessageAction?.Invoke("BFileServiceGC->CreateFilePubSubNotification: " + e.Message + ", trace: " + e.StackTrace);
+                return false;
             }
             return true;
         }

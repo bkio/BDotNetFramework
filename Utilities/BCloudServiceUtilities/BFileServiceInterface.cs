@@ -1,6 +1,7 @@
 ﻿/// MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
 
 using System;
+using System.Collections.Generic;
 using BCommonUtilities;
 
 namespace BCloudServiceUtilities
@@ -13,6 +14,15 @@ namespace BCloudServiceUtilities
         AuthenticatedRead,
         ProjectWideProtectedRead,
         PublicRead
+    };
+
+    /// <summary>
+    /// <para>After uploading or copying a file, defines accessibility to the new file location</para>
+    /// </summary>
+    public enum EBFilePubSubNotificationEventType
+    {
+        Uploaded,
+        Deleted
     };
 
     /// <summary>
@@ -314,6 +324,29 @@ namespace BCloudServiceUtilities
         bool ListAllFilesInBucket(
             string _BucketName,
             out System.Collections.Generic.List<string> _FileKeys,
+            Action<string> _ErrorMessageAction = null);
+
+        /// <summary>
+        ///
+        /// <para>CreateFilePubSubNotification:</para>
+        ///
+        /// <para>Creates file based pub/sub notification</para>
+        ///
+        /// <para>Parameters:</para>
+        /// <para><paramref name="_BucketName"/>                  Name of the Bucket</para>
+        /// <para><paramref name="_TopicName"/>                   Topic name to be pushed</para>
+        /// <para><paramref name="_PathPrefixToListen"/>          Path prefix to listen</para>
+        /// <para><paramref name="_EventsToListen"/>              Events to listen</para>
+        /// <para><paramref name="_ErrorMessageAction"/>          Error messages will be pushed to this action</para>
+        ///
+        /// <returns>                                             Returns: Operation success </returns>
+        ///
+        /// </summary>
+        bool CreateFilePubSubNotification(
+            string _BucketName,
+            string _TopicName,
+            string _PathPrefixToListen,
+            List<EBFilePubSubNotificationEventType> _EventsToListen,
             Action<string> _ErrorMessageAction = null);
     }
 }
