@@ -8,6 +8,7 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Storage.v1;
 using Google.Cloud.Storage.V1;
 using BCommonUtilities;
+using System.Threading.Tasks;
 
 namespace BCloudServiceUtilities.FileServices
 {
@@ -865,6 +866,55 @@ namespace BCloudServiceUtilities.FileServices
             catch (Exception e)
             {
                 _ErrorMessageAction?.Invoke("BFileServiceGC->CreateFilePubSubNotification: " + e.Message + ", trace: " + e.StackTrace);
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        ///
+        /// <para>DeleteAllFilePubSubNotifications:</para>
+        ///
+        /// <para>Deletes all file pub/sub notifications for a bucket/topic</para>
+        ///
+        /// <para>Parameters:</para>
+        /// <para><paramref name="_BucketName"/>                  Name of the Bucket</para>
+        /// <para><paramref name="_TopicName"/>                   Optional topic name to be pushed; if null; all will be deleted</para>
+        /// <para><paramref name="_ErrorMessageAction"/>          Error messages will be pushed to this action</para>
+        ///
+        /// <returns>                                             Returns: Operation success </returns>  
+        ///
+        /// </summary>
+        public bool DeleteAllFilePubSubNotifications(
+            string _BucketName,
+            string _TopicName = null,
+            Action<string> _ErrorMessageAction = null)
+        {
+            if (_TopicName != null)
+            {
+                _TopicName = "//pubsub.googleapis.com/projects/" + ProjectID + "/topics/" + _TopicName;
+            }
+            try
+            {
+                var Created = GSClient.ListNotifications(_BucketName);
+                if (Created == null || Created.Count == 0)
+                {
+                    return true;
+                }
+
+                var CreatedAsyncTasks = new List<Task>();
+                foreach (var Current in Created)
+                {
+                    if (_TopicName == null || Current.Topic == _TopicName)
+                    {
+                        CreatedAsyncTasks.Add(GSClient.DeleteNotificationAsync(_BucketName, Current.Id));
+                    }
+                }
+                Task.WaitAll(CreatedAsyncTasks.ToArray());
+            }
+            catch (Exception e)
+            {
+                _ErrorMessageAction?.Invoke("BFileServiceGC->DeleteAllFilePubSubNotifications: " + e.Message + ", trace: " + e.StackTrace);
                 return false;
             }
             return true;
