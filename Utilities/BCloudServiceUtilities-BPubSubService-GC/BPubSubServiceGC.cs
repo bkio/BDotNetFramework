@@ -10,6 +10,7 @@ using System.Threading;
 using System.Web;
 using BCommonUtilities;
 using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Iam.V1;
 using Google.Cloud.PubSub.V1;
 using Google.Protobuf;
 using Grpc.Auth;
@@ -517,6 +518,75 @@ namespace BCloudServiceUtilities.PubSubServices
                 }
             }
             return false;
+        }
+
+        public struct BGCPubSubIamPolicy
+        {
+            public string Role;
+            public List<string> Members;
+        }
+
+        /// <summary>
+        ///
+        /// <para>SetTopicIamPolicy:</para>
+        /// 
+        /// <para>Adds IAM policy to the given pub/sub topic</para>
+        /// 
+        /// </summary>
+        public bool SetTopicIamPolicy(
+            string _TopicName, 
+            List<BGCPubSubIamPolicy> _PoliciesToAdd,
+            Action<string> _ErrorMessageAction = null)
+        {
+            _TopicName = GetGoogleFriendlyTopicName(_TopicName);
+
+            var TopicInstance = new TopicName(ProjectID, _TopicName);
+
+            if (GetPublisher(out PublisherServiceApiClient Client, TopicInstance, _ErrorMessageAction))
+            {
+                try
+                {
+                    var NewPolicy = new Policy();
+                    foreach (var PolicyToAdd in _PoliciesToAdd)
+                    {
+                        var NewBinding = new Binding()
+                        {
+                            Role = PolicyToAdd.Role
+                        };
+                        foreach (var Member in PolicyToAdd.Members)
+                        {
+                            NewBinding.Members.Add(Member);
+                        }
+                        NewPolicy.Bindings.Add(NewBinding);
+                    }
+                    var Request = new SetIamPolicyRequest
+                    {
+                        ResourceAsResourceName = TopicInstance,
+                        Policy = NewPolicy
+                    };
+                    var Response = Client.SetIamPolicy(Request);
+                    if (Response == null)
+                    {
+                        return false;
+                    }
+                }
+                catch (Exception e)
+                {
+                    if (e is RpcException && (e as RpcException).Status.StatusCode == StatusCode.NotFound)
+                    {
+                        lock (LockablePublisherTopicDictionaryObject(_TopicName))
+                        {
+                            PublisherTopicDictionary.Remove(TopicInstance.TopicId);
+                        }
+                    }
+                    else
+                    {
+                        _ErrorMessageAction?.Invoke("BPubSubServiceGC->SetTopicIamPolicy: " + e.Message + ", Trace: " + e.StackTrace);
+                    }
+                    return false;
+                }
+            }
+            return true;
         }
 
         /// <summary>
