@@ -902,15 +902,14 @@ namespace BCloudServiceUtilities.FileServices
                     return true;
                 }
 
-                var CreatedAsyncTasks = new List<Task>();
                 foreach (var Current in Created)
                 {
                     if (_TopicName == null || Current.Topic == _TopicName)
                     {
-                        CreatedAsyncTasks.Add(GSClient.DeleteNotificationAsync(_BucketName, Current.Id));
+                        //Async cannot be used to run in parallel; throws "The project exceeded the rate limit for creating and deleting buckets"
+                        GSClient.DeleteNotification(_BucketName, Current.Id);
                     }
                 }
-                Task.WaitAll(CreatedAsyncTasks.ToArray());
             }
             catch (Exception e)
             {
