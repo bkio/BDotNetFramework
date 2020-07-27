@@ -187,7 +187,10 @@ namespace BWebServiceUtilities_GC
                 };
             }
         }
-        public static InterServicesRequestResponse InterServicesRequest(InterServicesRequestRequest _Request, Action<string> _ErrorMessageAction)
+        public static InterServicesRequestResponse InterServicesRequest(
+            InterServicesRequestRequest _Request, 
+            bool _bKillProcessOnAddAccessTokenForServiceExecutionFailure = true, 
+            Action<string> _ErrorMessageAction = null)
         {
             var bHttpRequestSuccess = false;
             var HttpRequestResponseCode = BWebResponse.Error_InternalError_Code;
@@ -210,13 +213,11 @@ namespace BWebServiceUtilities_GC
                     _Request.UseContextHeaders.Request.Headers.Remove(CaseSensitive_FoundHeaderKey);
                     _Request.UseContextHeaders.Request.Headers.Add("client-authorization", ClientAuthorization);
                 }
-#if (Debug || DEBUG)
-#else
-                if (!AddAccessTokenForServiceExecution(Request, _Request.DestinationServiceUrl, _ErrorMessageAction))
+
+                if (!AddAccessTokenForServiceExecution(Request, _Request.DestinationServiceUrl, _ErrorMessageAction) && _bKillProcessOnAddAccessTokenForServiceExecutionFailure)
                 {
                     return InterServicesRequestResponse.InternalErrorOccured("Request has failed due to an internal api gateway error.");
                 }
-#endif
             }
 
             var ExcludeHeaderKeysForRequest = LowerContentOfStrings(_Request.ExcludeHeaderKeysForRequest);
@@ -332,6 +333,7 @@ namespace BWebServiceUtilities_GC
             string _FullEndpoint,
             Action<string> _ErrorMessageAction = null,
             bool _bWithAuthToken = true,
+            bool _bKillProcessOnAddAccessTokenForServiceExecutionFailure = true,
             IEnumerable<string> _ExcludeHeaderKeysForRequest = null)
         {
             using (var InputStream = _Context.Request.InputStream)
@@ -347,7 +349,9 @@ namespace BWebServiceUtilities_GC
                         bWithAuthToken = _bWithAuthToken,
                         UseContextHeaders = _Context,
                         ExcludeHeaderKeysForRequest = _ExcludeHeaderKeysForRequest
-                    }, _ErrorMessageAction);
+                    }, 
+                    _bKillProcessOnAddAccessTokenForServiceExecutionFailure, 
+                    _ErrorMessageAction);
 
                     return new BWebServiceResponse(
                         Result.ResponseCode,
