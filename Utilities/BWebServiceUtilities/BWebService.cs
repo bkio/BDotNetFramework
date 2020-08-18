@@ -245,6 +245,7 @@ namespace BWebServiceUtilities
                                 }
                                     
                                 Context.Response.ContentType = Response.ResponseContentType;
+                                Context.Response.ContentEncoding = Encoding.UTF8;
 
                                 if (Response.ResponseContent.Type == EBStringOrStreamEnum.String)
                                 {
