@@ -8,88 +8,8 @@ using BCommonUtilities;
 
 namespace BWebServiceUtilities
 {
-    public enum EBResponseContentType
-    {
-        None,
-        TextHtml,
-        ByteArray,
-        JSON,
-        OpenCTM,
-        ZIP,
-        PDF,
-        JPG,
-        PNG,
-        GIF,
-        JS,
-        CSS
-    }
-
     public static class BWebUtilities
     {
-        //Replicated method with BwebServiceUtilities-GC-CloudRun
-        //Change that too if there is any modification needed.
-        public static string GetMimeStringFromEnum(EBResponseContentType ContentType)
-        {
-            switch (ContentType)
-            {
-                case EBResponseContentType.ByteArray:
-                    return "application/octet-stream";
-                case EBResponseContentType.JSON:
-                    return "application/json";
-                case EBResponseContentType.OpenCTM:
-                    return "application/x-openctm";
-                case EBResponseContentType.JS:
-                    return "application/javascript";
-                case EBResponseContentType.CSS:
-                    return "text/css";
-                case EBResponseContentType.ZIP:
-                    return "application/zip";
-                case EBResponseContentType.PDF:
-                    return "application/pdf";
-                case EBResponseContentType.JPG:
-                    return "image/jpeg";
-                case EBResponseContentType.PNG:
-                    return "image/png";
-                case EBResponseContentType.GIF:
-                    return "image/gif";
-                default:
-                    return "text/html";
-            }
-        }
-
-        //Replicated method with BWebServiceUtilities-GC-CloudRun
-        //Change that too if there is any modification needed.
-        public static EBResponseContentType GetEnumFromMimeString(string _ContentType)
-        {
-            if (_ContentType == null || _ContentType.Length == 0) return EBResponseContentType.None;
-            _ContentType = _ContentType.ToLower();
-            switch (_ContentType)
-            {
-                case "application/octet-stream":
-                    return EBResponseContentType.ByteArray;
-                case "application/json":
-                    return EBResponseContentType.JSON;
-                case "application/x-openctm":
-                    return EBResponseContentType.OpenCTM;
-                case "application/zip":
-                    return EBResponseContentType.ZIP;
-                case "application/pdf":
-                    return EBResponseContentType.PDF;
-                case "image/jpeg":
-                    return EBResponseContentType.JPG;
-                case "image/png":
-                    return EBResponseContentType.PNG;
-                case "image/gif":
-                    return EBResponseContentType.GIF;
-                case "application/javascript":
-                    return EBResponseContentType.JS;
-                case "text/css":
-                    return EBResponseContentType.CSS;
-                default:
-                    return EBResponseContentType.TextHtml;
-            }
-        }
-
         public static void InjectHeadersIntoDictionary(HttpHeaders _Headers, Dictionary<string, IEnumerable<string>> _Dictionary)
         {
             if (_Headers != null && _Dictionary != null)

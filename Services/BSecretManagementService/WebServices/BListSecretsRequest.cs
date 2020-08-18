@@ -63,7 +63,7 @@ namespace BSecretManagementService.WebServices
             return new BWebServiceResponse(
                 BWebResponse.Status_OK_Code,
                 new BStringOrStream(ResultObject.ToString()),
-                EBResponseContentType.JSON);
+                "application/json");
         }
     }
 }

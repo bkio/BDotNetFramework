@@ -12,9 +12,9 @@ namespace BWebServiceUtilities
         public readonly int StatusCode;
         public readonly Dictionary<string, IEnumerable<string>> Headers;
         public readonly BStringOrStream ResponseContent;
-        public readonly EBResponseContentType ResponseContentType;
+        public readonly string ResponseContentType;
 
-        public BWebServiceResponse(int _StatusCode, Dictionary<string, IEnumerable<string>> _Headers, BStringOrStream _ResponseContent, EBResponseContentType _ResponseContentType)
+        public BWebServiceResponse(int _StatusCode, Dictionary<string, IEnumerable<string>> _Headers, BStringOrStream _ResponseContent, string _ResponseContentType)
         {
             StatusCode = _StatusCode;
 
@@ -31,7 +31,7 @@ namespace BWebServiceUtilities
             ResponseContentType = _ResponseContentType;
         }
 
-        public BWebServiceResponse(int _StatusCode, BStringOrStream _ResponseContent, EBResponseContentType _ResponseContentType)
+        public BWebServiceResponse(int _StatusCode, BStringOrStream _ResponseContent, string _ResponseContentType)
         {
             StatusCode = _StatusCode;
 

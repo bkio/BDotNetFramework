@@ -164,7 +164,7 @@ namespace BWebServiceUtilities_GC
         {
             public string DestinationServiceUrl;
             public string RequestMethod;
-            public EBResponseContentType ContentType;
+            public string ContentType;
             public Dictionary<string, IEnumerable<string>> Headers = null;
             public BStringOrStream Content = null;
             public bool bWithAuthToken = true;
@@ -175,7 +175,7 @@ namespace BWebServiceUtilities_GC
         {
             public bool bSuccess = false;
             public int ResponseCode = BWebResponse.Error_InternalError_Code;
-            public EBResponseContentType ContentType = BWebResponse.Error_InternalError_ContentType;
+            public string ContentType = BWebResponse.Error_InternalError_ContentType;
             public BStringOrStream Content = null;
             public Dictionary<string, IEnumerable<string>> ResponseHeaders = new Dictionary<string, IEnumerable<string>>();
 
@@ -194,7 +194,7 @@ namespace BWebServiceUtilities_GC
         {
             var bHttpRequestSuccess = false;
             var HttpRequestResponseCode = BWebResponse.Error_InternalError_Code;
-            var HttpRequestResponseContentType = EBResponseContentType.None;
+            var HttpRequestResponseContentType = "";
             BStringOrStream HttpRequestResponseContent = null;
             Dictionary<string, IEnumerable<string>> HttpRequestResponseHeaders = null;
 
@@ -246,7 +246,7 @@ namespace BWebServiceUtilities_GC
                 if (_Request.RequestMethod != "GET" && _Request.RequestMethod != "DELETE"
                     && _Request.Content != null && ((_Request.Content.Type == EBStringOrStreamEnum.Stream && _Request.Content.Stream != null) || (_Request.Content.Type == EBStringOrStreamEnum.String && _Request.Content.String != null && _Request.Content.String.Length > 0)))
                 {
-                    Request.ContentType = GetMimeStringFromEnum_GC(_Request.ContentType);
+                    Request.ContentType = _Request.ContentType;
 
                     using (var OStream = Request.GetRequestStream())
                     {
@@ -344,7 +344,7 @@ namespace BWebServiceUtilities_GC
                     {
                         DestinationServiceUrl = _FullEndpoint,
                         RequestMethod = _Context.Request.HttpMethod,
-                        ContentType = GetEnumFromMimeString_GC(_Context.Request.ContentType),
+                        ContentType = _Context.Request.ContentType,
                         Content = new BStringOrStream(RequestStream, _Context.Request.ContentLength64),
                         bWithAuthToken = _bWithAuthToken,
                         UseContextHeaders = _Context,
@@ -367,14 +367,14 @@ namespace BWebServiceUtilities_GC
             HttpWebResponse _Response,
             out bool _bHttpRequestSuccess,
             out int _HttpRequestResponseCode,
-            out EBResponseContentType _HttpRequestResponseContentType,
+            out string _HttpRequestResponseContentType,
             out BStringOrStream _HttpRequestResponseContent,
             out Dictionary<string, IEnumerable<string>> _HttpRequestResponseHeaders,
             Action<string> _ErrorMessageAction)
         {
             _bHttpRequestSuccess = false;
             _HttpRequestResponseCode = BWebResponse.Error_InternalError_Code;
-            _HttpRequestResponseContentType = EBResponseContentType.None;
+            _HttpRequestResponseContentType = "";
             _HttpRequestResponseContent = null;
             _HttpRequestResponseHeaders = new Dictionary<string, IEnumerable<string>>();
 
@@ -384,7 +384,7 @@ namespace BWebServiceUtilities_GC
 
                 BWebUtilities.InjectHeadersIntoDictionary(_Response.Headers, _HttpRequestResponseHeaders);
 
-                _HttpRequestResponseContentType = GetEnumFromMimeString_GC(_Response.ContentType);
+                _HttpRequestResponseContentType = _Response.ContentType;
 
                 using (var ResStream = _Response.GetResponseStream())
                 {
@@ -400,70 +400,6 @@ namespace BWebServiceUtilities_GC
             {
                 _ErrorMessageAction?.Invoke("Error: RequestRedirection-AnalyzeResponse: " + e.Message + ", Trace: " + e.StackTrace);
                 _bHttpRequestSuccess = false;
-            }
-        }
-
-        //Replicated method with BwebServiceUtilities
-        //Change that too if there is any modification needed.
-        public static string GetMimeStringFromEnum_GC(EBResponseContentType ContentType)
-        {
-            switch (ContentType)
-            {
-                case EBResponseContentType.ByteArray:
-                    return "application/octet-stream";
-                case EBResponseContentType.JSON:
-                    return "application/json";
-                case EBResponseContentType.OpenCTM:
-                    return "application/x-openctm";
-                case EBResponseContentType.JS:
-                    return "application/javascript";
-                case EBResponseContentType.CSS:
-                    return "text/css";
-                case EBResponseContentType.ZIP:
-                    return "application/zip";
-                case EBResponseContentType.PDF:
-                    return "application/pdf";
-                case EBResponseContentType.JPG:
-                    return "image/jpeg";
-                case EBResponseContentType.PNG:
-                    return "image/png";
-                case EBResponseContentType.GIF:
-                    return "image/gif";
-                default:
-                    return "text/html";
-            }
-        }
-
-        //Replicated method with BwebServiceUtilities
-        //Change that too if there is any modification needed.
-        public static EBResponseContentType GetEnumFromMimeString_GC(string _ContentType)
-        {
-            if (_ContentType == null || _ContentType.Length == 0) return EBResponseContentType.None;
-            _ContentType = _ContentType.ToLower();
-            switch (_ContentType)
-            {
-                case "application/octet-stream":
-                    return EBResponseContentType.ByteArray;
-                case "application/json":
-                    return EBResponseContentType.JSON;
-                case "application/x-openctm":
-                    return EBResponseContentType.OpenCTM;
-                case "application/zip":
-                    return EBResponseContentType.ZIP;
-                case "application/pdf":
-                    return EBResponseContentType.PDF;
-                case "image/jpeg":
-                    return EBResponseContentType.JPG;
-                case "image/png":
-                    return EBResponseContentType.PNG;
-                case "image/gif":
-                    return EBResponseContentType.GIF;
-                case "application/javascript":
-                    return EBResponseContentType.JS;
-                case "text/css":
-                    return EBResponseContentType.CSS;
-                default:
-                    return EBResponseContentType.TextHtml;
             }
         }
     }

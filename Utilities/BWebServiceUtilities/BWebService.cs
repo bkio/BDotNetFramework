@@ -244,7 +244,7 @@ namespace BWebServiceUtilities
                                     }
                                 }
                                     
-                                Context.Response.ContentType = BWebUtilities.GetMimeStringFromEnum(Response.ResponseContentType);
+                                Context.Response.ContentType = Response.ResponseContentType;
 
                                 if (Response.ResponseContent.Type == EBStringOrStreamEnum.String)
                                 {
@@ -305,7 +305,7 @@ namespace BWebServiceUtilities
             string Resp = BWebResponse.Error_InternalError_String(_CustomMessage);
             byte[] Buff = Encoding.UTF8.GetBytes(Resp);
 
-            _WriteTo.ContentType = BWebUtilities.GetMimeStringFromEnum(BWebResponse.Error_InternalError_ContentType);
+            _WriteTo.ContentType = BWebResponse.Error_InternalError_ContentType;
             _WriteTo.StatusCode = BWebResponse.Error_InternalError_Code;
             _WriteTo.ContentLength64 = Buff.Length;
             _WriteTo.OutputStream.Write(Buff, 0, Buff.Length);
@@ -315,7 +315,7 @@ namespace BWebServiceUtilities
             string Resp = BWebResponse.Error_NotFound_String(_CustomMessage);
             byte[] Buff = Encoding.UTF8.GetBytes(Resp);
 
-            _WriteTo.ContentType = BWebUtilities.GetMimeStringFromEnum(BWebResponse.Error_NotFound_ContentType);
+            _WriteTo.ContentType = BWebResponse.Error_NotFound_ContentType;
             _WriteTo.StatusCode = BWebResponse.Error_NotFound_Code;
             _WriteTo.ContentLength64 = Buff.Length;
             _WriteTo.OutputStream.Write(Buff, 0, Buff.Length);
@@ -325,7 +325,7 @@ namespace BWebServiceUtilities
             string Resp = BWebResponse.Status_Success_String(_CustomMessage);
             byte[] Buff = Encoding.UTF8.GetBytes(Resp);
 
-            _WriteTo.ContentType = BWebUtilities.GetMimeStringFromEnum(BWebResponse.Status_Success_ContentType);
+            _WriteTo.ContentType = BWebResponse.Status_Success_ContentType;
             _WriteTo.StatusCode = BWebResponse.Status_OK_Code;
             _WriteTo.ContentLength64 = Buff.Length;
             _WriteTo.OutputStream.Write(Buff, 0, Buff.Length);
