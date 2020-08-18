@@ -112,24 +112,50 @@ namespace BWebServiceUtilities
                         }
 
                         bStartSucceed.Set(true);
-                        WaitForFirstSuccess.Set();
+                        try
+                        {
+                            WaitForFirstSuccess.Set();
+                        }
+                        catch (Exception) {}
 
                         FailureCount = 0;
 
-                        WaitForException.WaitOne();
+                        try
+                        {
+                            WaitForException.WaitOne();
+                            //Do not close WaitForException! Can be reused.
+                        }
+                        catch (Exception) { }
                     }
                     catch (Exception e)
                     {
                         _ServerLogAction?.Invoke("BWebService->Run->HttpListener->Start: " + e.Message + ", trace: " + e.Message);
-                        WaitForException.Set();
+
+                        try
+                        {
+                            WaitForException.Set();
+                        }
+                        catch (Exception) { }
+
                         Thread.Sleep(1000);
                     }
 
                 } while (++FailureCount < 10);
 
-                WaitForFirstSuccess.Set(); //When exhausted
+                try
+                {
+                    WaitForFirstSuccess.Set(); //When exhausted
+                }
+                catch (Exception) { }
             });
-            WaitForFirstSuccess.WaitOne();
+
+            try
+            {
+                WaitForFirstSuccess.WaitOne();
+                //Do not close WaitForFirstSuccess! Can be reused.
+            }
+            catch (Exception) {}
+
             if (!bStartSucceed.Get())
             {
                 _ServerLogAction?.Invoke("BWebService->Run: HttpListener.Start() has failed.");

@@ -14,6 +14,7 @@ namespace BWebServiceUtilities
         TextHtml,
         ByteArray,
         JSON,
+        OpenCTM,
         ZIP,
         PDF,
         JPG,
@@ -35,6 +36,8 @@ namespace BWebServiceUtilities
                     return "application/octet-stream";
                 case EBResponseContentType.JSON:
                     return "application/json";
+                case EBResponseContentType.OpenCTM:
+                    return "application/x-openctm";
                 case EBResponseContentType.JS:
                     return "application/javascript";
                 case EBResponseContentType.CSS:
@@ -54,12 +57,11 @@ namespace BWebServiceUtilities
             }
         }
 
-        //Replicated method with BwebServiceUtilities-GC-CloudRun
+        //Replicated method with BWebServiceUtilities-GC-CloudRun
         //Change that too if there is any modification needed.
         public static EBResponseContentType GetEnumFromMimeString(string _ContentType)
         {
             if (_ContentType == null || _ContentType.Length == 0) return EBResponseContentType.None;
-
             _ContentType = _ContentType.ToLower();
             switch (_ContentType)
             {
@@ -67,6 +69,8 @@ namespace BWebServiceUtilities
                     return EBResponseContentType.ByteArray;
                 case "application/json":
                     return EBResponseContentType.JSON;
+                case "application/x-openctm":
+                    return EBResponseContentType.OpenCTM;
                 case "application/zip":
                     return EBResponseContentType.ZIP;
                 case "application/pdf":

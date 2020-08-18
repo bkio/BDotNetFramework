@@ -107,13 +107,21 @@ namespace BSecretManagementService.WebServices
                     CompletionStateStack.TryPop(out object Ignore);
                     if (CompletionStateStack.Count == 0)
                     {
-                        WaitUntilSignal.Set();
+                        try
+                        {
+                            WaitUntilSignal.Set();
+                        }
+                        catch (Exception) { }
                     }
                 });
             }
 
-            WaitUntilSignal.WaitOne();
-            WaitUntilSignal.Close();
+            try
+            {
+                WaitUntilSignal.WaitOne();
+                WaitUntilSignal.Close();
+            }
+            catch (Exception) { }
 
             var ResultObject = new JObject
             {

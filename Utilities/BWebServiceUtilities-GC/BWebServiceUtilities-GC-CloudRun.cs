@@ -413,6 +413,8 @@ namespace BWebServiceUtilities_GC
                     return "application/octet-stream";
                 case EBResponseContentType.JSON:
                     return "application/json";
+                case EBResponseContentType.OpenCTM:
+                    return "application/x-openctm";
                 case EBResponseContentType.JS:
                     return "application/javascript";
                 case EBResponseContentType.CSS:
@@ -444,6 +446,8 @@ namespace BWebServiceUtilities_GC
                     return EBResponseContentType.ByteArray;
                 case "application/json":
                     return EBResponseContentType.JSON;
+                case "application/x-openctm":
+                    return EBResponseContentType.OpenCTM;
                 case "application/zip":
                     return EBResponseContentType.ZIP;
                 case "application/pdf":
