@@ -243,8 +243,11 @@ namespace BWebServiceUtilities
                                         }
                                     }
                                 }
-                                    
-                                Context.Response.ContentType = Response.ResponseContentType;
+                                
+                                if (Response.ResponseContentType != null)
+                                {
+                                    Context.Response.ContentType = Response.ResponseContentType;
+                                }
 
                                 if (Response.ResponseContent.Type == EBStringOrStreamEnum.String)
                                 {
