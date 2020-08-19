@@ -388,8 +388,7 @@ namespace BWebServiceUtilities_GC
 
                 using (var ResStream = _Response.GetResponseStream())
                 {
-                    var CopyStream = new BMemoryTributary();
-                    ResStream.CopyTo(CopyStream);
+                    var CopyStream = new BMemoryTributary(BUtility.ReadToEnd(ResStream));
 
                     _HttpRequestResponseContent = new BStringOrStream(CopyStream, CopyStream.Length, () => { try { CopyStream?.Dispose(); } catch { } });
                 }
