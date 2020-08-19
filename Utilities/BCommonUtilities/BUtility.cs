@@ -286,6 +286,58 @@ namespace BCommonUtilities
 
     public static class BUtility
     {
+        public static byte[] ReadToEnd(Stream _Stream)
+        {
+            long OriginalPosition = 0;
+
+            if (_Stream.CanSeek)
+            {
+                OriginalPosition = _Stream.Position;
+                _Stream.Position = 0;
+            }
+
+            try
+            {
+                byte[] ReadBuffer = new byte[4096];
+
+                int TotalBytesRead = 0;
+                int BytesRead;
+
+                while ((BytesRead = _Stream.Read(ReadBuffer, TotalBytesRead, ReadBuffer.Length - TotalBytesRead)) > 0)
+                {
+                    TotalBytesRead += BytesRead;
+
+                    if (TotalBytesRead == ReadBuffer.Length)
+                    {
+                        int NextByte = _Stream.ReadByte();
+                        if (NextByte != -1)
+                        {
+                            byte[] Temp = new byte[ReadBuffer.Length * 2];
+                            Buffer.BlockCopy(ReadBuffer, 0, Temp, 0, ReadBuffer.Length);
+                            Buffer.SetByte(Temp, TotalBytesRead, (byte)NextByte);
+                            ReadBuffer = Temp;
+                            TotalBytesRead++;
+                        }
+                    }
+                }
+
+                byte[] TmpBuffer = ReadBuffer;
+                if (ReadBuffer.Length != TotalBytesRead)
+                {
+                    TmpBuffer = new byte[TotalBytesRead];
+                    Buffer.BlockCopy(ReadBuffer, 0, TmpBuffer, 0, TotalBytesRead);
+                }
+                return TmpBuffer;
+            }
+            finally
+            {
+                if (_Stream.CanSeek)
+                {
+                    _Stream.Position = OriginalPosition;
+                }
+            }
+        }
+
         public static string TrimStart(this string _Target, string _TrimString)
         {
             if (string.IsNullOrEmpty(_TrimString)) return _Target;

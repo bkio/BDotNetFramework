@@ -388,10 +388,10 @@ namespace BWebServiceUtilities_GC
 
                 using (var ResStream = _Response.GetResponseStream())
                 {
-                    using (var Reader = new StreamReader(ResStream))
-                    {
-                        _HttpRequestResponseContent = new BStringOrStream(Reader.ReadToEnd());
-                    }
+                    var CopyStream = new BMemoryTributary();
+                    ResStream.CopyTo(CopyStream);
+
+                    _HttpRequestResponseContent = new BStringOrStream(CopyStream, CopyStream.Length, () => { try { CopyStream?.Dispose(); } catch { } });
                 }
 
                 _bHttpRequestSuccess = true;
