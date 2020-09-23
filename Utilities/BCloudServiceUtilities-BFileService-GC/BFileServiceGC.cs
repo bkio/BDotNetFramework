@@ -207,6 +207,43 @@ namespace BCloudServiceUtilities.FileServices
 
         /// <summary>
         ///
+        /// <para>DeleteFolder:</para>
+        ///
+        /// <para>Deletes a folder from File Service, caller thread will be blocked before it is done</para>
+        ///
+        /// <para>Check <seealso cref="IBFileServiceInterface.DeleteFile"/> for detailed documentation</para>
+        ///
+        /// </summary>
+        public bool DeleteFolder(
+            string _BucketName,
+            string _Folder,
+            Action<string> _ErrorMessageAction = null)
+        {
+            if (GSClient == null)
+            {
+                _ErrorMessageAction?.Invoke("BFileServiceGC->DeleteFolder: GSClient is null.");
+                return false;
+            }
+
+            try
+            {
+                var ListResult = GSClient.ListObjects(_BucketName, _Folder);
+                if (ListResult == null) return true;
+
+                foreach (var Current in ListResult)
+                {
+                    GSClient.DeleteObject(Current);
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        ///
         /// <para>DownloadFile:</para>
         ///
         /// <para>Downloads a file from File Service and stores locally/or to stream, caller thread will be blocked before it is done</para>

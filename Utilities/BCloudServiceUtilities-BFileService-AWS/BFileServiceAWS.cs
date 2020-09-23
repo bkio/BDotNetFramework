@@ -175,6 +175,78 @@ namespace BCloudServiceUtilities.FileServices
 
         /// <summary>
         ///
+        /// <para>DeleteFolder:</para>
+        ///
+        /// <para>Deletes a folder from File Service, caller thread will be blocked before it is done</para>
+        ///
+        /// <para>Check <seealso cref="IBFileServiceInterface.DeleteFile"/> for detailed documentation</para>
+        ///
+        /// </summary>
+        public bool DeleteFolder(
+            string _BucketName,
+            string _Folder,
+            Action<string> _ErrorMessageAction = null)
+        {
+            if (S3Client == null)
+            {
+                _ErrorMessageAction?.Invoke("BFileServiceAWS->DeleteFolder: S3Client is null.");
+                return false;
+            }
+
+            var PrefixedObjects = new List<KeyVersion>();
+
+            try
+            {
+                ListObjectsV2Request ListRequest = new ListObjectsV2Request()
+                {
+                    BucketName = _BucketName,
+                    Prefix = _Folder
+                };
+                using (var ListObjectsTask = S3Client.ListObjectsV2Async(ListRequest))
+                {
+                    ListObjectsTask.Wait();
+                    foreach (var FileObject in ListObjectsTask.Result.S3Objects)
+                    {
+                        if (FileObject != null)
+                        {
+                            PrefixedObjects.Add(new KeyVersion()
+                            {
+                                Key = FileObject.Key
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                PrefixedObjects = null;
+                _ErrorMessageAction?.Invoke("BFileServiceAWS->DeleteFolder-ListPrefixed: " + e.Message + ", Trace: " + e.StackTrace);
+                return false;
+            }
+
+            DeleteObjectsRequest Request = new DeleteObjectsRequest
+            {
+                BucketName = _BucketName,
+                Objects = PrefixedObjects
+            };
+
+            try
+            {
+                using (var CreatedTask = S3Client.DeleteObjectsAsync(Request))
+                {
+                    CreatedTask.Wait();
+                }
+            }
+            catch (Exception e)
+            {
+                _ErrorMessageAction?.Invoke("BFileServiceAWS->DeleteFolder: " + e.Message + ", Trace: " + e.StackTrace);
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        ///
         /// <para>DownloadFile:</para>
         ///
         /// <para>Downloads a file from File Service and stores locally/or to stream, caller thread will be blocked before it is done</para>

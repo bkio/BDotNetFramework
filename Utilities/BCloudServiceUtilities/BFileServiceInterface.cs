@@ -263,6 +263,25 @@ namespace BCloudServiceUtilities
 
         /// <summary>
         ///
+        /// <para>DeleteFolder:</para>
+        ///
+        /// <para>Deletes a folder from File Service, caller thread will be blocked before it is done</para>
+        ///
+        /// <para>Parameters:</para>
+        /// <para><paramref name="_BucketName"/>                  Name of the Bucket</para>
+        /// <para><paramref name="_Folder"/>                      Path to the folder</para>
+        /// <para><paramref name="_ErrorMessageAction"/>          Error messages will be pushed to this action</para>
+        ///
+        /// <returns>                                             Returns: Operation success </returns>
+        ///
+        /// </summary>
+        bool DeleteFolder(
+            string _BucketName,
+            string _Folder,
+            Action<string> _ErrorMessageAction = null);
+
+        /// <summary>
+        ///
         /// <para>CopyFile:</para>
         ///
         /// <para>Copy a file from a bucket and relative location to another in File Service, caller thread will be blocked before it is done</para>
