@@ -1,129 +1,30 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{41C90E45-F102-452E-921F-803914DFF09D}</ProjectGuid>
     <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>BCloudServiceUtilities_Tests</RootNamespace>
-    <AssemblyName>BCloudServiceUtilities-Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>..\..\Binaries\Debug\BCloudServiceUtilitiesTest\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>..\..\Binaries\Release\BCloudServiceUtilitiesTest\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup>
     <StartupObject>BCloudServiceUtilitiesTest.BProgram</StartupObject>
   </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="BProgram.cs" />
-    <Compile Include="BRunTests.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tests\BDatabaseServicesTest.cs" />
-    <Compile Include="Tests\BEmailServiceTest.cs" />
-    <Compile Include="Tests\BFileServiceTest.cs" />
-    <Compile Include="Tests\BLoggingServiceTest.cs" />
-    <Compile Include="Tests\BMemoryPubSubServiceTest.cs" />
+    <ProjectReference Include="..\BCloudServiceUtilities-BDatabaseService-AWS\BCloudServiceUtilities-BDatabaseService-AWS.csproj" />
+    <ProjectReference Include="..\BCloudServiceUtilities-BDatabaseService-GC\BCloudServiceUtilities-BDatabaseService-GC.csproj" />
+    <ProjectReference Include="..\BCloudServiceUtilities-BFileService-AWS\BCloudServiceUtilities-BFileService-AWS.csproj" />
+    <ProjectReference Include="..\BCloudServiceUtilities-BFileService-GC\BCloudServiceUtilities-BFileService-GC.csproj" />
+    <ProjectReference Include="..\BCloudServiceUtilities-BLoggingService-AWS\BCloudServiceUtilities-BLoggingService-AWS.csproj" />
+    <ProjectReference Include="..\BCloudServiceUtilities-BLoggingService-GC\BCloudServiceUtilities-BLoggingService-GC.csproj" />
+    <ProjectReference Include="..\BCloudServiceUtilities-BMailService-SendGrid\BCloudServiceUtilities-BMailService-SendGrid.csproj" />
+    <ProjectReference Include="..\BCloudServiceUtilities-BMemoryService-Redis\BCloudServiceUtilities-BMemoryService-Redis.csproj" />
+    <ProjectReference Include="..\BCloudServiceUtilities-BPubSubService-AWS\BCloudServiceUtilities-BPubSubService-AWS.csproj" />
+    <ProjectReference Include="..\BCloudServiceUtilities-BPubSubService-GC\BCloudServiceUtilities-BPubSubService-GC.csproj" />
+    <ProjectReference Include="..\BCloudServiceUtilities-BPubSubService-Redis\BCloudServiceUtilities-BPubSubService-Redis.csproj" />
+    <ProjectReference Include="..\BCloudServiceUtilities\BCloudServiceUtilities.csproj" />
+    <ProjectReference Include="..\BCommonUtilities\BCommonUtilities.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BCloudServiceUtilities-BDatabaseService-AWS\BCloudServiceUtilities-BDatabaseService-AWS.csproj">
-      <Project>{0479aee5-3b55-4a1e-97d5-f25f1309482f}</Project>
-      <Name>BCloudServiceUtilities-BDatabaseService-AWS</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BCloudServiceUtilities-BDatabaseService-GC\BCloudServiceUtilities-BDatabaseService-GC.csproj">
-      <Project>{1b30dab9-8bfb-41aa-8664-184139845102}</Project>
-      <Name>BCloudServiceUtilities-BDatabaseService-GC</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BCloudServiceUtilities-BFileService-AWS\BCloudServiceUtilities-BFileService-AWS.csproj">
-      <Project>{660a6ca5-8587-41c4-9ce6-ec64ed527a35}</Project>
-      <Name>BCloudServiceUtilities-BFileService-AWS</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BCloudServiceUtilities-BFileService-GC\BCloudServiceUtilities-BFileService-GC.csproj">
-      <Project>{94c5ca3c-506d-47d0-bd71-ac998340baf3}</Project>
-      <Name>BCloudServiceUtilities-BFileService-GC</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BCloudServiceUtilities-BLoggingService-AWS\BCloudServiceUtilities-BLoggingService-AWS.csproj">
-      <Project>{3c0a6f16-aae7-4b64-a2d9-38cd5d7c33b6}</Project>
-      <Name>BCloudServiceUtilities-BLoggingService-AWS</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BCloudServiceUtilities-BLoggingService-GC\BCloudServiceUtilities-BLoggingService-GC.csproj">
-      <Project>{1c8d99c8-0557-4e05-a0eb-0c50a8723910}</Project>
-      <Name>BCloudServiceUtilities-BLoggingService-GC</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BCloudServiceUtilities-BMailService-SendGrid\BCloudServiceUtilities-BMailService-SendGrid.csproj">
-      <Project>{5b09d876-b2db-46ea-abdc-130e6da6e82c}</Project>
-      <Name>BCloudServiceUtilities-BMailService-SendGrid</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BCloudServiceUtilities-BMemoryService-Redis\BCloudServiceUtilities-BMemoryService-Redis.csproj">
-      <Project>{c6abb91e-89a6-420f-acbf-7119c8821eb8}</Project>
-      <Name>BCloudServiceUtilities-BMemoryService-Redis</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BCloudServiceUtilities-BPresentationService-GC\BCloudServiceUtilities-BPresentationService-GC.csproj">
-      <Project>{cc418054-a1a3-42dd-8214-935005249ddf}</Project>
-      <Name>BCloudServiceUtilities-BPresentationService-GC</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BCloudServiceUtilities-BPubSubService-AWS\BCloudServiceUtilities-BPubSubService-AWS.csproj">
-      <Project>{c353c6b8-bd4e-4cf0-b213-7c7b28842066}</Project>
-      <Name>BCloudServiceUtilities-BPubSubService-AWS</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BCloudServiceUtilities-BPubSubService-GC\BCloudServiceUtilities-BPubSubService-GC.csproj">
-      <Project>{cc75bf42-af11-48b9-8f1f-86f5194d0c28}</Project>
-      <Name>BCloudServiceUtilities-BPubSubService-GC</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BCloudServiceUtilities-BPubSubService-Redis\BCloudServiceUtilities-BPubSubService-Redis.csproj">
-      <Project>{9bea5119-4edd-4685-970c-c4fad9cb06f1}</Project>
-      <Name>BCloudServiceUtilities-BPubSubService-Redis</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BCloudServiceUtilities-BTracingService-Zipkin\BCloudServiceUtilities-BTracingService-Zipkin.csproj">
-      <Project>{1fad2822-6e27-44dd-8ac0-3e90635bc0b8}</Project>
-      <Name>BCloudServiceUtilities-BTracingService-Zipkin</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BCloudServiceUtilities\BCloudServiceUtilities.csproj">
-      <Project>{c01963fb-2fe6-4d69-bd3e-1d4d33d8686f}</Project>
-      <Name>BCloudServiceUtilities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BCommonUtilities\BCommonUtilities.csproj">
-      <Project>{daa7f36d-3bca-49be-943d-2215710ea40f}</Project>
-      <Name>BCommonUtilities</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>

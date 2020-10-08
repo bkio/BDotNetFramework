@@ -65,7 +65,7 @@ namespace BWebServiceUtilities
 
         private bool LookForListenersFromRequest(out BWebServiceBase _Callback, HttpListenerContext _Context)
         {
-            KeyValuePair<string, Func<BWebServiceBase>> LongestMatch;
+            var LongestMatch = new KeyValuePair<string, Func<BWebServiceBase>>(null, null);
             int LongestLength = 0;
 
             foreach (var CurrentPrefixes in PrefixesToListen)

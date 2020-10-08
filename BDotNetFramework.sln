@@ -35,8 +35,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BPub
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BTracingService-Zipkin", "Utilities\BCloudServiceUtilities-BTracingService-Zipkin\BCloudServiceUtilities-BTracingService-Zipkin.csproj", "{1FAD2822-6E27-44DD-8AC0-3E90635BC0B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BCloudServiceUtilities-Tests", "Utilities\BCloudServiceUtilities-Tests\BCloudServiceUtilities-Tests.csproj", "{41C90E45-F102-452E-921F-803914DFF09D}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities", "Utilities\BCloudServiceUtilities\BCloudServiceUtilities.csproj", "{C01963FB-2FE6-4D69-BD3E-1D4D33D8686F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCommonUtilities", "Utilities\BCommonUtilities\BCommonUtilities.csproj", "{DAA7F36D-3BCA-49BE-943D-2215710EA40F}"
@@ -85,9 +83,11 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities", "Servic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BWebServiceUtilities-GC", "Utilities\BWebServiceUtilities-GC\BWebServiceUtilities-GC.csproj", "{1C644898-999F-4A15-8C16-9ACD72F9C828}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BCloudServiceUtilities-BVMService-GC", "Utilities\BCloudServiceUtilities-BVMService-GC\BCloudServiceUtilities-BVMService-GC.csproj", "{F60CF01A-1F41-450D-ADB2-8DACAD537E96}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BVMService-GC", "Utilities\BCloudServiceUtilities-BVMService-GC\BCloudServiceUtilities-BVMService-GC.csproj", "{F60CF01A-1F41-450D-ADB2-8DACAD537E96}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-VMService-GC", "Services\BServiceUtilities-VMService-GC\BServiceUtilities-VMService-GC.shproj", "{957218FD-0307-4215-B7C9-CA7D207A0309}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BCloudServiceUtilities-Tests", "Utilities\BCloudServiceUtilities-Tests\BCloudServiceUtilities-Tests.csproj", "{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -168,10 +168,6 @@ Global
 		{1FAD2822-6E27-44DD-8AC0-3E90635BC0B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1FAD2822-6E27-44DD-8AC0-3E90635BC0B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1FAD2822-6E27-44DD-8AC0-3E90635BC0B8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{41C90E45-F102-452E-921F-803914DFF09D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{41C90E45-F102-452E-921F-803914DFF09D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{41C90E45-F102-452E-921F-803914DFF09D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{41C90E45-F102-452E-921F-803914DFF09D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C01963FB-2FE6-4D69-BD3E-1D4D33D8686F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C01963FB-2FE6-4D69-BD3E-1D4D33D8686F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C01963FB-2FE6-4D69-BD3E-1D4D33D8686F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -212,6 +208,10 @@ Global
 		{F60CF01A-1F41-450D-ADB2-8DACAD537E96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F60CF01A-1F41-450D-ADB2-8DACAD537E96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F60CF01A-1F41-450D-ADB2-8DACAD537E96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -230,7 +230,6 @@ Global
 		{CC75BF42-AF11-48B9-8F1F-86F5194D0C28} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{9BEA5119-4EDD-4685-970C-C4FAD9CB06F1} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{1FAD2822-6E27-44DD-8AC0-3E90635BC0B8} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
-		{41C90E45-F102-452E-921F-803914DFF09D} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{C01963FB-2FE6-4D69-BD3E-1D4D33D8686F} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{DAA7F36D-3BCA-49BE-943D-2215710EA40F} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{EB5474E7-F207-4025-BB6D-5CE4304D4A18} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
@@ -257,6 +256,7 @@ Global
 		{1C644898-999F-4A15-8C16-9ACD72F9C828} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{F60CF01A-1F41-450D-ADB2-8DACAD537E96} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{957218FD-0307-4215-B7C9-CA7D207A0309} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0A20A57-39B7-4A17-85B0-DB0190848294}
