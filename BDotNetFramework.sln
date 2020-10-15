@@ -87,7 +87,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BVMS
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-VMService-GC", "Services\BServiceUtilities-VMService-GC\BServiceUtilities-VMService-GC.shproj", "{957218FD-0307-4215-B7C9-CA7D207A0309}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BCloudServiceUtilities-Tests", "Utilities\BCloudServiceUtilities-Tests\BCloudServiceUtilities-Tests.csproj", "{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-Tests", "Utilities\BCloudServiceUtilities-Tests\BCloudServiceUtilities-Tests.csproj", "{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExampleService", "ExampleService", "{1F89BE21-8BE5-4B1C-B3EF-E0CE45F84E24}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ServiceUtilities_All", "Utilities\ServiceUtilities_All\ServiceUtilities_All.shproj", "{CED4E48F-9644-4DCF-A6A2-1D91EEF01D87}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ServiceUtilities_PubSub_DB_Users", "Utilities\ServiceUtilities_PubSub_DB_Users\ServiceUtilities_PubSub_DB_Users.shproj", "{F87B8C2B-AD95-4C42-8D8E-DF69483A6139}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ServiceUtilities_PubSub_Users", "Utilities\ServiceUtilities_PubSub_Users\ServiceUtilities_PubSub_Users.shproj", "{BECBE5E8-7D82-4EC0-996F-380D24E065F1}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -107,9 +115,12 @@ Global
 		Services\BServiceUtilities-VMService-GC\BServiceUtilities-VMService-GC.projitems*{957218fd-0307-4215-b7c9-ca7d207a0309}*SharedItemsImports = 13
 		Services\BServiceUtilities-LoggingService-GC\BServiceUtilities-LoggingService-GC.projitems*{abf9c164-adde-4e24-b5d9-2b4247f323d9}*SharedItemsImports = 13
 		Services\BServiceUtilities-SMSService-Twilio\BServiceUtilities-SMSService-Twilio.projitems*{b4dd4534-945f-4fd1-894d-e5ac2cc254fc}*SharedItemsImports = 13
+		Utilities\ServiceUtilities_PubSub_Users\ServiceUtilities_PubSub_Users.projitems*{becbe5e8-7d82-4ec0-996f-380d24e065f1}*SharedItemsImports = 13
 		Services\BServiceUtilities-FileService-GC\BServiceUtilities-FileService-GC.projitems*{c7d560ac-a66b-44e9-8634-26543a8ead2d}*SharedItemsImports = 13
 		Services\BServiceUtilities\BServiceUtilities.projitems*{cd786aa9-0eff-4445-b49c-fae46451f8bc}*SharedItemsImports = 13
+		Utilities\ServiceUtilities_All\ServiceUtilities_All.projitems*{ced4e48f-9644-4dcf-a6a2-1d91eef01d87}*SharedItemsImports = 13
 		Services\BServiceUtilities-DatabaseService-AWS\BServiceUtilities-DatabaseService-AWS.projitems*{d41edae0-59e2-4faf-9fda-b36c7b22ac60}*SharedItemsImports = 13
+		Utilities\ServiceUtilities_PubSub_DB_Users\ServiceUtilities_PubSub_DB_Users.projitems*{f87b8c2b-ad95-4c42-8d8e-df69483a6139}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -234,7 +245,7 @@ Global
 		{DAA7F36D-3BCA-49BE-943D-2215710EA40F} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{EB5474E7-F207-4025-BB6D-5CE4304D4A18} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{FC4FD518-FC36-48D8-B458-0C7258229745} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
-		{12DA451B-D5B9-453B-8B07-FFFCCBA7742E} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{12DA451B-D5B9-453B-8B07-FFFCCBA7742E} = {1F89BE21-8BE5-4B1C-B3EF-E0CE45F84E24}
 		{1ACDADFE-53D8-4171-BB66-85AFE91205DD} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{4A1405F7-7488-4F1C-A520-FF90EF8AF83B} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{18AFC8BD-2D17-40F0-B02C-34F67C5A7D79} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
@@ -257,6 +268,9 @@ Global
 		{F60CF01A-1F41-450D-ADB2-8DACAD537E96} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{957218FD-0307-4215-B7C9-CA7D207A0309} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 		{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
+		{CED4E48F-9644-4DCF-A6A2-1D91EEF01D87} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
+		{F87B8C2B-AD95-4C42-8D8E-DF69483A6139} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
+		{BECBE5E8-7D82-4EC0-996F-380D24E065F1} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0A20A57-39B7-4A17-85B0-DB0190848294}

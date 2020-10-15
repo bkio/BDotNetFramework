@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>becbe5e8-7d82-4ec0-996f-380d24e065f1</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>ServiceUtilities_PubSub_Users</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Manager_PubSubService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PubSubActions\Action.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PubSubActions\Actions.cs" />
+    <Compile Include="..\..\common\ServiceUtilities_PubSub_Users\PubSubActions\Action_BatchProcessAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PubSubActions\Action_CustomProcedureActions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PubSubActions\Action_ModelActions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PubSubActions\Action_OperationTimeout.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PubSubActions\Action_StorageActions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PubSubActions\Action_UserActions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PubSubRelated\PubSubServiceBase.cs" />
+  </ItemGroup>
+</Project>

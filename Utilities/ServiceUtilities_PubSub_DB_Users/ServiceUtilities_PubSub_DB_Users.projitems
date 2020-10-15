@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>f87b8c2b-ad95-4c42-8d8e-df69483a6139</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>ServiceUtilities_PubSub_DB_Users</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)PubSubActions\Action_DeliveryEnsurer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PubSubControllers\Controller_AtomicDBOperation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PubSubControllers\Controller_DeliveryEnsurer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PubSubRelated\FailedDeliveryEnsurerOperationEntry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PubSubRelated\PubSubServiceBaseTimeoutableDeliveryEnsurerUser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PubSubRelated\WebServiceBaseTimeoutable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PubSubRelated\WebServiceBaseTimeoutableDeliveryEnsurerUser.cs" />
+  </ItemGroup>
+</Project>
