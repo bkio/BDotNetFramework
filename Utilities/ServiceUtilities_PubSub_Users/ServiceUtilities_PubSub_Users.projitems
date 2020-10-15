@@ -12,7 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Manager_PubSubService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PubSubActions\Action.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PubSubActions\Actions.cs" />
-    <Compile Include="..\..\common\ServiceUtilities_PubSub_Users\PubSubActions\Action_BatchProcessAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PubSubActions\Action_BatchProcessAction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PubSubActions\Action_CustomProcedureActions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PubSubActions\Action_ModelActions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PubSubActions\Action_OperationTimeout.cs" />
