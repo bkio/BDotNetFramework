@@ -201,11 +201,21 @@ namespace BCloudServiceUtilitiesTest.Tests
 
             //Test set file accessibility
             PrintAction?.Invoke("TestSetFileAccessibility->Log-> Testing SetFileAccessibility...");
-            SelectedFileService.SetFileAccessibility(BucketName, FileKey, EBRemoteFileReadPublicity.PublicRead, (string Message) =>
+
+            try
             {
-                Console.WriteLine("TestSetFileAccessibility->Error-> " + Message);
-                bLocalFailure = true;
-            });
+                SelectedFileService.SetFileAccessibility(BucketName, FileKey, EBRemoteFileReadPublicity.PublicRead, (string Message) =>
+                {
+                    Console.WriteLine("TestSetFileAccessibility->Error-> " + Message);
+                    bLocalFailure = true;
+                });
+            }
+            catch(NotSupportedException)
+            {
+                bLocalFailure = false;
+            }
+
+
             if (bLocalFailure)
             {
                 PrintAction?.Invoke("TestSetFileAccessibility->Error-> SetFileAccessibility failed.");

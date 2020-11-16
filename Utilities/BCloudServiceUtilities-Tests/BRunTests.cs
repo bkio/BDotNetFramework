@@ -8,6 +8,7 @@ using BCloudServiceUtilities.LoggingServices;
 using BCloudServiceUtilities.MailServices;
 using BCloudServiceUtilities.MemoryServices;
 using BCloudServiceUtilities.PubSubServices;
+using BCloudServiceUtilities_BFileService_AZ;
 using BCloudServiceUtilitiesTest.Tests;
 using BCommonUtilities;
 
@@ -230,6 +231,18 @@ namespace BCloudServiceUtilitiesTest
                     RequiredEnvVars["AWS_ACCESS_KEY"],
                     RequiredEnvVars["AWS_SECRET_KEY"],
                     RequiredEnvVars["AWS_REGION"],
+                    Console.WriteLine),
+                RequiredEnvVars["FILESERVICE_BUCKET"],
+                RequiredEnvVars["FILESERVICE_REMOTE_PATH"],
+                RequiredEnvVars["FILESERVICE_TEST_FILE_LOCAL_PATH"],
+                Comparator.AddLine);
+            if (!FSTests_AWS.Start()) return false;
+
+            Comparator.Next();
+
+            var FSTests_AZ = new BFileServiceTest(
+                new BFileServiceAZ(
+                    RequiredEnvVars["AZ_STORAGE_CONNECTION_STRING"],
                     Console.WriteLine),
                 RequiredEnvVars["FILESERVICE_BUCKET"],
                 RequiredEnvVars["FILESERVICE_REMOTE_PATH"],

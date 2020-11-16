@@ -97,6 +97,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ServiceUtilities_PubSub_DB_
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ServiceUtilities_PubSub_Users", "Utilities\ServiceUtilities_PubSub_Users\ServiceUtilities_PubSub_Users.shproj", "{BECBE5E8-7D82-4EC0-996F-380D24E065F1}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BFileService-AZ", "Utilities\BCloudServiceUtilities-BFileService-AZ\BCloudServiceUtilities-BFileService-AZ.csproj", "{44BBC378-4B2A-4309-8178-06F6C51347EA}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Services\BServiceUtilities-FileService-GC\BServiceUtilities-FileService-GC.projitems*{12da451b-d5b9-453b-8b07-fffccba7742e}*SharedItemsImports = 5
@@ -223,6 +225,10 @@ Global
 		{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44BBC378-4B2A-4309-8178-06F6C51347EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44BBC378-4B2A-4309-8178-06F6C51347EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44BBC378-4B2A-4309-8178-06F6C51347EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44BBC378-4B2A-4309-8178-06F6C51347EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -271,6 +277,7 @@ Global
 		{CED4E48F-9644-4DCF-A6A2-1D91EEF01D87} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{F87B8C2B-AD95-4C42-8D8E-DF69483A6139} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{BECBE5E8-7D82-4EC0-996F-380D24E065F1} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
+		{44BBC378-4B2A-4309-8178-06F6C51347EA} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0A20A57-39B7-4A17-85B0-DB0190848294}

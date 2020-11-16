@@ -15,6 +15,7 @@
     <ProjectReference Include="..\BCloudServiceUtilities-BDatabaseService-AWS\BCloudServiceUtilities-BDatabaseService-AWS.csproj" />
     <ProjectReference Include="..\BCloudServiceUtilities-BDatabaseService-GC\BCloudServiceUtilities-BDatabaseService-GC.csproj" />
     <ProjectReference Include="..\BCloudServiceUtilities-BFileService-AWS\BCloudServiceUtilities-BFileService-AWS.csproj" />
+    <ProjectReference Include="..\BCloudServiceUtilities-BFileService-AZ\BCloudServiceUtilities-BFileService-AZ.csproj" />
     <ProjectReference Include="..\BCloudServiceUtilities-BFileService-GC\BCloudServiceUtilities-BFileService-GC.csproj" />
     <ProjectReference Include="..\BCloudServiceUtilities-BLoggingService-AWS\BCloudServiceUtilities-BLoggingService-AWS.csproj" />
     <ProjectReference Include="..\BCloudServiceUtilities-BLoggingService-GC\BCloudServiceUtilities-BLoggingService-GC.csproj" />
