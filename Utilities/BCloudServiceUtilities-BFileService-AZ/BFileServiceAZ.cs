@@ -17,13 +17,15 @@ namespace BCloudServiceUtilities_BFileService_AZ
     public class BFileServiceAZ : IBFileServiceInterface
     {
         private readonly BlobServiceClient AServiceClient;
+        private readonly StorageSharedKeyCredential SharedKey;
         private readonly bool bInitializationSucceed;
 
-        public BFileServiceAZ(string _ConnectionString, Action<string> _ErrorMessageAction = null)
+        public BFileServiceAZ(string _ServieUrl, string _AccountName, string _AccountKey, Action<string> _ErrorMessageAction = null)
         {
             try
             {
-                AServiceClient = new BlobServiceClient(_ConnectionString);
+                SharedKey = new StorageSharedKeyCredential(_AccountName, _AccountKey);
+                AServiceClient = new BlobServiceClient(new Uri(_ServieUrl), SharedKey);
                 bInitializationSucceed = true;
             }
             catch (Exception ex)
@@ -128,8 +130,20 @@ namespace BCloudServiceUtilities_BFileService_AZ
                 BlobContainerClient ContainerClient = AServiceClient.GetBlobContainerClient(_BucketName);
                 BlobClient Blob = ContainerClient.GetBlobClient(_KeyInBucket);
 
-                Uri U = Blob.GenerateSasUri(BlobSasPermissions.Read, new DateTimeOffset(DateTime.Now, new TimeSpan(0, _URLValidForMinutes, 0)));
-                _SignedUrl = U.ToString();
+                BlobSasBuilder SasBuilder = new BlobSasBuilder()
+                {
+                    BlobContainerName = _BucketName,
+                    BlobName = _KeyInBucket,
+                    Resource = "b",
+                };
+
+                SasBuilder.StartsOn = DateTimeOffset.UtcNow;
+                SasBuilder.ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(_URLValidForMinutes);
+                SasBuilder.SetPermissions(BlobContainerSasPermissions.Read);
+
+                string SasToken = SasBuilder.ToSasQueryParameters(SharedKey).ToString();
+
+                _SignedUrl = $"{Blob.Uri}?{SasToken}";
 
                 return true;
             }
@@ -157,11 +171,21 @@ namespace BCloudServiceUtilities_BFileService_AZ
             {
                 BlobContainerClient ContainerClient = AServiceClient.GetBlobContainerClient(_BucketName);
                 BlobClient Blob = ContainerClient.GetBlobClient(_KeyInBucket);
-                Blob.SetHttpHeaders(new BlobHttpHeaders() { ContentType = _ContentType });
 
-                Uri U = Blob.GenerateSasUri(BlobSasPermissions.Create, new DateTimeOffset(DateTime.Now, new TimeSpan(0, _URLValidForMinutes, 0)));
+                BlobSasBuilder SasBuilder = new BlobSasBuilder()
+                {
+                    BlobContainerName = _BucketName,
+                    BlobName = _KeyInBucket,
+                    Resource = "b",
+                };
 
-                _SignedUrl = U.ToString();
+                SasBuilder.StartsOn = DateTimeOffset.UtcNow;
+                SasBuilder.ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(_URLValidForMinutes);
+                SasBuilder.SetPermissions(BlobContainerSasPermissions.Create);
+
+                string SasToken = SasBuilder.ToSasQueryParameters(SharedKey).ToString();
+
+                _SignedUrl = $"{Blob.Uri}?{SasToken}";
 
                 return true;
             }
@@ -531,7 +555,7 @@ namespace BCloudServiceUtilities_BFileService_AZ
                 }
 
                 Response<BlobInfo> Resp = Blob.SetMetadata(TagDictionary);
-                
+
                 return true;
             }
             catch (Exception ex)
@@ -589,7 +613,7 @@ namespace BCloudServiceUtilities_BFileService_AZ
                     try
                     {
                         Response = Blob.Upload(FS);
-                        
+
                         if (Response.Value == null)
                         {
                             _ErrorMessageAction?.Invoke("BFileServiceAZ->UploadFile: Operation has failed.");
@@ -636,7 +660,7 @@ namespace BCloudServiceUtilities_BFileService_AZ
                     {
                         Blob.SetMetadata(NewMetadata);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         _ErrorMessageAction?.Invoke($"BFileServiceAZ->UploadFile: {ex.Message}, Trace: {ex.StackTrace}");
                         return false;
@@ -657,7 +681,7 @@ namespace BCloudServiceUtilities_BFileService_AZ
                 {
                     Blob.SetHttpHeaders(Header);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     _ErrorMessageAction?.Invoke($"BFileServiceAZ->UploadFile: {ex.Message}, Trace: {ex.StackTrace}");
                     return false;
