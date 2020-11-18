@@ -1,4 +1,5 @@
-﻿using Azure;
+﻿/// MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
+using Azure;
 using Azure.Storage;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
@@ -20,8 +21,9 @@ using Microsoft.Rest.Azure;
 using Microsoft.Azure.EventGrid.Models;
 using Azure.Identity;
 using Azure.Core;
+using BCloudServiceUtilities_BFileService_AZ;
 
-namespace BCloudServiceUtilities_BFileService_AZ
+namespace BCloudServiceUtilities.FileServices
 {
     public class BFileServiceAZ : IBFileServiceInterface
     {
@@ -740,6 +742,8 @@ namespace BCloudServiceUtilities_BFileService_AZ
 
         /// <summary>
         /// With azure event grid all parameters provided here except for the topic name is used on the subscriber side so everything except for topic name will have an effect on the resulting system topic.
+        /// The way this is used with other cloud providers is not valid for azure because azure only allows one topic per storage account where all events gets pubished to.
+        /// So either terraform the system topics in or make sure to call this only once per storage account and then when subscribing to the created system topic use the parameters you would have used here in the subscribtion filters to get the right events to the right places.
         /// </summary>
         public bool CreateFilePubSubNotification(string _BucketName, string _TopicName, string _PathPrefixToListen, List<EBFilePubSubNotificationEventType> _EventsToListen, Action<string> _ErrorMessageAction = null)
         {
