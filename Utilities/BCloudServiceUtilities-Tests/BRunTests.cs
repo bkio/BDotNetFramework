@@ -17,6 +17,7 @@ namespace BCloudServiceUtilitiesTest
     /// 
     /// <para>Required environment variables:</para>
     /// 
+    /// <para>APPINSIGHTS_INSTRUMENTATIONKEY</para>
     /// <para>GC_PROJECT_ID</para>
     /// <para>AWS_ACCESS_KEY</para>
     /// <para>AWS_SECRET_KEY</para>
@@ -107,6 +108,13 @@ namespace BCloudServiceUtilitiesTest
                     Console.WriteLine),
                 Console.WriteLine);
             if (!LoggingTests_AWS.Start()) return false;
+
+            var LoggingTests_Azure = new BLoggingServiceTest(
+                new BLoggingServiceAzure(
+                    RequiredEnvVars["APPINSIGHTS_INSTRUMENTATIONKEY"],
+                    Console.WriteLine),
+                Console.WriteLine);
+            if (!LoggingTests_Azure.Start()) return false;
 
             /*
              * E-mail Services tests
