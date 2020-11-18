@@ -1,4 +1,5 @@
-﻿using BCloudServiceUtilities_BFileService_AZ.Models;
+﻿/// MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
+using BCloudServiceUtilities_BFileService_AZ.Models;
 using Microsoft.Azure.Management.EventGrid;
 using Microsoft.Azure.Management.EventGrid.Models;
 using Microsoft.Rest;

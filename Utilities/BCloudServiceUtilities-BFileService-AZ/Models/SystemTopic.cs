@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Management.EventGrid.Models;
+﻿/// MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
+using Microsoft.Azure.Management.EventGrid.Models;
 using Microsoft.Rest;
 using Newtonsoft.Json;
 using System;
