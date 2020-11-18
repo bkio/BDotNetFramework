@@ -242,7 +242,15 @@ namespace BCloudServiceUtilitiesTest
 
             var FSTests_AZ = new BFileServiceTest(
                 new BFileServiceAZ(
-                    RequiredEnvVars["AZ_STORAGE_CONNECTION_STRING"],
+                    RequiredEnvVars["AZ_STORAGE_SERVICE"],
+                    RequiredEnvVars["AZ_STORAGE_ACCOUNT"],
+                    RequiredEnvVars["AZ_STORAGE_ACCOUNT_KEY"],
+                    RequiredEnvVars["AZ_STORAGE_RESOURCE_GROUP"],
+                    RequiredEnvVars["AZ_STORAGE_MANAGEMENT_APP_ID"],
+                    RequiredEnvVars["AZ_STORAGE_MANAGEMENT_SECRET"],
+                    RequiredEnvVars["AZ_SUBSCRIPTION_ID"],
+                    RequiredEnvVars["AZ_TENANT_ID"],
+                    RequiredEnvVars["AZ_STORAGE_LOCATION"],
                     Console.WriteLine),
                 RequiredEnvVars["FILESERVICE_BUCKET"],
                 RequiredEnvVars["FILESERVICE_REMOTE_PATH"],

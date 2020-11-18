@@ -5,12 +5,21 @@ using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
 using BCloudServiceUtilities;
 using BCommonUtilities;
+using Microsoft.Azure.Management.EventGrid.Models;
+using Microsoft.Azure.Management.EventGrid;
+using Microsoft.Rest;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
+using BCloudServiceUtilities_BFileService_AZ.Models;
+using Microsoft.Rest.Azure;
+using Microsoft.Azure.EventGrid.Models;
+using Azure.Identity;
+using Azure.Core;
 
 namespace BCloudServiceUtilities_BFileService_AZ
 {
@@ -20,13 +29,41 @@ namespace BCloudServiceUtilities_BFileService_AZ
         private readonly StorageSharedKeyCredential SharedKey;
         private readonly bool bInitializationSucceed;
 
-        public BFileServiceAZ(string _ServieUrl, string _AccountName, string _AccountKey, Action<string> _ErrorMessageAction = null)
+        private readonly string ServiceClientId;
+        private readonly string ServiceSecret;
+        private readonly string TenantId;
+        private readonly string ResourceGroup;
+        private readonly string SubscriptionId;
+        private readonly string StorageAccountName;
+        private readonly string Location;
+
+        private AccessToken LastGeneratedToken = new AccessToken("", DateTimeOffset.MinValue);
+
+        public BFileServiceAZ(
+            string _ServiceUrl,
+            string _StorageAccountName,
+            string _StorageAccountKey,
+            string _ResourceGroup,
+            string _ManagementClientId,
+            string _ManagementSecret,
+            string _SubscriptionId,
+            string _TenantId,
+            string _Location,
+            Action<string> _ErrorMessageAction = null)
         {
             try
             {
-                SharedKey = new StorageSharedKeyCredential(_AccountName, _AccountKey);
-                AServiceClient = new BlobServiceClient(new Uri(_ServieUrl), SharedKey);
+                SharedKey = new StorageSharedKeyCredential(_StorageAccountName, _StorageAccountKey);
+                AServiceClient = new BlobServiceClient(new Uri(_ServiceUrl), SharedKey);
                 bInitializationSucceed = true;
+
+                ServiceClientId = _ManagementClientId;
+                ServiceSecret = _ManagementSecret;
+                TenantId = _TenantId;
+                ResourceGroup = _ResourceGroup;
+                SubscriptionId = _SubscriptionId;
+                StorageAccountName = _StorageAccountName;
+                Location = _Location;
             }
             catch (Exception ex)
             {
@@ -702,13 +739,55 @@ namespace BCloudServiceUtilities_BFileService_AZ
         }
 
         /// <summary>
-        /// All events on blob storage are active by default with a fixed name so you can only subscribe to them. You cannot create a custom topic on storage directly.
-        /// If you want a custom topic name you'll have to subscribe to the fixed events and map them to your topic names.
-        /// Calling this throws NotSupportedException
+        /// With azure event grid all parameters provided here except for the topic name is used on the subscriber side so everything except for topic name will have an effect on the resulting system topic.
         /// </summary>
         public bool CreateFilePubSubNotification(string _BucketName, string _TopicName, string _PathPrefixToListen, List<EBFilePubSubNotificationEventType> _EventsToListen, Action<string> _ErrorMessageAction = null)
         {
-            throw new NotSupportedException();
+            return CreateStorageSystemTopic(_TopicName, _ErrorMessageAction);
+        }
+
+        /// <summary>
+        /// Will create a system topic on a storage account where Azure will publish events for containers in the storage account.
+        /// Only one system topic can be created per storage account.
+        /// </summary>
+        private bool CreateStorageSystemTopic(string _TopicName, Action<string> _ErrorMessageAction = null)
+        {
+            try
+            {
+                SystemTopic TopicInfo = new SystemTopic(Location,
+                    $"/subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroup}/providers/Microsoft.EventGrid/systemTopics/{_TopicName}",
+                    _TopicName,
+                    "Microsoft.EventGrid/systemTopics",
+                    null,
+                    null,
+                    $"/subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroup}/providers/microsoft.storage/storageaccounts/{StorageAccountName}",
+                    null,
+                    "microsoft.storage.storageaccounts");
+
+                if (LastGeneratedToken.ExpiresOn.UtcDateTime <= DateTime.UtcNow)
+                {
+                    ClientSecretCredential ClientCred = new ClientSecretCredential(TenantId, ServiceClientId, ServiceSecret);
+                    TokenRequestContext RequestContext = new TokenRequestContext(new string[] { $"https://management.azure.com/.default" });
+                    LastGeneratedToken = ClientCred.GetToken(RequestContext);
+                }
+
+                TokenCredentials TokenCredential = new TokenCredentials(new StringTokenProvider(LastGeneratedToken.Token, "Bearer"));
+
+                EventGridManagementClient ManagmentClient = new EventGridManagementClient(TokenCredential);
+                TokenCredential.InitializeServiceClient(ManagmentClient);
+                ManagmentClient.SubscriptionId = SubscriptionId;
+
+                AZSystemTopicOperations SystemTopicOperations = new AZSystemTopicOperations(ManagmentClient);
+
+                bool Success = SystemTopicOperations.CreateOrUpdate(ResourceGroup, _TopicName, TopicInfo, out SystemTopic _, _ErrorMessageAction);
+
+                return Success;
+            }
+            catch (Exception ex)
+            {
+                _ErrorMessageAction?.Invoke($"{ex.Message} :\n {ex.StackTrace}");
+                return false;
+            }
         }
     }
 }
