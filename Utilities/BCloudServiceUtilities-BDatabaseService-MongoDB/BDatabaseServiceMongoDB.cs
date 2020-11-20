@@ -325,7 +325,14 @@ namespace BCloudServiceUtilities.DatabaseServices
 
             if (_ConditionExpression != null)
             {
-                Filter = Builders<BsonDocument>.Filter.And(Filter, (_ConditionExpression as BDatabaseAttributeConditionMongo).Filter);
+                if(_ConditionExpression.AttributeConditionType == EBDatabaseAttributeConditionType.ArrayElementNotExist)
+                {
+                    Filter = Builders<BsonDocument>.Filter.And(Filter, (_ConditionExpression as BAttributeArrayElementNotExistConditionMongoDb).GetArrayElementFilter(_ElementName));
+                }
+                else
+                {
+                    Filter = Builders<BsonDocument>.Filter.And(Filter, (_ConditionExpression as BDatabaseAttributeConditionMongo).Filter);
+                }
             }
 
             List<object> TempList = new List<object>();
@@ -590,9 +597,42 @@ namespace BCloudServiceUtilities.DatabaseServices
             }
 
         }
+
+        private class BAttributeArrayElementNotExistConditionMongoDb : BDatabaseAttributeConditionMongo
+        {
+            private BPrimitiveType ArrayElement;
+            public BAttributeArrayElementNotExistConditionMongoDb(BPrimitiveType _ArrayElement) : base(EBDatabaseAttributeConditionType.ArrayElementNotExist)
+            {
+                ArrayElement = _ArrayElement;
+
+            }
+
+            public FilterDefinition<BsonDocument> GetArrayElementFilter(string ArrName)
+            {
+                switch (ArrayElement.Type)
+                {
+                    case EBPrimitiveTypeEnum.Double:
+                        Filter = Builders<BsonDocument>.Filter.Eq(ArrName, ArrayElement.AsDouble);
+                        break;
+                    case EBPrimitiveTypeEnum.Integer:
+                        Filter = Builders<BsonDocument>.Filter.Eq(ArrName, ArrayElement.AsInteger);
+                        break;
+                    case EBPrimitiveTypeEnum.ByteArray:
+                        Filter = Builders<BsonDocument>.Filter.Eq(ArrName, ArrayElement.AsByteArray);
+                        break;
+                    case EBPrimitiveTypeEnum.String:
+                        Filter = Builders<BsonDocument>.Filter.Eq(ArrName, ArrayElement.AsString);
+                        break;
+                }
+                return Filter;
+            }
+
+        }
+
         public BDatabaseAttributeCondition BuildArrayElementNotExistCondition(BPrimitiveType ArrayElement)
         {
-            return new BAttributeExistConditionMongoDb(ArrayElement.ToString());
+
+            return new BAttributeArrayElementNotExistConditionMongoDb(ArrayElement);
         }
 
         private class BAttributeEqualsConditionMongoDb : BDatabaseAttributeConditionMongo
