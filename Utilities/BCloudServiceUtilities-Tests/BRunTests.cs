@@ -8,6 +8,7 @@ using BCloudServiceUtilities.LoggingServices;
 using BCloudServiceUtilities.MailServices;
 using BCloudServiceUtilities.MemoryServices;
 using BCloudServiceUtilities.PubSubServices;
+using BCloudServiceUtilities_BFileService_AZ;
 using BCloudServiceUtilitiesTest.Tests;
 using BCommonUtilities;
 
@@ -17,6 +18,7 @@ namespace BCloudServiceUtilitiesTest
     /// 
     /// <para>Required environment variables:</para>
     /// 
+    /// <para>APPINSIGHTS_INSTRUMENTATIONKEY</para>
     /// <para>GC_PROJECT_ID</para>
     /// <para>AWS_ACCESS_KEY</para>
     /// <para>AWS_SECRET_KEY</para>
@@ -107,6 +109,13 @@ namespace BCloudServiceUtilitiesTest
                     Console.WriteLine),
                 Console.WriteLine);
             if (!LoggingTests_AWS.Start()) return false;
+
+            var LoggingTests_Azure = new BLoggingServiceTest(
+                new BLoggingServiceAzure(
+                    RequiredEnvVars["APPINSIGHTS_INSTRUMENTATIONKEY"],
+                    Console.WriteLine),
+                Console.WriteLine);
+            if (!LoggingTests_Azure.Start()) return false;
 
             /*
              * E-mail Services tests
@@ -251,6 +260,26 @@ namespace BCloudServiceUtilitiesTest
                     RequiredEnvVars["AWS_ACCESS_KEY"],
                     RequiredEnvVars["AWS_SECRET_KEY"],
                     RequiredEnvVars["AWS_REGION"],
+                    Console.WriteLine),
+                RequiredEnvVars["FILESERVICE_BUCKET"],
+                RequiredEnvVars["FILESERVICE_REMOTE_PATH"],
+                RequiredEnvVars["FILESERVICE_TEST_FILE_LOCAL_PATH"],
+                Comparator.AddLine);
+            if (!FSTests_AWS.Start()) return false;
+
+            Comparator.Next();
+
+            var FSTests_AZ = new BFileServiceTest(
+                new BFileServiceAZ(
+                    RequiredEnvVars["AZ_STORAGE_SERVICE"],
+                    RequiredEnvVars["AZ_STORAGE_ACCOUNT"],
+                    RequiredEnvVars["AZ_STORAGE_ACCOUNT_KEY"],
+                    RequiredEnvVars["AZ_STORAGE_RESOURCE_GROUP"],
+                    RequiredEnvVars["AZ_STORAGE_MANAGEMENT_APP_ID"],
+                    RequiredEnvVars["AZ_STORAGE_MANAGEMENT_SECRET"],
+                    RequiredEnvVars["AZ_SUBSCRIPTION_ID"],
+                    RequiredEnvVars["AZ_TENANT_ID"],
+                    RequiredEnvVars["AZ_STORAGE_LOCATION"],
                     Console.WriteLine),
                 RequiredEnvVars["FILESERVICE_BUCKET"],
                 RequiredEnvVars["FILESERVICE_REMOTE_PATH"],

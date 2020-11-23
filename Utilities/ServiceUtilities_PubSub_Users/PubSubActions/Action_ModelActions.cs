@@ -306,228 +306,100 @@ namespace ServiceUtilities
         public static readonly Action_ModelRevisionUpdated DefaultInstance = new Action_ModelRevisionUpdated();
         protected override Action GetStaticDefaultInstance() { return DefaultInstance; }
     }
-
-    public abstract class Action_ModelRevisionVersionAction : Action_ModelRevisionAction
+        
+    public class Action_ModelRevisionFileEntryDeleted : Action_ModelRevisionAction
     {
-        [JsonProperty("versionIndex")]
-        public int VersionIndex;
-    }
-
-    public class Action_ModelRevisionVersionCreated : Action_ModelRevisionVersionAction
-    {
-        public Action_ModelRevisionVersionCreated() { }
-        public Action_ModelRevisionVersionCreated(string _ModelID, int _RevisionIndex, int _VersionIndex, string _UserID, List<string> _ModelSharedWithUserIDs, string _ActionPerformedByUserID)
+        public Action_ModelRevisionFileEntryDeleted() { }
+        public Action_ModelRevisionFileEntryDeleted(
+            string _ModelID, 
+            int _RevisionIndex, 
+            string _UserID, 
+            List<string> _ModelSharedWithUserIDs, 
+            string _ActionPerformedByUserID)
         {
             ModelID = _ModelID;
             UserID = _UserID;
             ModelSharedWithUserIDs = _ModelSharedWithUserIDs;
             ActionPerformedByUserID = _ActionPerformedByUserID;
             RevisionIndex = _RevisionIndex;
-            VersionIndex = _VersionIndex;
         }
 
         public override bool Equals(object _Other)
         {
-            return _Other is Action_ModelRevisionVersionCreated Casted &&
+            return _Other is Action_ModelRevisionFileEntryDeleted Casted &&
                     UserID == Casted.UserID &&
                     ActionPerformedByUserID == Casted.ActionPerformedByUserID &&
                     ModelID == Casted.ModelID &&
                     RevisionIndex == Casted.RevisionIndex &&
-                    VersionIndex == Casted.VersionIndex &&
                     ModelSharedWithUserIDs.OrderBy(t => t).SequenceEqual(Casted.ModelSharedWithUserIDs.OrderBy(t => t));
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(ModelID, RevisionIndex, VersionIndex, UserID, ActionPerformedByUserID, ModelSharedWithUserIDs);
+            return HashCode.Combine(ModelID, RevisionIndex, UserID, ActionPerformedByUserID, ModelSharedWithUserIDs);
         }
 
         public override Actions.EAction GetActionType()
         {
-            return Actions.EAction.ACTION_MODEL_REVISION_VERSION_CREATED;
+            return Actions.EAction.ACTION_MODEL_REVISION_FILE_ENTRY_DELETED;
         }
 
         //Default Instance
-        public static readonly Action_ModelRevisionVersionCreated DefaultInstance = new Action_ModelRevisionVersionCreated();
+        public static readonly Action_ModelRevisionFileEntryDeleted DefaultInstance = new Action_ModelRevisionFileEntryDeleted();
         protected override Action GetStaticDefaultInstance() { return DefaultInstance; }
     }
 
-    public class Action_ModelRevisionVersionDeleted : Action_ModelRevisionVersionAction
-    {
-        public Action_ModelRevisionVersionDeleted() { }
-        public Action_ModelRevisionVersionDeleted(string _ModelID, int _RevisionIndex, int _VersionIndex, string _UserID, List<string> _ModelSharedWithUserIDs, string _ActionPerformedByUserID)
-        {
-            ModelID = _ModelID;
-            UserID = _UserID;
-            ModelSharedWithUserIDs = _ModelSharedWithUserIDs;
-            ActionPerformedByUserID = _ActionPerformedByUserID;
-            RevisionIndex = _RevisionIndex;
-            VersionIndex = _VersionIndex;
-        }
-
-        public override bool Equals(object _Other)
-        {
-            return _Other is Action_ModelRevisionVersionDeleted Casted &&
-                    UserID == Casted.UserID &&
-                    ActionPerformedByUserID == Casted.ActionPerformedByUserID &&
-                    ModelID == Casted.ModelID &&
-                    RevisionIndex == Casted.RevisionIndex &&
-                    VersionIndex == Casted.VersionIndex &&
-                    ModelSharedWithUserIDs.OrderBy(t => t).SequenceEqual(Casted.ModelSharedWithUserIDs.OrderBy(t => t));
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(ModelID, RevisionIndex, VersionIndex, UserID, ActionPerformedByUserID, ModelSharedWithUserIDs);
-        }
-
-        public override Actions.EAction GetActionType()
-        {
-            return Actions.EAction.ACTION_MODEL_REVISION_VERSION_DELETED;
-        }
-
-        //Default Instance
-        public static readonly Action_ModelRevisionVersionDeleted DefaultInstance = new Action_ModelRevisionVersionDeleted();
-        protected override Action GetStaticDefaultInstance() { return DefaultInstance; }
-    }
-
-    public class Action_ModelRevisionVersionUpdated : Action_ModelRevisionVersionAction
+    public class Action_ModelRevisionFileEntryUpdated : Action_ModelRevisionAction
     {
         [JsonProperty("changes")]
         public JObject ChangesObject = new JObject();
 
-        public Action_ModelRevisionVersionUpdated() { }
-        public Action_ModelRevisionVersionUpdated(string _ModelID, int _RevisionIndex, int _VersionIndex, string _UserID, List<string> _ModelSharedWithUserIDs, string _ActionPerformedByUserID, JObject _ChangesObject)
+        public Action_ModelRevisionFileEntryUpdated() { }
+        public Action_ModelRevisionFileEntryUpdated(string _ModelID, int _RevisionIndex, string _UserID, List<string> _ModelSharedWithUserIDs, string _ActionPerformedByUserID, JObject _ChangesObject)
         {
             ModelID = _ModelID;
             UserID = _UserID;
             ModelSharedWithUserIDs = _ModelSharedWithUserIDs;
             ActionPerformedByUserID = _ActionPerformedByUserID;
             RevisionIndex = _RevisionIndex;
-            VersionIndex = _VersionIndex;
             ChangesObject = _ChangesObject;
         }
 
         public override bool Equals(object _Other)
         {
-            return _Other is Action_ModelRevisionVersionUpdated Casted &&
+            return _Other is Action_ModelRevisionFileEntryUpdated Casted &&
                     UserID == Casted.UserID &&
                     ActionPerformedByUserID == Casted.ActionPerformedByUserID &&
                     ModelID == Casted.ModelID &&
                     RevisionIndex == Casted.RevisionIndex &&
-                    VersionIndex == Casted.VersionIndex &&
                     ChangesObject.ToString() == Casted.ChangesObject.ToString() &&
                     ModelSharedWithUserIDs.OrderBy(t => t).SequenceEqual(Casted.ModelSharedWithUserIDs.OrderBy(t => t));
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(ModelID, RevisionIndex, VersionIndex, UserID, ActionPerformedByUserID, ModelSharedWithUserIDs);
+            return HashCode.Combine(ModelID, RevisionIndex, UserID, ActionPerformedByUserID, ChangesObject, ModelSharedWithUserIDs);
         }
 
         public override Actions.EAction GetActionType()
         {
-            return Actions.EAction.ACTION_MODEL_REVISION_VERSION_UPDATED;
+            return Actions.EAction.ACTION_MODEL_REVISION_FILE_ENTRY_UPDATED;
         }
 
         //Default Instance
-        public static readonly Action_ModelRevisionVersionUpdated DefaultInstance = new Action_ModelRevisionVersionUpdated();
+        public static readonly Action_ModelRevisionFileEntryUpdated DefaultInstance = new Action_ModelRevisionFileEntryUpdated();
         protected override Action GetStaticDefaultInstance() { return DefaultInstance; }
     }
 
-    public class Action_ModelRevisionVersionFileEntryDeleted : Action_ModelRevisionVersionAction
-    {
-        public Action_ModelRevisionVersionFileEntryDeleted() { }
-        public Action_ModelRevisionVersionFileEntryDeleted(string _ModelID, int _RevisionIndex, int _VersionIndex, string _UserID, List<string> _ModelSharedWithUserIDs, string _ActionPerformedByUserID)
-        {
-            ModelID = _ModelID;
-            UserID = _UserID;
-            ModelSharedWithUserIDs = _ModelSharedWithUserIDs;
-            ActionPerformedByUserID = _ActionPerformedByUserID;
-            RevisionIndex = _RevisionIndex;
-            VersionIndex = _VersionIndex;
-        }
-
-        public override bool Equals(object _Other)
-        {
-            return _Other is Action_ModelRevisionVersionFileEntryDeleted Casted &&
-                    UserID == Casted.UserID &&
-                    ActionPerformedByUserID == Casted.ActionPerformedByUserID &&
-                    ModelID == Casted.ModelID &&
-                    RevisionIndex == Casted.RevisionIndex &&
-                    VersionIndex == Casted.VersionIndex &&
-                    ModelSharedWithUserIDs.OrderBy(t => t).SequenceEqual(Casted.ModelSharedWithUserIDs.OrderBy(t => t));
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(ModelID, RevisionIndex, VersionIndex, UserID, ActionPerformedByUserID, ModelSharedWithUserIDs);
-        }
-
-        public override Actions.EAction GetActionType()
-        {
-            return Actions.EAction.ACTION_MODEL_REVISION_VERSION_FILE_ENTRY_DELETED;
-        }
-
-        //Default Instance
-        public static readonly Action_ModelRevisionVersionFileEntryDeleted DefaultInstance = new Action_ModelRevisionVersionFileEntryDeleted();
-        protected override Action GetStaticDefaultInstance() { return DefaultInstance; }
-    }
-
-    public class Action_ModelRevisionVersionFileEntryUpdated : Action_ModelRevisionVersionAction
-    {
-        [JsonProperty("changes")]
-        public JObject ChangesObject = new JObject();
-
-        public Action_ModelRevisionVersionFileEntryUpdated() { }
-        public Action_ModelRevisionVersionFileEntryUpdated(string _ModelID, int _RevisionIndex, int _VersionIndex, string _UserID, List<string> _ModelSharedWithUserIDs, string _ActionPerformedByUserID, JObject _ChangesObject)
-        {
-            ModelID = _ModelID;
-            UserID = _UserID;
-            ModelSharedWithUserIDs = _ModelSharedWithUserIDs;
-            ActionPerformedByUserID = _ActionPerformedByUserID;
-            RevisionIndex = _RevisionIndex;
-            VersionIndex = _VersionIndex;
-            ChangesObject = _ChangesObject;
-        }
-
-        public override bool Equals(object _Other)
-        {
-            return _Other is Action_ModelRevisionVersionFileEntryUpdated Casted &&
-                    UserID == Casted.UserID &&
-                    ActionPerformedByUserID == Casted.ActionPerformedByUserID &&
-                    ModelID == Casted.ModelID &&
-                    RevisionIndex == Casted.RevisionIndex &&
-                    VersionIndex == Casted.VersionIndex &&
-                    ChangesObject.ToString() == Casted.ChangesObject.ToString() &&
-                    ModelSharedWithUserIDs.OrderBy(t => t).SequenceEqual(Casted.ModelSharedWithUserIDs.OrderBy(t => t));
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(ModelID, RevisionIndex, VersionIndex, UserID, ActionPerformedByUserID, ChangesObject, ModelSharedWithUserIDs);
-        }
-
-        public override Actions.EAction GetActionType()
-        {
-            return Actions.EAction.ACTION_MODEL_REVISION_VERSION_FILE_ENTRY_UPDATED;
-        }
-
-        //Default Instance
-        public static readonly Action_ModelRevisionVersionFileEntryUpdated DefaultInstance = new Action_ModelRevisionVersionFileEntryUpdated();
-        protected override Action GetStaticDefaultInstance() { return DefaultInstance; }
-    }
-
-    public class Action_ModelRevisionVersionFileEntryDeleteAll : Action_ModelRevisionVersionAction
+    public class Action_ModelRevisionFileEntryDeleteAll : Action_ModelRevisionAction
     {
         [JsonProperty("fileEntry")]
         public JObject Entry;
 
-        public Action_ModelRevisionVersionFileEntryDeleteAll() { }
-        public Action_ModelRevisionVersionFileEntryDeleteAll(
+        public Action_ModelRevisionFileEntryDeleteAll() { }
+        public Action_ModelRevisionFileEntryDeleteAll(
             string _ModelID, 
             int _RevisionIndex, 
-            int _VersionIndex, 
             string _UserID,
             List<string> _ModelSharedWithUserIDs,
             string _ActionPerformedByUserID,
@@ -538,78 +410,80 @@ namespace ServiceUtilities
             ModelSharedWithUserIDs = _ModelSharedWithUserIDs;
             ActionPerformedByUserID = _ActionPerformedByUserID;
             RevisionIndex = _RevisionIndex;
-            VersionIndex = _VersionIndex;
             Entry = _Entry;
         }
 
         public override bool Equals(object _Other)
         {
-            return _Other is Action_ModelRevisionVersionFileEntryDeleteAll Casted &&
+            return _Other is Action_ModelRevisionFileEntryDeleteAll Casted &&
                     UserID == Casted.UserID &&
                     ActionPerformedByUserID == Casted.ActionPerformedByUserID &&
                     ModelID == Casted.ModelID &&
                     RevisionIndex == Casted.RevisionIndex &&
-                    VersionIndex == Casted.VersionIndex &&
                     Entry == Casted.Entry &&
                     ModelSharedWithUserIDs.OrderBy(t => t).SequenceEqual(Casted.ModelSharedWithUserIDs.OrderBy(t => t));
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(ModelID, RevisionIndex, VersionIndex, UserID, ActionPerformedByUserID, Entry, ModelSharedWithUserIDs);
+            return HashCode.Combine(ModelID, RevisionIndex, UserID, ActionPerformedByUserID, Entry, ModelSharedWithUserIDs);
         }
 
         public override Actions.EAction GetActionType()
         {
-            return Actions.EAction.ACTION_MODEL_REVISION_VERSION_FILE_ENTRY_DELETE_ALL;
+            return Actions.EAction.ACTION_MODEL_REVISION_FILE_ENTRY_DELETE_ALL;
         }
 
         //Default Instance
-        public static readonly Action_ModelRevisionVersionFileEntryDeleteAll DefaultInstance = new Action_ModelRevisionVersionFileEntryDeleteAll();
+        public static readonly Action_ModelRevisionFileEntryDeleteAll DefaultInstance = new Action_ModelRevisionFileEntryDeleteAll();
         protected override Action GetStaticDefaultInstance() { return DefaultInstance; }
     }
 
-    public class Action_ModelRevisionVersionRawFileUploaded : Action_ModelRevisionVersionAction
+    public class Action_ModelRevisionRawFileUploaded : Action_ModelRevisionAction
     {
         [JsonProperty("model")]
         public JObject ModelObject = new JObject();
 
-        public Action_ModelRevisionVersionRawFileUploaded() { }
-        public Action_ModelRevisionVersionRawFileUploaded(string _ModelID, int _RevisionIndex, int _VersionIndex, string _UserID, List<string> _ModelSharedWithUserIDs, string _ActionPerformedByUserID, JObject _ModelObject)
+        public Action_ModelRevisionRawFileUploaded() { }
+        public Action_ModelRevisionRawFileUploaded(
+            string _ModelID, 
+            int _RevisionIndex, 
+            string _UserID, 
+            List<string> _ModelSharedWithUserIDs, 
+            string _ActionPerformedByUserID, 
+            JObject _ModelObject)
         {
             ModelID = _ModelID;
             UserID = _UserID;
             ModelSharedWithUserIDs = _ModelSharedWithUserIDs;
             ActionPerformedByUserID = _ActionPerformedByUserID;
             RevisionIndex = _RevisionIndex;
-            VersionIndex = _VersionIndex;
             ModelObject = _ModelObject;
         }
 
         public override bool Equals(object _Other)
         {
-            return _Other is Action_ModelRevisionVersionRawFileUploaded Casted &&
+            return _Other is Action_ModelRevisionRawFileUploaded Casted &&
                     UserID == Casted.UserID &&
                     ActionPerformedByUserID == Casted.ActionPerformedByUserID &&
                     ModelID == Casted.ModelID &&
                     RevisionIndex == Casted.RevisionIndex &&
-                    VersionIndex == Casted.VersionIndex &&
                     ModelObject.ToString() == Casted.ModelObject.ToString() &&
                     ModelSharedWithUserIDs.OrderBy(t => t).SequenceEqual(Casted.ModelSharedWithUserIDs.OrderBy(t => t));
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(ModelID, RevisionIndex, VersionIndex, UserID, ActionPerformedByUserID, ModelObject, ModelSharedWithUserIDs);
+            return HashCode.Combine(ModelID, RevisionIndex, UserID, ActionPerformedByUserID, ModelObject, ModelSharedWithUserIDs);
         }
 
         public override Actions.EAction GetActionType()
         {
-            return Actions.EAction.ACTION_MODEL_REVISION_VERSION_RAW_FILE_UPLOADED;
+            return Actions.EAction.ACTION_MODEL_REVISION_RAW_FILE_UPLOADED;
         }
 
         //Default Instance
-        public static readonly Action_ModelRevisionVersionRawFileUploaded DefaultInstance = new Action_ModelRevisionVersionRawFileUploaded();
+        public static readonly Action_ModelRevisionRawFileUploaded DefaultInstance = new Action_ModelRevisionRawFileUploaded();
         protected override Action GetStaticDefaultInstance() { return DefaultInstance; }
     }
 }

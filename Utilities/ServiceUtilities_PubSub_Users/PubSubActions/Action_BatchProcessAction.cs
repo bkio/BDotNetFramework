@@ -1,7 +1,5 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace ServiceUtilities
 {
@@ -18,33 +16,28 @@ namespace ServiceUtilities
 
         public Action_BatchProcessFailed() { }
 
-        [JsonProperty("versionIndex")]
-        public int VersionIndex;
-
         [JsonProperty("revisionIndex")]
         public int RevisionIndex;
 
         [JsonProperty("modelId")]
         public string ModelID;
 
-        public Action_BatchProcessFailed(string _ModelId, int _RevisionIndex, int _VersionIndex) 
+        public Action_BatchProcessFailed(string _ModelId, int _RevisionIndex) 
         {
             ModelID = _ModelId;
             RevisionIndex = _RevisionIndex;
-            VersionIndex = _VersionIndex;
         }
 
         public override bool Equals(object _Other)
         {
             return _Other is Action_BatchProcessFailed Casted &&
                     ModelID == Casted.ModelID &&
-                    RevisionIndex == Casted.RevisionIndex &&
-                    VersionIndex == Casted.VersionIndex;
+                    RevisionIndex == Casted.RevisionIndex;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(ModelID, RevisionIndex, VersionIndex);
+            return HashCode.Combine(ModelID, RevisionIndex);
         }
 
         //Default Instance

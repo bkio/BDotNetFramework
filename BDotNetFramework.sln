@@ -97,6 +97,12 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ServiceUtilities_PubSub_DB_
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ServiceUtilities_PubSub_Users", "Utilities\ServiceUtilities_PubSub_Users\ServiceUtilities_PubSub_Users.shproj", "{BECBE5E8-7D82-4EC0-996F-380D24E065F1}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BFileService-AZ", "Utilities\BCloudServiceUtilities-BFileService-AZ\BCloudServiceUtilities-BFileService-AZ.csproj", "{44BBC378-4B2A-4309-8178-06F6C51347EA}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-FileService-AZ", "Services\BServiceUtilities-FileService-AZ\BServiceUtilities-FileService-AZ.shproj", "{FF2A7938-4B58-4925-BFE6-C3340A70EBB4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BLoggingService-Azure", "Utilities\BCloudServiceUtilities-BLoggingService-Azure\BCloudServiceUtilities-BLoggingService-Azure.csproj", "{8A0FD215-7ABB-4650-BB83-7CD486B9ECE9}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-LoggingService-Azure", "Services\BServiceUtilities-LoggingService-Azure\BServiceUtilities-LoggingService-Azure.shproj", "{3801A9BF-F27F-4810-BF83-891492713381}"
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BPubSubService-Azure", "Utilities\BCloudServiceUtilities-BPubSubService-Azure\BCloudServiceUtilities-BPubSubService-Azure.csproj", "{E9124FB2-FE0E-4926-ACEC-4325AAFB9C79}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-PubSubService-Azure", "Services\BServiceUtilities-PubSubService-Azure\BServiceUtilities-PubSubService-Azure.shproj", "{29B1DD26-FECE-4676-B6D6-745C60EF012F}"
@@ -110,6 +116,7 @@ Global
 		Services\BServiceUtilities-FileService-AWS\BServiceUtilities-FileService-AWS.projitems*{1c6c3236-f3d0-41d7-8e27-25fc29439511}*SharedItemsImports = 13
 		Services\BServiceUtilities-PubSubService-GC\BServiceUtilities-PubSubService-GC.projitems*{1ce00f9b-1598-40bc-80b0-a184d2a68246}*SharedItemsImports = 13
 		Services\BServiceUtilities-LoggingService-AWS\BServiceUtilities-LoggingService-AWS.projitems*{1d64afe7-5361-41bf-a1ac-95ce4b81d988}*SharedItemsImports = 13
+		Services\BServiceUtilities-LoggingService-Azure\BServiceUtilities-LoggingService-Azure.projitems*{3801a9bf-f27f-4810-bf83-891492713381}*SharedItemsImports = 13
 		Services\BServiceUtilities-PubSubService-Azure\BServiceUtilities-PubSubService-Azure.projitems*{29b1dd26-fece-4676-b6d6-745c60ef012f}*SharedItemsImports = 13
 		Services\BServiceUtilities-PubSubService-Redis\BServiceUtilities-PubSubService-Redis.projitems*{58d5d147-a1c6-4051-9cb0-1d4b44949aa6}*SharedItemsImports = 13
 		Services\BServiceUtilities-MemoryService-Redis\BServiceUtilities-MemoryService-Redis.projitems*{5cf16d7b-e3ed-463b-bbd9-ba483a7eb4be}*SharedItemsImports = 13
@@ -126,6 +133,7 @@ Global
 		Utilities\ServiceUtilities_All\ServiceUtilities_All.projitems*{ced4e48f-9644-4dcf-a6a2-1d91eef01d87}*SharedItemsImports = 13
 		Services\BServiceUtilities-DatabaseService-AWS\BServiceUtilities-DatabaseService-AWS.projitems*{d41edae0-59e2-4faf-9fda-b36c7b22ac60}*SharedItemsImports = 13
 		Utilities\ServiceUtilities_PubSub_DB_Users\ServiceUtilities_PubSub_DB_Users.projitems*{f87b8c2b-ad95-4c42-8d8e-df69483a6139}*SharedItemsImports = 13
+		Services\BServiceUtilities-FileService-AZ\BServiceUtilities-FileService-AZ.projitems*{ff2a7938-4b58-4925-bfe6-c3340a70ebb4}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -228,6 +236,14 @@ Global
 		{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44BBC378-4B2A-4309-8178-06F6C51347EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44BBC378-4B2A-4309-8178-06F6C51347EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44BBC378-4B2A-4309-8178-06F6C51347EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44BBC378-4B2A-4309-8178-06F6C51347EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A0FD215-7ABB-4650-BB83-7CD486B9ECE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A0FD215-7ABB-4650-BB83-7CD486B9ECE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A0FD215-7ABB-4650-BB83-7CD486B9ECE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A0FD215-7ABB-4650-BB83-7CD486B9ECE9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E9124FB2-FE0E-4926-ACEC-4325AAFB9C79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E9124FB2-FE0E-4926-ACEC-4325AAFB9C79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9124FB2-FE0E-4926-ACEC-4325AAFB9C79}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -280,6 +296,10 @@ Global
 		{CED4E48F-9644-4DCF-A6A2-1D91EEF01D87} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{F87B8C2B-AD95-4C42-8D8E-DF69483A6139} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{BECBE5E8-7D82-4EC0-996F-380D24E065F1} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
+		{44BBC378-4B2A-4309-8178-06F6C51347EA} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
+		{FF2A7938-4B58-4925-BFE6-C3340A70EBB4} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{8A0FD215-7ABB-4650-BB83-7CD486B9ECE9} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
+		{3801A9BF-F27F-4810-BF83-891492713381} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 		{E9124FB2-FE0E-4926-ACEC-4325AAFB9C79} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{29B1DD26-FECE-4676-B6D6-745C60EF012F} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 	EndGlobalSection

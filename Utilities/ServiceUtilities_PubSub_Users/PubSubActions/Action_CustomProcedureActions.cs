@@ -19,9 +19,6 @@ namespace ServiceUtilities
         [JsonProperty("revisionIndex")]
         public int RevisionIndex = 0;
 
-        [JsonProperty("versionIndex")]
-        public int VersionIndex = 0;
-
         [JsonProperty("fileEntryName")]
         public string FileEntryName = "";
 
@@ -40,7 +37,6 @@ namespace ServiceUtilities
                     DownloadURL == Casted.DownloadURL &&
                     ModelID == Casted.ModelID &&
                     RevisionIndex == Casted.RevisionIndex &&
-                    VersionIndex == Casted.VersionIndex &&
                     FileEntryName == Casted.FileEntryName &&
                     FileEntryFileType == Casted.FileEntryFileType &&
                     FacilityName_IfExists == Casted.FacilityName_IfExists &&
@@ -48,7 +44,7 @@ namespace ServiceUtilities
         }
         public override int GetHashCode()
         {
-            return HashCode.Combine(HashCode.Combine(DownloadURL, ModelID, RevisionIndex, VersionIndex), HashCode.Combine(FileEntryName, FileEntryFileType, FacilityName_IfExists, DataSource));
+            return HashCode.Combine(HashCode.Combine(DownloadURL, ModelID, RevisionIndex), HashCode.Combine(FileEntryName, FileEntryFileType, FacilityName_IfExists, DataSource));
         }
         public static bool operator ==(ZipAndUploadModelToCdf x, ZipAndUploadModelToCdf y)
         {

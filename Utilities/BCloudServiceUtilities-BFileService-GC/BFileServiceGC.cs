@@ -279,7 +279,7 @@ namespace BCloudServiceUtilities.FileServices
             if (!bExists)
             {
                 _ErrorMessageAction?.Invoke("BFileServiceGC->DownloadFile: File does not exist in the File Service.");
-                return true;
+                return false;
             }
 
             DownloadObjectOptions DOO = null;

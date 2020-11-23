@@ -40,13 +40,10 @@ namespace ServiceUtilities
             ACTION_MODEL_REVISION_CREATED,
             ACTION_MODEL_REVISION_DELETED,
             ACTION_MODEL_REVISION_UPDATED,
-            ACTION_MODEL_REVISION_VERSION_CREATED,
-            ACTION_MODEL_REVISION_VERSION_DELETED,
-            ACTION_MODEL_REVISION_VERSION_UPDATED,
-            ACTION_MODEL_REVISION_VERSION_FILE_ENTRY_UPDATED,
-            ACTION_MODEL_REVISION_VERSION_FILE_ENTRY_DELETED,
-            ACTION_MODEL_REVISION_VERSION_FILE_ENTRY_DELETE_ALL,
-            ACTION_MODEL_REVISION_VERSION_RAW_FILE_UPLOADED,
+            ACTION_MODEL_REVISION_FILE_ENTRY_UPDATED,
+            ACTION_MODEL_REVISION_FILE_ENTRY_DELETED,
+            ACTION_MODEL_REVISION_FILE_ENTRY_DELETE_ALL,
+            ACTION_MODEL_REVISION_RAW_FILE_UPLOADED,
             ACTION_STORAGE_FILE_UPLOADED,
             ACTION_STORAGE_FILE_DELETED,
             ACTION_ZIP_AND_UPLOAD_MODELS_TO_CDF,
@@ -70,13 +67,10 @@ namespace ServiceUtilities
             [EAction.ACTION_MODEL_REVISION_CREATED] = "action_model_revision_created_",
             [EAction.ACTION_MODEL_REVISION_DELETED] = "action_model_revision_deleted_",
             [EAction.ACTION_MODEL_REVISION_UPDATED] = "action_model_revision_updated_",
-            [EAction.ACTION_MODEL_REVISION_VERSION_CREATED] = "action_model_revision_version_created_",
-            [EAction.ACTION_MODEL_REVISION_VERSION_DELETED] = "action_model_revision_version_deleted_",
-            [EAction.ACTION_MODEL_REVISION_VERSION_UPDATED] = "action_model_revision_version_updated_",
-            [EAction.ACTION_MODEL_REVISION_VERSION_FILE_ENTRY_UPDATED] = "action_model_revision_version_file_entry_updated_",
-            [EAction.ACTION_MODEL_REVISION_VERSION_FILE_ENTRY_DELETED] = "action_model_revision_version_file_entry_deleted_",
-            [EAction.ACTION_MODEL_REVISION_VERSION_FILE_ENTRY_DELETE_ALL] = "action_model_revision_version_file_entry_delete_all_",
-            [EAction.ACTION_MODEL_REVISION_VERSION_RAW_FILE_UPLOADED] = "action_model_revision_version_raw_file_uploaded_",
+            [EAction.ACTION_MODEL_REVISION_FILE_ENTRY_UPDATED] = "action_model_revision_file_entry_updated_",
+            [EAction.ACTION_MODEL_REVISION_FILE_ENTRY_DELETED] = "action_model_revision_file_entry_deleted_",
+            [EAction.ACTION_MODEL_REVISION_FILE_ENTRY_DELETE_ALL] = "action_model_revision_file_entry_delete_all_",
+            [EAction.ACTION_MODEL_REVISION_RAW_FILE_UPLOADED] = "action_model_revision_raw_file_uploaded_",
             [EAction.ACTION_STORAGE_FILE_UPLOADED] = "action_storage_file_uploaded_",
             [EAction.ACTION_STORAGE_FILE_DELETED] = "action_storage_file_deleted_",
             [EAction.ACTION_ZIP_AND_UPLOAD_MODELS_TO_CDF] = "action_zip_and_upload_models_to_cdf_",
@@ -112,20 +106,14 @@ namespace ServiceUtilities
                     return JsonConvert.DeserializeObject<Action_ModelRevisionDeleted>(_SerializedAction);
                 case EAction.ACTION_MODEL_REVISION_UPDATED:
                     return JsonConvert.DeserializeObject<Action_ModelRevisionUpdated>(_SerializedAction);
-                case EAction.ACTION_MODEL_REVISION_VERSION_CREATED:
-                    return JsonConvert.DeserializeObject<Action_ModelRevisionVersionCreated>(_SerializedAction);
-                case EAction.ACTION_MODEL_REVISION_VERSION_DELETED:
-                    return JsonConvert.DeserializeObject<Action_ModelRevisionVersionDeleted>(_SerializedAction);
-                case EAction.ACTION_MODEL_REVISION_VERSION_UPDATED:
-                    return JsonConvert.DeserializeObject<Action_ModelRevisionVersionUpdated>(_SerializedAction);
-                case EAction.ACTION_MODEL_REVISION_VERSION_FILE_ENTRY_DELETED:
-                    return JsonConvert.DeserializeObject<Action_ModelRevisionVersionFileEntryDeleted>(_SerializedAction);
-                case EAction.ACTION_MODEL_REVISION_VERSION_FILE_ENTRY_UPDATED:
-                    return JsonConvert.DeserializeObject<Action_ModelRevisionVersionFileEntryUpdated>(_SerializedAction);
-                case EAction.ACTION_MODEL_REVISION_VERSION_FILE_ENTRY_DELETE_ALL:
-                    return JsonConvert.DeserializeObject<Action_ModelRevisionVersionFileEntryDeleteAll>(_SerializedAction);
-                case EAction.ACTION_MODEL_REVISION_VERSION_RAW_FILE_UPLOADED:
-                    return JsonConvert.DeserializeObject<Action_ModelRevisionVersionRawFileUploaded>(_SerializedAction);
+                case EAction.ACTION_MODEL_REVISION_FILE_ENTRY_DELETED:
+                    return JsonConvert.DeserializeObject<Action_ModelRevisionFileEntryDeleted>(_SerializedAction);
+                case EAction.ACTION_MODEL_REVISION_FILE_ENTRY_UPDATED:
+                    return JsonConvert.DeserializeObject<Action_ModelRevisionFileEntryUpdated>(_SerializedAction);
+                case EAction.ACTION_MODEL_REVISION_FILE_ENTRY_DELETE_ALL:
+                    return JsonConvert.DeserializeObject<Action_ModelRevisionFileEntryDeleteAll>(_SerializedAction);
+                case EAction.ACTION_MODEL_REVISION_RAW_FILE_UPLOADED:
+                    return JsonConvert.DeserializeObject<Action_ModelRevisionRawFileUploaded>(_SerializedAction);
                 case EAction.ACTION_STORAGE_FILE_UPLOADED:
                     return JsonConvert.DeserializeObject<Action_StorageFileUploaded>(_SerializedAction);
                 case EAction.ACTION_STORAGE_FILE_DELETED:
