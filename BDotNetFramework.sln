@@ -97,6 +97,10 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ServiceUtilities_PubSub_DB_
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ServiceUtilities_PubSub_Users", "Utilities\ServiceUtilities_PubSub_Users\ServiceUtilities_PubSub_Users.shproj", "{BECBE5E8-7D82-4EC0-996F-380D24E065F1}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BPubSubService-Azure", "Utilities\BCloudServiceUtilities-BPubSubService-Azure\BCloudServiceUtilities-BPubSubService-Azure.csproj", "{E9124FB2-FE0E-4926-ACEC-4325AAFB9C79}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-PubSubService-Azure", "Services\BServiceUtilities-PubSubService-Azure\BServiceUtilities-PubSubService-Azure.shproj", "{29B1DD26-FECE-4676-B6D6-745C60EF012F}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Services\BServiceUtilities-FileService-GC\BServiceUtilities-FileService-GC.projitems*{12da451b-d5b9-453b-8b07-fffccba7742e}*SharedItemsImports = 5
@@ -106,6 +110,7 @@ Global
 		Services\BServiceUtilities-FileService-AWS\BServiceUtilities-FileService-AWS.projitems*{1c6c3236-f3d0-41d7-8e27-25fc29439511}*SharedItemsImports = 13
 		Services\BServiceUtilities-PubSubService-GC\BServiceUtilities-PubSubService-GC.projitems*{1ce00f9b-1598-40bc-80b0-a184d2a68246}*SharedItemsImports = 13
 		Services\BServiceUtilities-LoggingService-AWS\BServiceUtilities-LoggingService-AWS.projitems*{1d64afe7-5361-41bf-a1ac-95ce4b81d988}*SharedItemsImports = 13
+		Services\BServiceUtilities-PubSubService-Azure\BServiceUtilities-PubSubService-Azure.projitems*{29b1dd26-fece-4676-b6d6-745c60ef012f}*SharedItemsImports = 13
 		Services\BServiceUtilities-PubSubService-Redis\BServiceUtilities-PubSubService-Redis.projitems*{58d5d147-a1c6-4051-9cb0-1d4b44949aa6}*SharedItemsImports = 13
 		Services\BServiceUtilities-MemoryService-Redis\BServiceUtilities-MemoryService-Redis.projitems*{5cf16d7b-e3ed-463b-bbd9-ba483a7eb4be}*SharedItemsImports = 13
 		Services\BServiceUtilities-MailService-SendGrid\BServiceUtilities-MailService-SendGrid.projitems*{66a97ff4-5d8d-44e4-b5a0-2875b566dcb9}*SharedItemsImports = 13
@@ -223,6 +228,10 @@ Global
 		{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9C95C50-F6C1-4EDF-91B3-96A7D55CFC63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9124FB2-FE0E-4926-ACEC-4325AAFB9C79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9124FB2-FE0E-4926-ACEC-4325AAFB9C79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9124FB2-FE0E-4926-ACEC-4325AAFB9C79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9124FB2-FE0E-4926-ACEC-4325AAFB9C79}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -271,6 +280,8 @@ Global
 		{CED4E48F-9644-4DCF-A6A2-1D91EEF01D87} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{F87B8C2B-AD95-4C42-8D8E-DF69483A6139} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{BECBE5E8-7D82-4EC0-996F-380D24E065F1} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
+		{E9124FB2-FE0E-4926-ACEC-4325AAFB9C79} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
+		{29B1DD26-FECE-4676-B6D6-745C60EF012F} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0A20A57-39B7-4A17-85B0-DB0190848294}

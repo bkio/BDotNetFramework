@@ -208,6 +208,27 @@ namespace BCloudServiceUtilitiesTest
 
             if (!Comparator.Compare()) return false;
 
+            Comparator.Next();
+
+            var MemTests_WithAzurePubSub = new BMemoryPubSubServiceTest(
+                new BMemoryServiceRedis(
+                    RequiredEnvVars["REDIS_ENDPOINT"],
+                    int.Parse(RequiredEnvVars["REDIS_PORT"]),
+                    RequiredEnvVars["REDIS_PASSWORD"],
+                    new BPubSubServiceAzure(
+                        RequiredEnvVars["AZURE_CLIENT_ID"],
+                        RequiredEnvVars["AZURE_CLIENT_SECRET"],
+                        RequiredEnvVars["AZURE_TENANT_ID"],
+                        RequiredEnvVars["AZURE_NAMESPACE_ID"],
+                        RequiredEnvVars["AZURE_NAMESPACE_CONNSTR"],
+                        Console.WriteLine),
+                    true,
+                    Console.WriteLine),
+                Comparator.AddLine);
+            if (!MemTests_WithAWSPubSub.Start()) return false;
+
+            if (!Comparator.Compare()) return false;
+
             /*
              * File Services tests
              */
