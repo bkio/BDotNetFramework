@@ -332,7 +332,7 @@ namespace BCloudServiceUtilities.FileServices
             if (!bExists)
             {
                 _ErrorMessageAction?.Invoke("BFileServiceAZ->DownloadFile: File does not exist in the File Service.");
-                return true;
+                return false;
             }
 
             HttpRange Range = default(HttpRange);
