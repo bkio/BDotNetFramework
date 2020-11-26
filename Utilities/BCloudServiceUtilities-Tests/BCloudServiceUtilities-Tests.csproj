@@ -24,6 +24,7 @@
     <ProjectReference Include="..\BCloudServiceUtilities-BMailService-SendGrid\BCloudServiceUtilities-BMailService-SendGrid.csproj" />
     <ProjectReference Include="..\BCloudServiceUtilities-BMemoryService-Redis\BCloudServiceUtilities-BMemoryService-Redis.csproj" />
     <ProjectReference Include="..\BCloudServiceUtilities-BPubSubService-AWS\BCloudServiceUtilities-BPubSubService-AWS.csproj" />
+    <ProjectReference Include="..\BCloudServiceUtilities-BPubSubService-Azure\BCloudServiceUtilities-BPubSubService-Azure.csproj" />
     <ProjectReference Include="..\BCloudServiceUtilities-BPubSubService-GC\BCloudServiceUtilities-BPubSubService-GC.csproj" />
     <ProjectReference Include="..\BCloudServiceUtilities-BPubSubService-Redis\BCloudServiceUtilities-BPubSubService-Redis.csproj" />
     <ProjectReference Include="..\BCloudServiceUtilities\BCloudServiceUtilities.csproj" />
