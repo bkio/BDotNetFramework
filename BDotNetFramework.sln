@@ -100,12 +100,15 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BFileService-AZ", "Utilities\BCloudServiceUtilities-BFileService-AZ\BCloudServiceUtilities-BFileService-AZ.csproj", "{44BBC378-4B2A-4309-8178-06F6C51347EA}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-FileService-AZ", "Services\BServiceUtilities-FileService-AZ\BServiceUtilities-FileService-AZ.shproj", "{FF2A7938-4B58-4925-BFE6-C3340A70EBB4}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BLoggingService-Azure", "Utilities\BCloudServiceUtilities-BLoggingService-Azure\BCloudServiceUtilities-BLoggingService-Azure.csproj", "{8A0FD215-7ABB-4650-BB83-7CD486B9ECE9}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-LoggingService-Azure", "Services\BServiceUtilities-LoggingService-Azure\BServiceUtilities-LoggingService-Azure.shproj", "{3801A9BF-F27F-4810-BF83-891492713381}"
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BPubSubService-Azure", "Utilities\BCloudServiceUtilities-BPubSubService-Azure\BCloudServiceUtilities-BPubSubService-Azure.csproj", "{E9124FB2-FE0E-4926-ACEC-4325AAFB9C79}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-PubSubService-Azure", "Services\BServiceUtilities-PubSubService-Azure\BServiceUtilities-PubSubService-Azure.shproj", "{29B1DD26-FECE-4676-B6D6-745C60EF012F}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-DatabaseService-MongoDB", "Services\BServiceUtilities-DatabaseService-MongoDB\BServiceUtilities-DatabaseService-MongoDB.shproj", "{2EAD34EF-40E1-4FDD-B610-3B476C9F26B3}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -116,6 +119,7 @@ Global
 		Services\BServiceUtilities-FileService-AWS\BServiceUtilities-FileService-AWS.projitems*{1c6c3236-f3d0-41d7-8e27-25fc29439511}*SharedItemsImports = 13
 		Services\BServiceUtilities-PubSubService-GC\BServiceUtilities-PubSubService-GC.projitems*{1ce00f9b-1598-40bc-80b0-a184d2a68246}*SharedItemsImports = 13
 		Services\BServiceUtilities-LoggingService-AWS\BServiceUtilities-LoggingService-AWS.projitems*{1d64afe7-5361-41bf-a1ac-95ce4b81d988}*SharedItemsImports = 13
+		Services\BServiceUtilities-DatabaseService-MongoDB\BServiceUtilities-DatabaseService-MongoDB.projitems*{2ead34ef-40e1-4fdd-b610-3b476c9f26b3}*SharedItemsImports = 13
 		Services\BServiceUtilities-LoggingService-Azure\BServiceUtilities-LoggingService-Azure.projitems*{3801a9bf-f27f-4810-bf83-891492713381}*SharedItemsImports = 13
 		Services\BServiceUtilities-PubSubService-Azure\BServiceUtilities-PubSubService-Azure.projitems*{29b1dd26-fece-4676-b6d6-745c60ef012f}*SharedItemsImports = 13
 		Services\BServiceUtilities-PubSubService-Redis\BServiceUtilities-PubSubService-Redis.projitems*{58d5d147-a1c6-4051-9cb0-1d4b44949aa6}*SharedItemsImports = 13
@@ -302,6 +306,7 @@ Global
 		{3801A9BF-F27F-4810-BF83-891492713381} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 		{E9124FB2-FE0E-4926-ACEC-4325AAFB9C79} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 		{29B1DD26-FECE-4676-B6D6-745C60EF012F} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{2EAD34EF-40E1-4FDD-B610-3B476C9F26B3} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0A20A57-39B7-4A17-85B0-DB0190848294}

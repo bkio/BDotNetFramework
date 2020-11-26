@@ -158,6 +158,18 @@ namespace BCloudServiceUtilitiesTest
                 Comparator.AddLine);
             if (!DBTests_AWS.Start()) return false;
 
+            Comparator.Next();
+
+            var DBTests_MongoDB = new BDatabaseServicesTest(
+                new BDatabaseServiceMongoDB(
+                    RequiredEnvVars["MONGO_DB_CONNECTION_STRING"],
+                    RequiredEnvVars["MONGO_DB_DATABASE"],
+                    Console.WriteLine),
+                "BTest",
+                "TestKey",
+                Comparator.AddLine);
+            if (!DBTests_MongoDB.Start()) return false;
+
             if (!Comparator.Compare()) return false;
 
             /*

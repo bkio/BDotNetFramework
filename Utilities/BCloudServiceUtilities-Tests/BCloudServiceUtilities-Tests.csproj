@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BCloudServiceUtilities-BDatabaseService-AWS\BCloudServiceUtilities-BDatabaseService-AWS.csproj" />
     <ProjectReference Include="..\BCloudServiceUtilities-BDatabaseService-GC\BCloudServiceUtilities-BDatabaseService-GC.csproj" />
+    <ProjectReference Include="..\BCloudServiceUtilities-BDatabaseService-MongoDB\BCloudServiceUtilities-BDatabaseService-MongoDB.csproj" />
     <ProjectReference Include="..\BCloudServiceUtilities-BFileService-AWS\BCloudServiceUtilities-BFileService-AWS.csproj" />
     <ProjectReference Include="..\BCloudServiceUtilities-BFileService-AZ\BCloudServiceUtilities-BFileService-AZ.csproj" />
     <ProjectReference Include="..\BCloudServiceUtilities-BFileService-GC\BCloudServiceUtilities-BFileService-GC.csproj" />
