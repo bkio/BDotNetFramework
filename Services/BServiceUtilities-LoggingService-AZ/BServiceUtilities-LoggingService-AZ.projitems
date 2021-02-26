@@ -9,6 +9,6 @@
     <Import_RootNamespace>BServiceUtilities_LoggingService_Azure</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)BServiceUtilities-LoggingService-Azure.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BServiceUtilities-LoggingService-AZ.cs" />
   </ItemGroup>
 </Project>

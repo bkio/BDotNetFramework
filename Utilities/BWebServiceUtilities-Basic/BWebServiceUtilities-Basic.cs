@@ -92,7 +92,7 @@ namespace BWebServiceUtilities
             _TokenType = null;
             _AccessKey = null;
 
-            var FullEndpoint = "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/identity?audience=" + _ForExecutingRequestUrl;
+            var FullEndpoint = _ForExecutingRequestUrl;
 
             using (var Handler = new HttpClientHandler())
             {
@@ -101,8 +101,6 @@ namespace BWebServiceUtilities
 
                 using (var Client = new HttpClient(Handler))
                 {
-                    Client.DefaultRequestHeaders.TryAddWithoutValidation("Metadata-Flavor", "Google");
-
                     try
                     {
                         using (var RequestTask = Client.GetAsync(FullEndpoint))
@@ -149,16 +147,6 @@ namespace BWebServiceUtilities
             return true;
         }
 
-        public static bool AddAccessTokenForServiceExecution(HttpClient _Client, string _ForExecutingRequestUrl, Action<string> _ErrorMessageAction)
-        {
-            if (!GetAccessTokenForServiceExecution(out string TokenType, out string AccessKey, _ForExecutingRequestUrl, _ErrorMessageAction))
-            {
-                return false;
-            }
-            _Client.DefaultRequestHeaders.TryAddWithoutValidation("authorization", TokenType + " " + AccessKey);
-            return true;
-        }
-
         public class InterServicesRequestRequest
         {
             public string DestinationServiceUrl;
@@ -170,6 +158,7 @@ namespace BWebServiceUtilities
             public HttpListenerContext UseContextHeaders = null;
             public IEnumerable<string> ExcludeHeaderKeysForRequest = null;
         }
+
         public class InterServicesRequestResponse
         {
             public bool bSuccess = false;
@@ -186,9 +175,10 @@ namespace BWebServiceUtilities
                 };
             }
         }
+
         public static InterServicesRequestResponse InterServicesRequest(
-            InterServicesRequestRequest _Request, 
-            bool _bKillProcessOnAddAccessTokenForServiceExecutionFailure = true, 
+            InterServicesRequestRequest _Request,
+            bool _bKillProcessOnAddAccessTokenForServiceExecutionFailure = true,
             Action<string> _ErrorMessageAction = null)
         {
             var bHttpRequestSuccess = false;
@@ -325,41 +315,6 @@ namespace BWebServiceUtilities
                 }
             }
             return Lowered;
-        }
-
-        public static BWebServiceResponse RequestRedirection(
-            HttpListenerContext _Context,
-            string _FullEndpoint,
-            Action<string> _ErrorMessageAction = null,
-            bool _bWithAuthToken = true,
-            bool _bKillProcessOnAddAccessTokenForServiceExecutionFailure = true,
-            IEnumerable<string> _ExcludeHeaderKeysForRequest = null)
-        {
-            using (var InputStream = _Context.Request.InputStream)
-            {
-                using (var RequestStream = InputStream)
-                {
-                    var Result = InterServicesRequest(new InterServicesRequestRequest()
-                    {
-                        DestinationServiceUrl = _FullEndpoint,
-                        RequestMethod = _Context.Request.HttpMethod,
-                        ContentType = _Context.Request.ContentType,
-                        Content = new BStringOrStream(RequestStream, _Context.Request.ContentLength64),
-                        bWithAuthToken = _bWithAuthToken,
-                        UseContextHeaders = _Context,
-                        ExcludeHeaderKeysForRequest = _ExcludeHeaderKeysForRequest
-                    }, 
-                    _bKillProcessOnAddAccessTokenForServiceExecutionFailure, 
-                    _ErrorMessageAction);
-
-                    return new BWebServiceResponse(
-                        Result.ResponseCode,
-                        Result.ResponseHeaders,
-                        Result.Content,
-                        Result.ContentType);
-                }
-            }
-
         }
 
         private static void AnalyzeResponse(

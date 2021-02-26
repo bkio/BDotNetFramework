@@ -1,11 +1,9 @@
 ﻿/// MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 using BCloudServiceUtilities;
 using BCloudServiceUtilities.FileServices;
 
-namespace BServiceUtilities_FileService_AZ
+namespace BServiceUtilities
 {
     /// <summary>
     /// 
@@ -23,15 +21,15 @@ namespace BServiceUtilities_FileService_AZ
             /*
             * File service initialization
             */
-            FileService = new BFileServiceAZ(RequiredEnvVars["AZ_STORAGE_SERVICE"],
-                    RequiredEnvVars["AZ_STORAGE_ACCOUNT"],
-                    RequiredEnvVars["AZ_STORAGE_ACCOUNT_KEY"],
-                    RequiredEnvVars["AZ_STORAGE_RESOURCE_GROUP"],
-                    RequiredEnvVars["AZ_STORAGE_MANAGEMENT_APP_ID"],
-                    RequiredEnvVars["AZ_STORAGE_MANAGEMENT_SECRET"],
-                    RequiredEnvVars["AZ_SUBSCRIPTION_ID"],
-                    RequiredEnvVars["AZ_TENANT_ID"],
-                    RequiredEnvVars["AZ_STORAGE_LOCATION"],
+            FileService = new BFileServiceAZ(RequiredEnvironmentVariables["AZ_STORAGE_SERVICE"],
+                    RequiredEnvironmentVariables["AZ_STORAGE_ACCOUNT"],
+                    RequiredEnvironmentVariables["AZ_STORAGE_ACCOUNT_KEY"],
+                    RequiredEnvironmentVariables["AZ_STORAGE_RESOURCE_GROUP"],
+                    RequiredEnvironmentVariables["AZ_STORAGE_MANAGEMENT_APP_ID"],
+                    RequiredEnvironmentVariables["AZ_STORAGE_MANAGEMENT_SECRET"],
+                    RequiredEnvironmentVariables["AZ_SUBSCRIPTION_ID"],
+                    RequiredEnvironmentVariables["AZ_TENANT_ID"],
+                    RequiredEnvironmentVariables["AZ_STORAGE_LOCATION"],
                 (string Message) =>
                 {
                     LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, Message), ProgramID, "Initialization");

@@ -9,6 +9,6 @@
     <Import_RootNamespace>BServiceUtilities_PubSubService_Azure</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)BServiceUtilities-PubSubService-Azure.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BServiceUtilities-PubSubService-AZ.cs" />
   </ItemGroup>
 </Project>

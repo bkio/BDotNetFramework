@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <RootNamespace>BWebServiceUtilities_Basic</RootNamespace>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\BCloudServiceUtilities\BCloudServiceUtilities.csproj" />
+		<ProjectReference Include="..\BCommonUtilities\BCommonUtilities.csproj" />
+		<ProjectReference Include="..\BWebServiceUtilities\BWebServiceUtilities.csproj" />
+	</ItemGroup>
+
+</Project>
