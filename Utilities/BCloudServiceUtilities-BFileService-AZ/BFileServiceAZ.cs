@@ -31,41 +31,41 @@ namespace BCloudServiceUtilities.FileServices
         private readonly StorageSharedKeyCredential SharedKey;
         private readonly bool bInitializationSucceed;
 
-        private readonly string ServiceClientId;
-        private readonly string ServiceSecret;
+        private readonly string ClientId;
+        private readonly string ClientSecret;
         private readonly string TenantId;
-        private readonly string ResourceGroup;
+        private readonly string ResourceGroupName;
+        private readonly string ResourceGroupLocation;
         private readonly string SubscriptionId;
         private readonly string StorageAccountName;
-        private readonly string Location;
 
         private AccessToken LastGeneratedToken = new AccessToken("", DateTimeOffset.MinValue);
 
         public BFileServiceAZ(
             string _ServiceUrl,
             string _StorageAccountName,
-            string _StorageAccountKey,
-            string _ResourceGroup,
-            string _ManagementClientId,
-            string _ManagementSecret,
+            string _StorageAccountAccessKey,
+            string _ResourceGroupName,
+            string _ResourceGroupLocation,
+            string _ClientId,
+            string _ClientSecret,
             string _SubscriptionId,
             string _TenantId,
-            string _Location,
             Action<string> _ErrorMessageAction = null)
         {
             try
             {
-                SharedKey = new StorageSharedKeyCredential(_StorageAccountName, _StorageAccountKey);
+                SharedKey = new StorageSharedKeyCredential(_StorageAccountName, _StorageAccountAccessKey);
                 AServiceClient = new BlobServiceClient(new Uri(_ServiceUrl), SharedKey);
                 bInitializationSucceed = true;
 
-                ServiceClientId = _ManagementClientId;
-                ServiceSecret = _ManagementSecret;
+                ClientId = _ClientId;
+                ClientSecret = _ClientSecret;
                 TenantId = _TenantId;
-                ResourceGroup = _ResourceGroup;
+                ResourceGroupName = _ResourceGroupName;
                 SubscriptionId = _SubscriptionId;
                 StorageAccountName = _StorageAccountName;
-                Location = _Location;
+                ResourceGroupLocation = _ResourceGroupLocation;
             }
             catch (Exception ex)
             {
@@ -758,19 +758,19 @@ namespace BCloudServiceUtilities.FileServices
         {
             try
             {
-                SystemTopic TopicInfo = new SystemTopic(Location,
-                    $"/subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroup}/providers/Microsoft.EventGrid/systemTopics/{_TopicName}",
+                SystemTopic TopicInfo = new SystemTopic(ResourceGroupLocation,
+                    $"/subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroupName}/providers/Microsoft.EventGrid/systemTopics/{_TopicName}",
                     _TopicName,
                     "Microsoft.EventGrid/systemTopics",
                     null,
                     null,
-                    $"/subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroup}/providers/microsoft.storage/storageaccounts/{StorageAccountName}",
+                    $"/subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroupName}/providers/microsoft.storage/storageaccounts/{StorageAccountName}",
                     null,
                     "microsoft.storage.storageaccounts");
 
                 if (LastGeneratedToken.ExpiresOn.UtcDateTime <= DateTime.UtcNow)
                 {
-                    ClientSecretCredential ClientCred = new ClientSecretCredential(TenantId, ServiceClientId, ServiceSecret);
+                    ClientSecretCredential ClientCred = new ClientSecretCredential(TenantId, ClientId, ClientSecret);
                     TokenRequestContext RequestContext = new TokenRequestContext(new string[] { $"https://management.azure.com/.default" });
                     LastGeneratedToken = ClientCred.GetToken(RequestContext);
                 }
@@ -783,7 +783,7 @@ namespace BCloudServiceUtilities.FileServices
 
                 AZSystemTopicOperations SystemTopicOperations = new AZSystemTopicOperations(ManagmentClient);
 
-                bool Success = SystemTopicOperations.CreateOrUpdate(ResourceGroup, _TopicName, TopicInfo, out SystemTopic _, _ErrorMessageAction);
+                bool Success = SystemTopicOperations.CreateOrUpdate(ResourceGroupName, _TopicName, TopicInfo, out SystemTopic _, _ErrorMessageAction);
 
                 return Success;
             }

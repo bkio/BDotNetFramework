@@ -9,7 +9,7 @@ namespace BServiceUtilities
     /// 
     /// <para>Required Environment variables:</para>
     /// 
-    /// <para>AZ_STORAGE_SERVICE, AZ_STORAGE_ACCOUNT AZ_STORAGE_ACCOUNT_KEY, AZ_STORAGE_RESOURCE_GROUP, AZ_STORAGE_MANAGEMENT_APP_ID, AZ_STORAGE_MANAGEMENT_SECRET, AZ_SUBSCRIPTION_ID, AZ_TENANT_ID, AZ_STORAGE_LOCATION  must be provided and valid.</para>
+    /// <para>AZ_STORAGE_SERVICE_URL, AZ_STORAGE_ACCOUNT_NAME, AZ_STORAGE_ACCOUNT_ACCESS_KEY, AZ_RESOURCE_GROUP_NAME, AZ_RESOURCE_GROUP_LOCATION, AZ_CLIENT_ID, AZ_CLIENT_SECRET, AZ_SUBSCRIPTION_ID, AZ_TENANT_ID  must be provided and valid.</para>
     /// 
     /// </summary>
     public partial class BServiceInitializer
@@ -21,15 +21,15 @@ namespace BServiceUtilities
             /*
             * File service initialization
             */
-            FileService = new BFileServiceAZ(RequiredEnvironmentVariables["AZ_STORAGE_SERVICE"],
-                    RequiredEnvironmentVariables["AZ_STORAGE_ACCOUNT"],
-                    RequiredEnvironmentVariables["AZ_STORAGE_ACCOUNT_KEY"],
-                    RequiredEnvironmentVariables["AZ_STORAGE_RESOURCE_GROUP"],
-                    RequiredEnvironmentVariables["AZ_STORAGE_MANAGEMENT_APP_ID"],
-                    RequiredEnvironmentVariables["AZ_STORAGE_MANAGEMENT_SECRET"],
+            FileService = new BFileServiceAZ(RequiredEnvironmentVariables["AZ_STORAGE_SERVICE_URL"],
+                    RequiredEnvironmentVariables["AZ_STORAGE_ACCOUNT_NAME"],
+                    RequiredEnvironmentVariables["AZ_STORAGE_ACCOUNT_ACCESS_KEY"],
+                    RequiredEnvironmentVariables["AZ_RESOURCE_GROUP_NAME"],
+                    RequiredEnvironmentVariables["AZ_RESOURCE_GROUP_LOCATION"],
+                    RequiredEnvironmentVariables["AZ_CLIENT_ID"],
+                    RequiredEnvironmentVariables["AZ_CLIENT_SECRET"],
                     RequiredEnvironmentVariables["AZ_SUBSCRIPTION_ID"],
                     RequiredEnvironmentVariables["AZ_TENANT_ID"],
-                    RequiredEnvironmentVariables["AZ_STORAGE_LOCATION"],
                 (string Message) =>
                 {
                     LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, Message), ProgramID, "Initialization");
