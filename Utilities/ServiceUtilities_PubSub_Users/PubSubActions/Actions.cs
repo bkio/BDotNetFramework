@@ -54,27 +54,27 @@ namespace ServiceUtilities
         //Therefore this should only be called by Manager_PubSubService.SetDeploymentBranchNameAndBuildNumber() (Except microservice-dependency-map.cs for local debug run)
         public static readonly Dictionary<EAction, string> ActionStringPrefixMap = new Dictionary<EAction, string>()
         {
-            [EAction.ACTION_OPERATION_TIMEOUT] = "action_operation_timeout_",
-            [EAction.ACTION_USER_CREATED] = "action_user_created_",
-            [EAction.ACTION_USER_DELETED] = "action_user_deleted_",
-            [EAction.ACTION_USER_UPDATED] = "action_user_updated_",
-            [EAction.ACTION_AUTH_SERVICE_DELIVERY_ENSURER] = "action_auth_service_delivery_ensurer_",
-            [EAction.ACTION_CAD_FILE_SERVICE_DELIVERY_ENSURER] = "action_cad_file_service_delivery_ensurer_",
-            [EAction.ACTION_MODEL_CREATED] = "action_model_created_",
-            [EAction.ACTION_MODEL_DELETED] = "action_model_deleted_",
-            [EAction.ACTION_MODEL_UPDATED] = "action_model_updated_",
-            [EAction.ACTION_MODEL_SHARED_WITH_USER_IDS_CHANGED] = "action_model_shared_with_user_ids_changed_",
-            [EAction.ACTION_MODEL_REVISION_CREATED] = "action_model_revision_created_",
-            [EAction.ACTION_MODEL_REVISION_DELETED] = "action_model_revision_deleted_",
-            [EAction.ACTION_MODEL_REVISION_UPDATED] = "action_model_revision_updated_",
-            [EAction.ACTION_MODEL_REVISION_FILE_ENTRY_UPDATED] = "action_model_revision_file_entry_updated_",
-            [EAction.ACTION_MODEL_REVISION_FILE_ENTRY_DELETED] = "action_model_revision_file_entry_deleted_",
-            [EAction.ACTION_MODEL_REVISION_FILE_ENTRY_DELETE_ALL] = "action_model_revision_file_entry_delete_all_",
-            [EAction.ACTION_MODEL_REVISION_RAW_FILE_UPLOADED] = "action_model_revision_raw_file_uploaded_",
-            [EAction.ACTION_STORAGE_FILE_UPLOADED] = "action_storage_file_uploaded_",
-            [EAction.ACTION_STORAGE_FILE_DELETED] = "action_storage_file_deleted_",
-            [EAction.ACTION_ZIP_AND_UPLOAD_MODELS_TO_CDF] = "action_zip_and_upload_models_to_cdf_",
-            [EAction.ACTION_BATCH_PROCESS_FAILED] = "action_cad_process_batch_process_failed_"
+            [EAction.ACTION_OPERATION_TIMEOUT] = "operation_timeout_",
+            [EAction.ACTION_USER_CREATED] = "user_created_",
+            [EAction.ACTION_USER_DELETED] = "user_deleted_",
+            [EAction.ACTION_USER_UPDATED] = "user_updated_",
+            [EAction.ACTION_AUTH_SERVICE_DELIVERY_ENSURER] = "auth_delivery_ensurer_",
+            [EAction.ACTION_CAD_FILE_SERVICE_DELIVERY_ENSURER] = "cad_file_delivery_ensurer_",
+            [EAction.ACTION_MODEL_CREATED] = "model_created_",
+            [EAction.ACTION_MODEL_DELETED] = "model_deleted_",
+            [EAction.ACTION_MODEL_UPDATED] = "model_updated_",
+            [EAction.ACTION_MODEL_SHARED_WITH_USER_IDS_CHANGED] = "model_shared_user_changed_",
+            [EAction.ACTION_MODEL_REVISION_CREATED] = "revision_created_",
+            [EAction.ACTION_MODEL_REVISION_DELETED] = "revision_deleted_",
+            [EAction.ACTION_MODEL_REVISION_UPDATED] = "revision_updated_",
+            [EAction.ACTION_MODEL_REVISION_FILE_ENTRY_UPDATED] = "rev_file_entry_updated_",
+            [EAction.ACTION_MODEL_REVISION_FILE_ENTRY_DELETED] = "rev_file_entry_deleted_",
+            [EAction.ACTION_MODEL_REVISION_FILE_ENTRY_DELETE_ALL] = "rev_file_entry_delete_all_",
+            [EAction.ACTION_MODEL_REVISION_RAW_FILE_UPLOADED] = "rev_raw_file_uploaded_",
+            [EAction.ACTION_STORAGE_FILE_UPLOADED] = "storage_file_uploaded_",
+            [EAction.ACTION_STORAGE_FILE_DELETED] = "storage_file_deleted_",
+            [EAction.ACTION_ZIP_AND_UPLOAD_MODELS_TO_CDF] = "zip_and_upload_to_cdf_",
+            [EAction.ACTION_BATCH_PROCESS_FAILED] = "cad_process_batch_failed_"
         };
 
         public static Action DeserializeAction(EAction _IdentifiedAction, string _SerializedAction)
