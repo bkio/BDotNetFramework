@@ -7,7 +7,7 @@ namespace BServiceUtilities
     /// 
     /// <para>Required Environment variables:</para>
     /// 
-    /// <para>AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID, AZURE_NAMESPACE_ID, and AZURE_NAMESPACE_CONNSTR must be provided and valid.</para>
+    /// <para>AZ_CLIENT_ID, AZ_CLIENT_SECRET, AZ_TENANT_ID, AZ_SERVICEBUS_NAMESPACE_ID, and AZ_SERVICEBUS_NAMESPACE_CONNECTION_STRING must be provided and valid.</para>
     /// 
     /// </summary>
     public partial class BServiceInitializer
@@ -23,11 +23,11 @@ namespace BServiceUtilities
             * Pub/Sub service initialization
             */
             PubSubService = new BPubSubServiceAzure(
-                RequiredEnvironmentVariables["AZURE_CLIENT_ID"], 
-                RequiredEnvironmentVariables["AZURE_CLIENT_SECRET"], 
-                RequiredEnvironmentVariables["AZURE_TENANT_ID"], 
-                RequiredEnvironmentVariables["AZURE_NAMESPACE_ID"], 
-                RequiredEnvironmentVariables["AZURE_NAMESPACE_CONNSTR"]
+                RequiredEnvironmentVariables["AZ_CLIENT_ID"], 
+                RequiredEnvironmentVariables["AZ_CLIENT_SECRET"], 
+                RequiredEnvironmentVariables["AZ_TENANT_ID"], 
+                RequiredEnvironmentVariables["AZ_SERVICEBUS_NAMESPACE_ID"], 
+                RequiredEnvironmentVariables["AZ_SERVICEBUS_NAMESPACE_CONNECTION_STRING"],
                 (string Message) =>
                 {
                     LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, Message), ProgramID, "Initialization");

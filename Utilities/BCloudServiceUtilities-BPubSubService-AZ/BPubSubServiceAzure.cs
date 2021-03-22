@@ -31,7 +31,7 @@ namespace BCloudServiceUtilities.PubSubServices
         /// <summary>
         /// Holds namespace connection string for QueueClient connections.
         /// </summary>
-        private readonly string NamespaceConnectionString;
+        private readonly string ServiceBusNamespaceConnectionString;
 
         /// <summary>
         /// Holds initialization success
@@ -48,25 +48,25 @@ namespace BCloudServiceUtilities.PubSubServices
         /// <para>BPubSubServiceAzure: Parametered Constructor for Managed Service by Microsoft Azure</para>
         /// 
         /// <para>Parameters:</para>
-        /// <para><paramref name="_ClientId"/>                      Azure Application/Client Id</para>
-        /// <para><paramref name="_ClientSecret"/>                  Azure Client Secret</para>
-        /// <para><paramref name="_TenantId"/>                      Azure AD Tenant Id</para>
-        /// <para><paramref name="_NamespaceId"/>                   Azure Service Bus Namespace Id</para>
-        /// <para><paramref name="_NamespaceConnectionString"/>     Azure Service Bus Namespace Connection String</para>
-        /// <para><paramref name="_ErrorMessageAction"/>            Error messages will be pushed to this action</para>
+        /// <para><paramref name="_ClientId"/>                                  Azure Client Id</para>
+        /// <para><paramref name="_ClientSecret"/>                              Azure Client Secret</para>
+        /// <para><paramref name="_TenantId"/>                                  Azure Tenant Id</para>
+        /// <para><paramref name="_ServiceBusNamespaceId"/>                     Azure Service Bus Namespace Id</para>
+        /// <para><paramref name="_ServiceBusNamespaceConnectionString"/>       Azure Service Bus Namespace Connection String</para>
+        /// <para><paramref name="_ErrorMessageAction"/>                        Error messages will be pushed to this action</para>
         /// 
         /// </summary>
         public BPubSubServiceAzure(
             string _ClientId,
             string _ClientSecret,
             string _TenantId,
-            string _NamespaceId,
-            string _NamespaceConnectionString,
+            string _ServiceBusNamespaceId,
+            string _ServiceBusNamespaceConnectionString,
             Action<string> _ErrorMessageAction = null)
         {
             try
             {
-                NamespaceConnectionString = _NamespaceConnectionString;
+                ServiceBusNamespaceConnectionString = _ServiceBusNamespaceConnectionString;
 
                 var credentials = SdkContext.AzureCredentialsFactory.FromServicePrincipal(_ClientId, _ClientSecret, _TenantId, AzureEnvironment.AzureGlobalCloud);
 
@@ -76,7 +76,7 @@ namespace BCloudServiceUtilities.PubSubServices
                     .Authenticate(credentials)
                     .WithDefaultSubscription();
 
-                using (var GetNamespaceTask = AzureManager.ServiceBusNamespaces.GetByIdAsync(_NamespaceId))
+                using (var GetNamespaceTask = AzureManager.ServiceBusNamespaces.GetByIdAsync(_ServiceBusNamespaceId))
                 {
                     GetNamespaceTask.Wait();
                     AzureNamespaceManager = GetNamespaceTask.Result;
@@ -91,18 +91,18 @@ namespace BCloudServiceUtilities.PubSubServices
             }
         }
 
-        private bool CheckQueueExists(string _QueueName, out IQueueClient _QueueClient)
+        private bool CheckTopicExists(string _TopicName, out ITopicClient _TopicClient)
         {
-            _QueueClient = null;
+            _TopicClient = null;
 
             try
             {
-                using (var GetQueueTask = AzureNamespaceManager.Queues.GetByNameAsync(_QueueName))
+                using (var GetQueueTask = AzureNamespaceManager.Queues.GetByNameAsync(_TopicName))
                 {
                     GetQueueTask.Wait();
                     if (GetQueueTask.Result != null && GetQueueTask.Result.Name != null && GetQueueTask.Result.Name.Length > 0)
                     {
-                        _QueueClient = new QueueClient(NamespaceConnectionString, _QueueName);
+                        _TopicClient = new TopicClient(ServiceBusNamespaceConnectionString, _TopicName);
                         return true;
                     }
                 }
@@ -112,19 +112,19 @@ namespace BCloudServiceUtilities.PubSubServices
             return false;
         }
 
-        private bool EnsureQueueExists(string _QueueName, out IQueueClient _QueueClient, Action<string> _ErrorMessageAction)
+        private bool EnsureTopicExists(string _TopicName, out ITopicClient _TopicClient, Action<string> _ErrorMessageAction)
         {
-            bool bExists = CheckQueueExists(_QueueName, out _QueueClient);
+            bool bExists = CheckTopicExists(_TopicName, out _TopicClient);
             if (!bExists)
             {
                 try
                 {
-                    using (var CreateQueueTask = AzureNamespaceManager.Queues.Define(_QueueName).CreateAsync())
+                    using (var CreateTopicTask = AzureNamespaceManager.Topics.Define(_TopicName).CreateAsync())
                     {
-                        CreateQueueTask.Wait();
-                        if (CreateQueueTask.Result != null && CreateQueueTask.Result.Name != null && CreateQueueTask.Result.Name.Length > 0)
+                        CreateTopicTask.Wait();
+                        if (CreateTopicTask.Result != null && CreateTopicTask.Result.Name != null && CreateTopicTask.Result.Name.Length > 0)
                         {
-                            _QueueClient = new QueueClient(NamespaceConnectionString, _QueueName);
+                            _TopicClient = new TopicClient(ServiceBusNamespaceConnectionString, _TopicName);
                             bExists = true;
                         }
                     }
@@ -132,10 +132,10 @@ namespace BCloudServiceUtilities.PubSubServices
                 catch (Exception e)
                 {
                     bExists = false;
-                    _ErrorMessageAction?.Invoke("BPubSubServiceAzure->EnsureQueueExists->Callback: " + e.Message + ", Trace: " + e.StackTrace);
+                    _ErrorMessageAction?.Invoke("BPubSubServiceAzure->EnsureTopicExists->Callback: " + e.Message + ", Trace: " + e.StackTrace);
                     if (e.InnerException != null && e.InnerException != e)
                     {
-                        _ErrorMessageAction?.Invoke("BPubSubServiceAzure->EnsureQueueExists->Inner: " + e.InnerException.Message + ", Trace: " + e.InnerException.StackTrace);
+                        _ErrorMessageAction?.Invoke("BPubSubServiceAzure->EnsureTopicExists->Inner: " + e.InnerException.Message + ", Trace: " + e.InnerException.StackTrace);
                     }
                 }
             }
@@ -148,7 +148,7 @@ namespace BCloudServiceUtilities.PubSubServices
                 && _CustomMessage != null && _CustomMessage.Length > 0
                 && BUtility.CalculateStringMD5(_CustomTopic, out string TopicMD5, _ErrorMessageAction))
             {
-                if (EnsureQueueExists(TopicMD5, out IQueueClient _QueueClient, _ErrorMessageAction))
+                if (EnsureTopicExists(TopicMD5, out ITopicClient _TopicClient, _ErrorMessageAction))
                 {
                     string TimestampHash = null;
                     UniqueMessageDeliveryEnsurer?.Publish_PrependTimestampToMessage(ref _CustomMessage, out TimestampHash);
@@ -161,7 +161,7 @@ namespace BCloudServiceUtilities.PubSubServices
                             {
                                 var AzureMessage = new Message(Encoding.UTF8.GetBytes(_CustomMessage));
                                 AzureMessage.Label = TopicMD5;
-                                using (var SendMessageTask = _QueueClient.SendAsync(AzureMessage))
+                                using (var SendMessageTask = _TopicClient.SendAsync(AzureMessage))
                                 {
                                     SendMessageTask.Wait();
                                 }
@@ -175,7 +175,7 @@ namespace BCloudServiceUtilities.PubSubServices
                         else
                         {
                             var AzureMessage = new Message(Encoding.UTF8.GetBytes(_CustomMessage));
-                            using (var SendMessageTask = _QueueClient.SendAsync(AzureMessage))
+                            using (var SendMessageTask = _TopicClient.SendAsync(AzureMessage))
                             {
                                 SendMessageTask.Wait();
                             }
@@ -192,7 +192,7 @@ namespace BCloudServiceUtilities.PubSubServices
                     }
                     finally
                     {
-                        using (var CloseTask = _QueueClient.CloseAsync())
+                        using (var CloseTask = _TopicClient.CloseAsync())
                         {
                             CloseTask.Wait();
                         }
@@ -205,9 +205,10 @@ namespace BCloudServiceUtilities.PubSubServices
 
         public bool CustomSubscribe(string _CustomTopic, Action<string, string> _OnMessage, Action<string> _ErrorMessageAction = null)
         {
-            if (_CustomTopic != null && _CustomTopic.Length > 0 && _OnMessage != null && BUtility.CalculateStringMD5(_CustomTopic, out string TopicMD5, _ErrorMessageAction))
+            if (_CustomTopic != null && _CustomTopic.Length > 0 && _OnMessage != null 
+                && BUtility.CalculateStringMD5(_CustomTopic, out string TopicMD5, _ErrorMessageAction))
             {
-                if (EnsureQueueExists(TopicMD5, out IQueueClient _QueueClient, _ErrorMessageAction))
+                if (EnsureTopicExists(TopicMD5, out ITopicClient _TopicClient, _ErrorMessageAction))
                 {
                     var SubscriptionCancellationVar = new BValue<bool>(false, EBProducerStatus.MultipleProducer);
                     var SubscriptionThread = new Thread(() =>
@@ -237,8 +238,10 @@ namespace BCloudServiceUtilities.PubSubServices
 
                             try
                             {
+
+                                var _SubscriptionClient = new Microsoft.Azure.ServiceBus.SubscriptionClient(ServiceBusNamespaceConnectionString, _TopicClient.Path, _CustomTopic);
                                 // Register the function that processes messages.
-                                _QueueClient.RegisterMessageHandler((Message MessageContainer, CancellationToken token) =>
+                                _SubscriptionClient.RegisterMessageHandler((Message MessageContainer, CancellationToken token) =>
                                 {
                                     if (MessageContainer != null)
                                     {
@@ -263,14 +266,14 @@ namespace BCloudServiceUtilities.PubSubServices
 
                                             // Complete the message so that it is not received again.
                                             // This can be done only if the queue Client is created in ReceiveMode.PeekLock mode (which is the default).
-                                            using (var ReceiveMessageCompleteTask = _QueueClient.CompleteAsync(MessageContainer.SystemProperties.LockToken))
+                                            using (var ReceiveMessageCompleteTask = _SubscriptionClient.CompleteAsync(MessageContainer.SystemProperties.LockToken))
                                             {
                                                 ReceiveMessageCompleteTask.Wait();
                                             }
                                         }
                                         else
                                         {
-                                            using (var DeadLetterTask = _QueueClient.DeadLetterAsync(MessageContainer.SystemProperties.LockToken))
+                                            using (var DeadLetterTask = _SubscriptionClient.DeadLetterAsync(MessageContainer.SystemProperties.LockToken))
                                             {
                                                 DeadLetterTask.Wait();
                                             }
