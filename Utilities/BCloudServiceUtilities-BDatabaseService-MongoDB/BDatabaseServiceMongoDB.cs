@@ -1,11 +1,13 @@
 ﻿/// MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using BCommonUtilities;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
 using MongoDB.Driver;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace BCloudServiceUtilities.DatabaseServices
@@ -91,6 +93,61 @@ namespace BCloudServiceUtilities.DatabaseServices
             try
             {
                 var Client = new MongoClient(_ConnectionString);
+                MongoDB = Client.GetDatabase(_MongoDatabase);
+                bInitializationSucceed = MongoDB != null;
+            }
+            catch (Exception e)
+            {
+                _ErrorMessageAction?.Invoke("BDatabaseServiceMongoDB->Constructor: " + e.Message + ", Trace: " + e.StackTrace);
+                bInitializationSucceed = false;
+            }
+        }
+
+        public BDatabaseServiceMongoDB(
+            string _MongoClientConfigJson,
+            string _MongoPassword,
+            string _MongoDatabase,
+            Action<string> _ErrorMessageAction = null)
+        {
+            try
+            {
+                byte[] byteArray = Convert.FromBase64String(_MongoClientConfigJson);
+
+                var clientConfigString = Encoding.UTF8.GetString(byteArray);
+                var clientConfigJObject = JObject.Parse(clientConfigString);
+
+                var replicaSetName = clientConfigJObject.SelectToken("replicaSets[0]._id").ToObject<string>();
+                var hostTokens = clientConfigJObject.SelectTokens("$...hostname");
+                var hosts = new List<string>();
+                foreach (var item in hostTokens)
+                {
+                    hosts.Add(item.ToObject<string>());
+                }
+                var portTokens = clientConfigJObject.SelectTokens("$....port");
+                var ports = new List<int>();
+                foreach (var item in portTokens)
+                {
+                    ports.Add(item.ToObject<int>());
+                }
+                var DatabaseName = clientConfigJObject.SelectToken("auth.usersWanted[0].db").ToObject<string>();
+                var UserName = clientConfigJObject.SelectToken("auth.usersWanted[0].user").ToObject<string>();
+                int MongoDBPort = 27017;
+
+                var clientSettings = new MongoClientSettings();
+                var serverList = new List<MongoServerAddress>();
+                for (int i = 0; i < hosts.Count; i++)
+                {
+                    if (i < ports.Count)
+                        MongoDBPort = ports[i];
+
+                    serverList.Add(new MongoServerAddress(hosts[i], MongoDBPort));
+                }
+
+                clientSettings.Servers = serverList.ToArray();
+                clientSettings.ConnectionMode = ConnectionMode.ReplicaSet;
+                clientSettings.Credential = MongoCredential.CreateCredential(DatabaseName, UserName, _MongoPassword);
+                clientSettings.ReplicaSetName = replicaSetName;
+                var Client = new MongoClient(clientSettings);
                 MongoDB = Client.GetDatabase(_MongoDatabase);
                 bInitializationSucceed = MongoDB != null;
             }

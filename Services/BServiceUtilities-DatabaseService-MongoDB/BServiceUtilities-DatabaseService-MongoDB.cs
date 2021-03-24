@@ -24,7 +24,7 @@ namespace BServiceUtilities
             /*
             * File service initialization
             */
-            DatabaseService = new BDatabaseServiceMongoDB(RequiredEnvironmentVariables["MONGODB_CONNECTION_STRING"], RequiredEnvironmentVariables["MONGODB_DATABASE"],
+            DatabaseService = new BDatabaseServiceMongoDB(RequiredEnvironmentVariables["MONGODB_CLIENT_CONFIG"], RequiredEnvironmentVariables["MONGODB_PASSWORD"], RequiredEnvironmentVariables["MONGODB_DATABASE"],
                 (string Message) =>
                 {
                     LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, Message), ProgramID, "Initialization");
