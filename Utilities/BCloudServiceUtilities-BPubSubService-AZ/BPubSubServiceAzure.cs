@@ -94,6 +94,9 @@ namespace BCloudServiceUtilities.PubSubServices
         {
             _TopicClient = null;
 
+            if (AzureNamespaceManager == null)
+                return false;
+
             try
             {
                 using (var GetTopicTask = AzureNamespaceManager.Topics.GetByNameAsync(_TopicName))
@@ -116,6 +119,9 @@ namespace BCloudServiceUtilities.PubSubServices
             bool bExists = CheckTopicExists(_TopicName, out _TopicClient);
             if (!bExists)
             {
+                if (AzureNamespaceManager == null)
+                    return false;
+
                 try
                 {
                     using (var CreateTopicTask = AzureNamespaceManager.Topics.Define(_TopicName).CreateAsync())
@@ -144,6 +150,9 @@ namespace BCloudServiceUtilities.PubSubServices
         private bool CheckSubscriptionExists(string _SubscriptionName, ITopicClient _TopicClient, out Microsoft.Azure.ServiceBus.ISubscriptionClient _SubscriptionClient)
         {
             _SubscriptionClient = null;
+
+            if (AzureNamespaceManager == null)
+                return false;
 
             try
             {
@@ -175,6 +184,9 @@ namespace BCloudServiceUtilities.PubSubServices
             bool bExists = CheckSubscriptionExists(_SubscriptionName, _TopicClient, out _SubscriptionClient);
             if (!bExists)
             {
+                if (AzureNamespaceManager == null)
+                    return false;
+
                 try
                 {
                     using (var GetTopicTask = AzureNamespaceManager.Topics.GetByNameAsync(_SubscriptionName))
@@ -366,7 +378,8 @@ namespace BCloudServiceUtilities.PubSubServices
 
         public void DeleteCustomTopicGlobally(string _CustomTopic, Action<string> _ErrorMessageAction = null)
         {
-            if (BUtility.CalculateStringMD5(_CustomTopic, out string TopicMD5, _ErrorMessageAction))
+            if (BUtility.CalculateStringMD5(_CustomTopic, out string TopicMD5, _ErrorMessageAction)
+                && AzureNamespaceManager != null)
             {
                 try
                 {
