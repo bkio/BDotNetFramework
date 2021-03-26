@@ -22,14 +22,13 @@ namespace BCloudServiceUtilities.PubSubServices
         /// </summary>
         private readonly IAzure AzureManager;
 
-
         /// <summary>
         /// Azure Namespace Manager for managing Azure Service Bus Namespaces
         /// </summary>
         private readonly IServiceBusNamespace AzureNamespaceManager;
 
         /// <summary>
-        /// Holds namespace connection string for QueueClient connections.
+        /// Holds namespace connection string for ITopicClient and ISubscriptionClient connections.
         /// </summary>
         private readonly string ServiceBusNamespaceConnectionString;
 
@@ -41,7 +40,7 @@ namespace BCloudServiceUtilities.PubSubServices
         private BPubSubUniqueMessageDeliveryEnsurer UniqueMessageDeliveryEnsurer = null;
 
         private readonly object SubscriberThreadsDictionaryLock = new object();
-        private readonly Dictionary<string, BTuple<Thread, BValue<bool>>> SubscriberThreadsDictionary = new Dictionary<string, BTuple<Thread, BValue<bool>>>();
+        private readonly Dictionary<string, BTuple<Microsoft.Azure.ServiceBus.ISubscriptionClient, BValue<string>>> SubscriberThreadsCancelDictionary = new Dictionary<string, BTuple<Microsoft.Azure.ServiceBus.ISubscriptionClient, BValue<string>>>();
 
         /// <summary>
         /// 
@@ -97,10 +96,10 @@ namespace BCloudServiceUtilities.PubSubServices
 
             try
             {
-                using (var GetQueueTask = AzureNamespaceManager.Queues.GetByNameAsync(_TopicName))
+                using (var GetTopicTask = AzureNamespaceManager.Topics.GetByNameAsync(_TopicName))
                 {
-                    GetQueueTask.Wait();
-                    if (GetQueueTask.Result != null && GetQueueTask.Result.Name != null && GetQueueTask.Result.Name.Length > 0)
+                    GetTopicTask.Wait();
+                    if (GetTopicTask.Result != null && GetTopicTask.Result.Name != null && GetTopicTask.Result.Name.Length > 0)
                     {
                         _TopicClient = new TopicClient(ServiceBusNamespaceConnectionString, _TopicName);
                         return true;
@@ -136,6 +135,73 @@ namespace BCloudServiceUtilities.PubSubServices
                     if (e.InnerException != null && e.InnerException != e)
                     {
                         _ErrorMessageAction?.Invoke("BPubSubServiceAzure->EnsureTopicExists->Inner: " + e.InnerException.Message + ", Trace: " + e.InnerException.StackTrace);
+                    }
+                }
+            }
+            return bExists;
+        }
+
+        private bool CheckSubscriptionExists(string _SubscriptionName, ITopicClient _TopicClient, out Microsoft.Azure.ServiceBus.ISubscriptionClient _SubscriptionClient)
+        {
+            _SubscriptionClient = null;
+
+            try
+            {
+                using (var GetTopicTask = AzureNamespaceManager.Topics.GetByNameAsync(_SubscriptionName))
+                {
+                    GetTopicTask.Wait();
+                    if (GetTopicTask.Result != null && GetTopicTask.Result.Name != null && GetTopicTask.Result.Name.Length > 0)
+                    {
+                        var TopicManager = GetTopicTask.Result;
+                        using (var GetSubscriptionTask = TopicManager.Subscriptions.GetByNameAsync(_SubscriptionName))
+                        {
+                            GetSubscriptionTask.Wait();
+                            if (GetSubscriptionTask.Result != null && GetSubscriptionTask.Result.Name != null && GetSubscriptionTask.Result.Name.Length > 0)
+                            {
+                                _SubscriptionClient = new Microsoft.Azure.ServiceBus.SubscriptionClient(ServiceBusNamespaceConnectionString, _TopicClient.Path, _SubscriptionName);
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception) { }
+
+            return false;
+        }
+
+        private bool EnsureSubscriptionExists(string _SubscriptionName, ITopicClient _TopicClient, out Microsoft.Azure.ServiceBus.ISubscriptionClient _SubscriptionClient, Action<string> _ErrorMessageAction)
+        {
+            bool bExists = CheckSubscriptionExists(_SubscriptionName, _TopicClient, out _SubscriptionClient);
+            if (!bExists)
+            {
+                try
+                {
+                    using (var GetTopicTask = AzureNamespaceManager.Topics.GetByNameAsync(_SubscriptionName))
+                    {
+                        GetTopicTask.Wait();
+                        if (GetTopicTask.Result != null && GetTopicTask.Result.Name != null && GetTopicTask.Result.Name.Length > 0)
+                        {
+                            var TopicManager = GetTopicTask.Result;
+                            using (var CreateSubscriptionTask = TopicManager.Subscriptions.Define(_SubscriptionName).CreateAsync())
+                            {
+                                CreateSubscriptionTask.Wait();
+                                if (CreateSubscriptionTask.Result != null && CreateSubscriptionTask.Result.Name != null && CreateSubscriptionTask.Result.Name.Length > 0)
+                                {
+                                    _SubscriptionClient = new Microsoft.Azure.ServiceBus.SubscriptionClient(ServiceBusNamespaceConnectionString, _TopicClient.Path, _SubscriptionName);
+                                    bExists = true;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    bExists = false;
+                    _ErrorMessageAction?.Invoke("BPubSubServiceAzure->EnsureSubscriptionExists->Callback: " + e.Message + ", Trace: " + e.StackTrace);
+                    if (e.InnerException != null && e.InnerException != e)
+                    {
+                        _ErrorMessageAction?.Invoke("BPubSubServiceAzure->EnsureSubscriptionExists->Inner: " + e.InnerException.Message + ", Trace: " + e.InnerException.StackTrace);
                     }
                 }
             }
@@ -210,19 +276,19 @@ namespace BCloudServiceUtilities.PubSubServices
             {
                 if (EnsureTopicExists(TopicMD5, out ITopicClient _TopicClient, _ErrorMessageAction))
                 {
-                    var SubscriptionCancellationVar = new BValue<bool>(false, EBProducerStatus.MultipleProducer);
-                    var SubscriptionThread = new Thread(() =>
+                    if(EnsureSubscriptionExists(TopicMD5, _TopicClient, out Microsoft.Azure.ServiceBus.ISubscriptionClient _SubscriptionClient, _ErrorMessageAction))
                     {
-                        Thread.CurrentThread.IsBackground = true;
-
-                        while (!SubscriptionCancellationVar.Get())
+                        var SubscriptionCancellationVar = new BValue<bool>(false, EBProducerStatus.MultipleProducer);
+                        var SubscriptionThread = new Thread(() =>
                         {
+                            Thread.CurrentThread.IsBackground = true;
+
                             // Define exception receiver handler
                             Func<ExceptionReceivedEventArgs, Task> ExceptionReceiverHandler = (ExceptionReceivedEventArgs exceptionReceivedEventArgs) =>
-                                {
-                                    _ErrorMessageAction?.Invoke("BPubSubServiceAzure->CustomSubscribe: " + exceptionReceivedEventArgs.Exception.Message + ", Trace: " + exceptionReceivedEventArgs.Exception.StackTrace);
-                                    return Task.CompletedTask;
-                                };
+                            {
+                                _ErrorMessageAction?.Invoke("BPubSubServiceAzure->CustomSubscribe: " + exceptionReceivedEventArgs.Exception.Message + ", Trace: " + exceptionReceivedEventArgs.Exception.StackTrace);
+                                return Task.CompletedTask;
+                            };
 
                             // Configure the message handler options in terms of exception handling, number of concurrent messages to deliver, etc.
                             var messageHandlerOptions = new MessageHandlerOptions(ExceptionReceiverHandler)
@@ -238,8 +304,6 @@ namespace BCloudServiceUtilities.PubSubServices
 
                             try
                             {
-
-                                var _SubscriptionClient = new Microsoft.Azure.ServiceBus.SubscriptionClient(ServiceBusNamespaceConnectionString, _TopicClient.Path, _CustomTopic);
                                 // Register the function that processes messages.
                                 _SubscriptionClient.RegisterMessageHandler((Message MessageContainer, CancellationToken token) =>
                                 {
@@ -264,11 +328,10 @@ namespace BCloudServiceUtilities.PubSubServices
                                                 _OnMessage?.Invoke(_CustomTopic, Data);
                                             }
 
-                                            // Complete the message so that it is not received again.
-                                            // This can be done only if the queue Client is created in ReceiveMode.PeekLock mode (which is the default).
-                                            using (var ReceiveMessageCompleteTask = _SubscriptionClient.CompleteAsync(MessageContainer.SystemProperties.LockToken))
+                                            lock (SubscriberThreadsDictionaryLock)
                                             {
-                                                ReceiveMessageCompleteTask.Wait();
+                                                var LockTokenVar = new BValue<string>(MessageContainer.SystemProperties.LockToken, EBProducerStatus.MultipleProducer);
+                                                SubscriberThreadsCancelDictionary.Add(_CustomTopic, new BTuple<Microsoft.Azure.ServiceBus.ISubscriptionClient, BValue<string>>(_SubscriptionClient, LockTokenVar));
                                             }
                                         }
                                         else
@@ -291,16 +354,11 @@ namespace BCloudServiceUtilities.PubSubServices
                                     _ErrorMessageAction?.Invoke("BPubSubServiceAzure->CustomSubscribe->Inner: " + e.InnerException.Message + ", Trace: " + e.InnerException.StackTrace);
                                 }
                             }
-                        }
 
-                    });
-                    SubscriptionThread.Start();
-
-                    lock (SubscriberThreadsDictionaryLock)
-                    {
-                        SubscriberThreadsDictionary.Add(_CustomTopic, new BTuple<Thread, BValue<bool>>(SubscriptionThread, SubscriptionCancellationVar));
+                        });
+                        SubscriptionThread.Start();
+                        return true;
                     }
-                    return true;
                 }
             }
             return false;
@@ -314,20 +372,27 @@ namespace BCloudServiceUtilities.PubSubServices
                 {
                     lock (SubscriberThreadsDictionaryLock)
                     {
-                        if (SubscriberThreadsDictionary.ContainsKey(_CustomTopic))
+                        if (SubscriberThreadsCancelDictionary.ContainsKey(_CustomTopic))
                         {
-                            var SubscriberThread = SubscriberThreadsDictionary[_CustomTopic];
+                            var SubscriberThread = SubscriberThreadsCancelDictionary[_CustomTopic];
                             if (SubscriberThread != null)
                             {
-                                SubscriberThread.Item2.Set(true);
+                                var _SubscriptionClient = SubscriberThread.Item1;
+                                var _LockToken = SubscriberThread.Item2.Get();
+                                // Complete the message so that it is not received again.
+                                // This can be done only if the client is created in ReceiveMode.PeekLock mode (which is the default).
+                                using (var ReceiveMessageCompleteTask = _SubscriptionClient.CompleteAsync(_LockToken))
+                                {
+                                    ReceiveMessageCompleteTask.Wait();
+                                }
                             }
-                            SubscriberThreadsDictionary.Remove(_CustomTopic);
+                            SubscriberThreadsCancelDictionary.Remove(_CustomTopic);
                         }
                     }
 
-                    using (var DeleteQueueTask = AzureNamespaceManager.Queues.DeleteByNameAsync(TopicMD5))
+                    using (var DeleteTopicTask = AzureNamespaceManager.Topics.DeleteByNameAsync(TopicMD5))
                     {
-                        DeleteQueueTask.Wait();
+                        DeleteTopicTask.Wait();
                     }
                 }
                 catch (Exception e)
