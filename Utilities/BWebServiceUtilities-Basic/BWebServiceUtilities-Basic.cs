@@ -317,6 +317,40 @@ namespace BWebServiceUtilities
             return Lowered;
         }
 
+        public static BWebServiceResponse RequestRedirection(
+            HttpListenerContext _Context,
+            string _FullEndpoint,
+            Action<string> _ErrorMessageAction = null,
+            bool _bWithAuthToken = true,
+            bool _bKillProcessOnAddAccessTokenForServiceExecutionFailure = true,
+            IEnumerable<string> _ExcludeHeaderKeysForRequest = null)
+        {
+            using (var InputStream = _Context.Request.InputStream)
+            {
+                using (var RequestStream = InputStream)
+                {
+                    var Result = InterServicesRequest(new InterServicesRequestRequest()
+                    {
+                        DestinationServiceUrl = _FullEndpoint,
+                        RequestMethod = _Context.Request.HttpMethod,
+                        ContentType = _Context.Request.ContentType,
+                        Content = new BStringOrStream(RequestStream, _Context.Request.ContentLength64),
+                        bWithAuthToken = _bWithAuthToken,
+                        UseContextHeaders = _Context,
+                        ExcludeHeaderKeysForRequest = _ExcludeHeaderKeysForRequest
+                    },
+                    _bKillProcessOnAddAccessTokenForServiceExecutionFailure,
+                    _ErrorMessageAction);
+
+                    return new BWebServiceResponse(
+                        Result.ResponseCode,
+                        Result.ResponseHeaders,
+                        Result.Content,
+                        Result.ContentType);
+                }
+            }
+        }
+
         private static void AnalyzeResponse(
             HttpWebResponse _Response,
             out bool _bHttpRequestSuccess,
