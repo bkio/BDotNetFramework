@@ -111,9 +111,17 @@ namespace BCloudServiceUtilities.DatabaseServices
         {
             try
             {
-                byte[] byteArray = Convert.FromBase64String(_MongoClientConfigJson);
+                var clientConfigString = _MongoClientConfigJson;
+                // Parse the Client Config Json if it's a base64 encoded (for running on local environment with launchSettings.json) 
+                Span<byte> buffer = new Span<byte>(new byte[clientConfigString.Length]);
+                if(Convert.TryFromBase64String(clientConfigString, buffer, out int bytesParsed))
+                {
+                    if(bytesParsed > 0)
+                    {
+                        clientConfigString = Encoding.UTF8.GetString(buffer);
+                    }
+                }
 
-                var clientConfigString = Encoding.UTF8.GetString(byteArray);
                 var clientConfigJObject = JObject.Parse(clientConfigString);
 
                 var replicaSetName = clientConfigJObject.SelectToken("replicaSets[0]._id").ToObject<string>();
