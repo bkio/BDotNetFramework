@@ -224,7 +224,7 @@ namespace BWebServiceUtilities
                                         WriteOK(Context.Response, "pong");
                                         return;
                                     }
-                                    _ServerLogAction?.Invoke("BWebserver->Run: Request is not being listened. Request: " + Context.Request.RawUrl);
+                                    _ServerLogAction?.Invoke($"BWebserver->Run: Request is not being listened. Request: {Context.Request.RawUrl} - Full Path: {Context.Request.Url}");
                                     WriteNotFound(Context.Response, "Request is not being listened.");
                                     return;
                                 }
