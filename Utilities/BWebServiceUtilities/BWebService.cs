@@ -219,12 +219,17 @@ namespace BWebServiceUtilities
                                 }
                                 if (!LookForListenersFromRequest(out BWebServiceBase _Callback, Context))
                                 {
+                                    if (Context.Request.RawUrl.Equals("/"))
+                                    {
+                                        WriteOK(Context.Response, "OK");
+                                        return;
+                                    }
                                     if (Context.Request.RawUrl.EndsWith("/ping"))
                                     {
                                         WriteOK(Context.Response, "pong");
                                         return;
                                     }
-                                    _ServerLogAction?.Invoke($"BWebserver->Run: Request is not being listened. Request: {Context.Request.RawUrl} - Full Path: {Context.Request.Url}");
+                                    _ServerLogAction?.Invoke($"BWebserver->Run: Request is not being listened. Request: {Context.Request.RawUrl}");
                                     WriteNotFound(Context.Response, "Request is not being listened.");
                                     return;
                                 }
