@@ -33,10 +33,17 @@ namespace BServiceUtilities
                 return false;
             }
 
+            bool RedisSslEnabled = false;
+            if (RequiredEnvironmentVariables.ContainsKey("REDIS_SSL_ENABLED") && !bool.TryParse(RequiredEnvironmentVariables["REDIS_SSL_ENABLED"], out RedisSslEnabled))
+            {
+                LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Warning, "REDIS_SSL_ENABLED parameter has been provided, but it has not a valid value. It will be continued without SSL."), ProgramID, "Initialization");
+            }
+
             MemoryService = new BMemoryServiceRedis(
                 RequiredEnvironmentVariables["REDIS_ENDPOINT"],
                 RedisPort,
                 RequiredEnvironmentVariables["REDIS_PASSWORD"],
+                RedisSslEnabled,
                 _WithPubSubService,
                 _bFailoverMechanismEnabled,
                 (string Message) =>

@@ -181,10 +181,12 @@ namespace BCloudServiceUtilitiesTest
                     RequiredEnvVars["REDIS_ENDPOINT"],
                     int.Parse(RequiredEnvVars["REDIS_PORT"]),
                     RequiredEnvVars["REDIS_PASSWORD"],
+                    bool.Parse(RequiredEnvVars["REDIS_SSL_ENABLED"]),
                     new BPubSubServiceRedis(
                         RequiredEnvVars["REDIS_ENDPOINT"],
                         int.Parse(RequiredEnvVars["REDIS_PORT"]),
                         RequiredEnvVars["REDIS_PASSWORD"],
+                        bool.Parse(RequiredEnvVars["REDIS_SSL_ENABLED"]),
                         true,
                         Console.WriteLine),
                     true,
@@ -199,6 +201,7 @@ namespace BCloudServiceUtilitiesTest
                     RequiredEnvVars["REDIS_ENDPOINT"],
                     int.Parse(RequiredEnvVars["REDIS_PORT"]),
                     RequiredEnvVars["REDIS_PASSWORD"],
+                    bool.Parse(RequiredEnvVars["REDIS_SSL_ENABLED"]),
                     new BPubSubServiceGC(
                         RequiredEnvVars["GC_PROJECT_ID"],
                         Console.WriteLine),
@@ -216,6 +219,7 @@ namespace BCloudServiceUtilitiesTest
                     RequiredEnvVars["REDIS_ENDPOINT"],
                     int.Parse(RequiredEnvVars["REDIS_PORT"]),
                     RequiredEnvVars["REDIS_PASSWORD"],
+                    bool.Parse(RequiredEnvVars["REDIS_SSL_ENABLED"]),
                     new BPubSubServiceAWS(
                         RequiredEnvVars["AWS_ACCESS_KEY"],
                         RequiredEnvVars["AWS_SECRET_KEY"],
@@ -235,6 +239,7 @@ namespace BCloudServiceUtilitiesTest
                     RequiredEnvVars["REDIS_ENDPOINT"],
                     int.Parse(RequiredEnvVars["REDIS_PORT"]),
                     RequiredEnvVars["REDIS_PASSWORD"],
+                    bool.Parse(RequiredEnvVars["REDIS_SSL_ENABLED"]),
                     new BPubSubServiceAzure(
                         RequiredEnvVars["AZURE_CLIENT_ID"],
                         RequiredEnvVars["AZURE_CLIENT_SECRET"],

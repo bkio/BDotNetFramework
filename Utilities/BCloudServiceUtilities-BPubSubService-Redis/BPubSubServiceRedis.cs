@@ -24,7 +24,29 @@ namespace BCloudServiceUtilities.PubSubServices
             int _RedisPort,
             string _RedisPassword,
             bool _bFailoverMechanismEnabled = true,
-            Action<string> _ErrorMessageAction = null) : base("BPubSubServiceRedis", _RedisEndpoint, _RedisPort, _RedisPassword, _bFailoverMechanismEnabled,  _ErrorMessageAction)
+            Action<string> _ErrorMessageAction = null) : base("BPubSubServiceRedis", _RedisEndpoint, _RedisPort, _RedisPassword, false, _bFailoverMechanismEnabled,  _ErrorMessageAction)
+        {
+        }
+
+        /// <summary>
+        /// 
+        /// <para>BPubSubServiceRedis: Parametered Constructor</para>
+        /// <para>Note: Redis Pub/Sub service does not keep messages in a permanent queue, therefore if there is not any listener, message will be lost, unlike other Pub/Sub services.</para>
+        /// 
+        /// <para>Parameters:</para>
+        /// <para><paramref name="_RedisEndpoint"/>                 Redis Endpoint without Port</para>
+        /// <para><paramref name="_RedisPort"/>                     Redis Endpoint Port</para>
+        /// <para><paramref name="_RedisPassword"/>                 Redis Server Password</para>
+        /// <para><paramref name="_RedisSslEnabled"/>               Redis Server SSL Connection Enabled/Disabled</para>
+        /// 
+        /// </summary>
+        public BPubSubServiceRedis(
+            string _RedisEndpoint,
+            int _RedisPort,
+            string _RedisPassword,
+            bool _RedisSslEnabled,
+            bool _bFailoverMechanismEnabled = true,
+            Action<string> _ErrorMessageAction = null) : base("BPubSubServiceRedis", _RedisEndpoint, _RedisPort, _RedisPassword, _RedisSslEnabled, _bFailoverMechanismEnabled, _ErrorMessageAction)
         {
         }
 

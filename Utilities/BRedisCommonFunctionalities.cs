@@ -29,6 +29,7 @@ namespace BCloudServiceUtilities
             string _RedisEndpoint,
             int _RedisPort,
             string _RedisPassword,
+            bool _RedisSslEnabled = false,
             bool _bFailoverMechanismEnabled = true,
             Action<string> _ErrorMessageAction = null)
         {
@@ -60,6 +61,11 @@ namespace BCloudServiceUtilities
             if (_RedisPassword != null && _RedisPassword.Length > 0 && _RedisPassword != "N/A")
             {
                 RedisConfig.Password = _RedisPassword;
+            }
+
+            if (_RedisSslEnabled)
+            {
+                RedisConfig.Ssl = _RedisSslEnabled;
             }
 
             try

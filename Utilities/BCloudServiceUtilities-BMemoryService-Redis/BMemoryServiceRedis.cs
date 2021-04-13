@@ -30,7 +30,31 @@ namespace BCloudServiceUtilities.MemoryServices
             string _RedisPassword,
             IBPubSubServiceInterface _PubSubService,
             bool _bFailoverMechanismEnabled = true,
-            Action<string> _ErrorMessageAction = null) : base("BMemoryServiceRedis", _RedisEndpoint, _RedisPort, _RedisPassword, _bFailoverMechanismEnabled, _ErrorMessageAction)
+            Action<string> _ErrorMessageAction = null) : base("BMemoryServiceRedis", _RedisEndpoint, _RedisPort, _RedisPassword, false, _bFailoverMechanismEnabled, _ErrorMessageAction)
+        {
+            PubSubService = _PubSubService;
+        }
+
+        /// <summary>
+        /// 
+        /// <para>BMemoryServiceRedis: Parametered Constructor</para>
+        /// 
+        /// <para>Parameters:</para>
+        /// <para><paramref name="_RedisEndpoint"/>           Redis Endpoint without Port</para>
+        /// <para><paramref name="_RedisPort"/>               Redis Endpoint Port</para>
+        /// <para><paramref name="_RedisPassword"/>           Redis Server Password</para>
+        /// <para><paramref name="_RedisSslEnabled"/>         Redis Server SSL Connection Enabled/Disabled</para>
+        /// <para><paramref name="_PubSubService"/>           Pub/Sub Service Instance</para>
+        /// 
+        /// </summary>
+        public BMemoryServiceRedis(
+            string _RedisEndpoint,
+            int _RedisPort,
+            string _RedisPassword,
+            bool _RedisSslEnabled,
+            IBPubSubServiceInterface _PubSubService,
+            bool _bFailoverMechanismEnabled = true,
+            Action<string> _ErrorMessageAction = null) : base("BMemoryServiceRedis", _RedisEndpoint, _RedisPort, _RedisPassword, _RedisSslEnabled, _bFailoverMechanismEnabled, _ErrorMessageAction)
         {
             PubSubService = _PubSubService;
         }
