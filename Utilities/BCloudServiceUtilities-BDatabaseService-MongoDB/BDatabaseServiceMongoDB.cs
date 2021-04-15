@@ -1,13 +1,16 @@
 ﻿/// MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using BCommonUtilities;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
-using Newtonsoft.Json;
+using Newtonsoft.Json.Bson;
 using Newtonsoft.Json.Linq;
 
 namespace BCloudServiceUtilities.DatabaseServices
@@ -31,6 +34,39 @@ namespace BCloudServiceUtilities.DatabaseServices
             return bInitializationSucceed;
         }
 
+        private bool TableExists(string _TableName)
+        {
+            var filter = new BsonDocument("name", _TableName);
+            var options = new ListCollectionNamesOptions { Filter = filter };
+
+            return MongoDB.ListCollectionNames(options).Any();
+        }
+
+        /// <summary>
+        /// 
+        /// <para>TryCreateTable</para>
+        /// 
+        /// <para>If given table (collection) does not exist in the database, it will create a new table (collection)</para>
+        /// 
+        /// 
+        /// </summary>
+        private bool TryCreateTable(string _TableName, Action<string> _ErrorMessageAction = null)
+        {
+            try
+            {
+                if (!TableExists(_TableName))
+                {
+                    MongoDB.CreateCollection(_TableName);
+                }
+                return true;
+            }
+            catch (System.Exception ex)
+            {
+                _ErrorMessageAction?.Invoke($"BDatabaseServiceMongoDB->TryCreateTable: Given table(collection) couldn't create. Error: {ex.Message} \n Trace: {ex.StackTrace}");
+                return false;
+            }
+        }
+
         private readonly IMongoDatabase MongoDB = null;
 
         private readonly Dictionary<string, IMongoCollection<BsonDocument>> TableMap = new Dictionary<string, IMongoCollection<BsonDocument>>();
@@ -41,6 +77,11 @@ namespace BCloudServiceUtilities.DatabaseServices
             {
                 if (!TableMap.ContainsKey(_TableName))
                 {
+                    if (!TryCreateTable(_TableName, _ErrorMessageAction))
+                    {
+                        return null;
+                    }
+
                     var TableObj = MongoDB.GetCollection<BsonDocument>(_TableName);
                     if (TableObj != null)
                     {
@@ -80,7 +121,7 @@ namespace BCloudServiceUtilities.DatabaseServices
             }
             catch (Exception e)
             {
-                _ErrorMessageAction?.Invoke("BDatabaseServiceMongoDB->Constructor: " + e.Message + ", Trace: " + e.StackTrace);
+                _ErrorMessageAction?.Invoke($"BDatabaseServiceMongoDB->Constructor: {e.Message} \n Trace: {e.StackTrace}");
                 bInitializationSucceed = false;
             }
         }
@@ -98,7 +139,7 @@ namespace BCloudServiceUtilities.DatabaseServices
             }
             catch (Exception e)
             {
-                _ErrorMessageAction?.Invoke("BDatabaseServiceMongoDB->Constructor: " + e.Message + ", Trace: " + e.StackTrace);
+                _ErrorMessageAction?.Invoke($"BDatabaseServiceMongoDB->Constructor: {e.Message} \n Trace: {e.StackTrace}");
                 bInitializationSucceed = false;
             }
         }
@@ -167,7 +208,7 @@ namespace BCloudServiceUtilities.DatabaseServices
             }
             catch (Exception e)
             {
-                _ErrorMessageAction?.Invoke("BDatabaseServiceMongoDB->Constructor: " + e.Message + ", Trace: " + e.StackTrace);
+                _ErrorMessageAction?.Invoke($"BDatabaseServiceMongoDB->Constructor: {e.Message} \n Trace: {e.StackTrace}");
                 bInitializationSucceed = false;
             }
         }
@@ -188,25 +229,22 @@ namespace BCloudServiceUtilities.DatabaseServices
             var Table = GetTable(_Table);
             if (Table == null) return false;
 
-            var Filter = Builders<BsonDocument>.Filter.Eq(_KeyName, _KeyValue.ToString());
-
             try
             {
-                BsonDocument Document = Table.Find(Filter).First();
+                var Filter = Builders<BsonDocument>.Filter.Eq(_KeyName, _KeyValue.ToString());
+                BsonDocument Document = Table.Find(Filter).FirstOrDefault();
 
                 if (Document != null)
                 {
                     _Result = BsonToJObject(Document);
-
-                    return true;
                 }
+                return true;
             }
             catch (Exception ex)
             {
-                _ErrorMessageAction?.Invoke($"{ex.Message} : {ex.StackTrace}");
+                _ErrorMessageAction?.Invoke($"BDatabaseServiceMongoDB->GetItem: {ex.Message} \n {ex.StackTrace}");
             }
 
-            _Result = null;
             return false;
         }
 
@@ -220,7 +258,7 @@ namespace BCloudServiceUtilities.DatabaseServices
         /// <para>Check <seealso cref="IBDatabaseServiceInterface.PutItem"/> for detailed documentation</para>
         /// 
         /// </summary>
-        public bool PutItem(string _Table, string _KeyName, BPrimitiveType _KeyValue, JObject _Item, out JObject _ReturnItem, EBReturnItemBehaviour _ReturnItemBehaviour = EBReturnItemBehaviour.DoNotReturn, BDatabaseAttributeCondition _ConditionExpression = null, Action<string> _ErrorMessageAction = null)
+        public bool PutItem(string _Table, string _KeyName, BPrimitiveType _KeyValue, JObject _PutItem, out JObject _ReturnItem, EBReturnItemBehaviour _ReturnItemBehaviour = EBReturnItemBehaviour.DoNotReturn, BDatabaseAttributeCondition _ConditionExpression = null, Action<string> _ErrorMessageAction = null)
         {
             _ReturnItem = null;
 
@@ -229,25 +267,24 @@ namespace BCloudServiceUtilities.DatabaseServices
 
             try
             {
-                JObject NewObject = (JObject)_Item.DeepClone();
+                JObject NewObject = (JObject)_PutItem.DeepClone();
                 AddKeyToJson(NewObject, _KeyName, _KeyValue);
 
                 var Filter = Builders<BsonDocument>.Filter.Eq(_KeyName, _KeyValue.ToString());
-
-                BsonDocument Document = BsonDocument.Parse(NewObject.ToString());
 
                 if (_ConditionExpression != null)
                 {
                     Filter = Builders<BsonDocument>.Filter.And(Filter, (_ConditionExpression as BDatabaseAttributeConditionMongo).Filter);
                 }
 
+                BsonDocument Document = new BsonDocument { { "$set", JObjectToBson(NewObject) } }; //use $set for preventing to get element name is not valid exception. more info https://stackoverflow.com/a/35441075
 
                 Table.ReplaceOne(Filter, Document, new UpdateOptions() { IsUpsert = true });
                 return true;
             }
             catch (Exception ex)
             {
-                _ErrorMessageAction?.Invoke($"{ex.Message} : \n {ex.StackTrace}");
+                _ErrorMessageAction?.Invoke($"BDatabaseServiceMongoDB->PutItem: {ex.Message} : \n {ex.StackTrace}");
             }
 
             return false;
@@ -269,23 +306,24 @@ namespace BCloudServiceUtilities.DatabaseServices
             var Table = GetTable(_Table);
             if (Table == null) return false;
 
-            var Filter = Builders<BsonDocument>.Filter.Eq(_KeyName, _KeyValue.ToString());
-
-            if (_ConditionExpression != null)
-            {
-                Filter = Builders<BsonDocument>.Filter.And(Filter, (_ConditionExpression as BDatabaseAttributeConditionMongo).Filter);
-            }
-
-            JObject NewObject = (JObject)_UpdateItem.DeepClone();
-            AddKeyToJson(NewObject, _KeyName, _KeyValue);
-
-            BsonDocument Document = _UpdateItem.ToBsonDocument();
-
             try
             {
+                var Filter = Builders<BsonDocument>.Filter.Eq(_KeyName, _KeyValue.ToString());
+
+                if (_ConditionExpression != null)
+                {
+                    Filter = Builders<BsonDocument>.Filter.And(Filter, (_ConditionExpression as BDatabaseAttributeConditionMongo).Filter);
+                }
+
+                JObject NewObject = (JObject)_UpdateItem.DeepClone();
+                AddKeyToJson(NewObject, _KeyName, _KeyValue);
+
+                BsonDocument Document = new BsonDocument { { "$set", JObjectToBson(NewObject) } }; //use $set for preventing to get element name is not valid exception. more info https://stackoverflow.com/a/35441075
+
                 if (_ReturnItemBehaviour == EBReturnItemBehaviour.DoNotReturn)
                 {
-                    Table.UpdateOne(Filter, Document);
+                    Table.UpdateOne(Filter, Document, new UpdateOptions() { IsUpsert = true });
+                    return true;
                 }
                 else
                 {
@@ -300,10 +338,10 @@ namespace BCloudServiceUtilities.DatabaseServices
             }
             catch (Exception ex)
             {
-                _ErrorMessageAction?.Invoke($"{ex.Message} : \n {ex.StackTrace}");
+                _ErrorMessageAction?.Invoke($"BDatabaseServiceMongoDB->UpdateItem: {ex.Message} : \n {ex.StackTrace}");
             }
 
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -324,7 +362,6 @@ namespace BCloudServiceUtilities.DatabaseServices
             if (Table == null) return false;
 
             var Filter = Builders<BsonDocument>.Filter.Eq(_KeyName, _KeyValue.ToString());
-
 
             try
             {
@@ -347,7 +384,7 @@ namespace BCloudServiceUtilities.DatabaseServices
             }
             catch (Exception ex)
             {
-                _ErrorMessageAction?.Invoke($"{ex.Message} : \n {ex.StackTrace}");
+                _ErrorMessageAction?.Invoke($"BDatabaseServiceMongoDB->DeleteItem: {ex.Message} : \n {ex.StackTrace}");
             }
 
             return false;
@@ -937,6 +974,27 @@ namespace BCloudServiceUtilities.DatabaseServices
             var JsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
 
             return JObject.Parse(_Document.ToJson(JsonWriterSettings));
+        }
+
+        private BsonDocument JObjectToBson(JObject _JsonObject)
+        {
+            // https://stackoverflow.com/a/62104268
+            //Write JObject to MemoryStream
+            using var stream = new MemoryStream();
+            using (var writer = new BsonDataWriter(stream) { CloseOutput = false })
+            {
+                _JsonObject.WriteTo(writer);
+            }
+            stream.Position = 0; //for reading the steam immediately 
+
+            //Read the object from MemoryStream
+            BsonDocument bsonData;
+            using (var reader = new BsonBinaryReader(stream))
+            {
+                var context = BsonDeserializationContext.CreateRoot(reader);
+                bsonData = BsonDocumentSerializer.Instance.Deserialize(context);
+            }
+            return bsonData;
         }
     }
 }
