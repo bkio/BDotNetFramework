@@ -182,6 +182,7 @@ namespace BCloudServiceUtilities.DatabaseServices
                 var _ReplicaSetName = _ClientConfigJObject.SelectToken("replicaSets[0]._id").ToObject<string>();
                 var _DatabaseName = _ClientConfigJObject.SelectToken("auth.usersWanted[0].db").ToObject<string>();
                 var _UserName = _ClientConfigJObject.SelectToken("auth.usersWanted[0].user").ToObject<string>();
+                var _AuthMechnasim = _ClientConfigJObject.SelectToken("auth.autoAuthMechanism").ToObject<string>();
                 int _MongoDBPort = 27017;
 
                 var _ServerList = new List<MongoServerAddress>();
@@ -195,7 +196,8 @@ namespace BCloudServiceUtilities.DatabaseServices
 
                 MongoInternalIdentity _InternalIdentity = new MongoInternalIdentity(_DatabaseName, _UserName);
                 PasswordEvidence _PasswordEvidence = new PasswordEvidence(_MongoPassword);
-                MongoCredential _MongoCredential = new MongoCredential("SCRAM-SHA-1", _InternalIdentity, _PasswordEvidence);
+                MongoCredential _MongoCredential = new MongoCredential(_AuthMechnasim, _InternalIdentity, _PasswordEvidence);
+                //MongoCredential _MongoCredential = MongoCredential.CreateCredential(_DatabaseName, _UserName, _MongoPassword);
 
                 var _ClientSettings = new MongoClientSettings();
                 _ClientSettings.Servers = _ServerList.ToArray();
