@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<TargetFramework>netstandard2.1</TargetFramework>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <RootNamespace>BCloudServiceUtilities_BVMService_AZ</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.Management.Fluent" Version="1.37.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BCloudServiceUtilities\BCloudServiceUtilities.csproj" />
+  </ItemGroup>
+
+</Project>
