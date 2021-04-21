@@ -9,6 +9,9 @@ using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.Compute.Fluent;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
+using Microsoft.Azure.Management.Compute.Fluent.Models;
 
 namespace BCloudServiceUtilities.VMServices
 {
@@ -107,209 +110,7 @@ namespace BCloudServiceUtilities.VMServices
         {
             _ErrorCode = 400;
 
-            if (!BUtility.CalculateStringMD5(BUtility.RandomString(32, true), out string RandomFirewallTag, _ErrorMessageAction))
-            {
-                _ErrorMessageAction?.Invoke("BVMServiceAZ->CreateInstance: Firewall tag MD5 generation has failed.");
-                return false;
-            }
-
-            RandomFirewallTag = "a-" /*Has to start with a letter*/ + RandomFirewallTag;
-
-            try
-            {
-                //using (var Service = GetService())
-                //{
-                //    var NewInstance = new Instance()
-                //    {
-                //        Name = _UniqueInstanceName,
-                //        Description = _Description,
-                //        DeletionProtection = false,
-                //        Zone = "projects/" + ProjectID + "/zones/" + ZoneName,
-                //        Labels = _Labels,
-                //        MachineType = "projects/" + ProjectID + "/zones/" + ZoneName + "/machineTypes/" + _MachineType,
-                //        Disks = new List<AttachedDisk>()
-                //        {
-                //            new AttachedDisk()
-                //            {
-                //                AutoDelete = true,
-                //                Boot = true,
-                //                Kind = "compute#attachedDisk",
-                //                DeviceName = _UniqueInstanceName,
-                //                Mode = "READ_WRITE",
-                //                InitializeParams = new AttachedDiskInitializeParams()
-                //                {
-                //                    SourceImage = _OSSourceImageURL,
-                //                    DiskType = "projects/" + ProjectID + "/zones/" + ZoneName + "/diskTypes/" + (_DiskType == EBVMDiskType.SSD ? "pd-ssd" : "pd-standard"),
-                //                    DiskSizeGb = _DiskSizeGB
-                //                },
-                //                Type = "PERSISTENT"
-                //            }
-                //        },
-                //        NetworkInterfaces = new List<NetworkInterface>()
-                //        {
-                //            new NetworkInterface()
-                //            {
-                //                AccessConfigs = new List<AccessConfig>()
-                //                {
-                //                    new AccessConfig()
-                //                    {
-                //                        Kind = "compute#accessConfig",
-                //                        Name = "External NAT",
-                //                        NetworkTier = "PREMIUM",
-                //                        Type = "ONE_TO_ONE_NAT"
-                //                    }
-                //                },
-                //                Kind = "compute#networkInterface",
-                //                Name = "nic0",
-                //                Network = "projects/" + ProjectID + "/global/networks/default",
-                //                Subnetwork = "projects/" + ProjectID + "/regions/" + ZoneName.Substring(0, ZoneName.LastIndexOf('-')) + "/subnetworks/default"
-                //            }
-                //        },
-                //        Tags = new Tags()
-                //        {
-                //            Items = new List<string>()
-                //            {
-                //                RandomFirewallTag
-                //            }
-                //        },
-                //        Metadata = new Metadata()
-                //        {
-                //            Kind = "compute#metadata",
-                //            Items = new List<Metadata.ItemsData>()
-                //        },
-                //        ShieldedInstanceConfig = new ShieldedInstanceConfig()
-                //        {
-                //            EnableVtpm = true,
-                //            EnableSecureBoot = false,
-                //            EnableIntegrityMonitoring = true
-                //        },
-                //        Scheduling = new Scheduling()
-                //        {
-                //            AutomaticRestart = true,
-                //            Preemptible = false,
-                //            OnHostMaintenance = "TERMINATE"
-                //        }
-                //    };
-
-                //    if (_OptionalStartupScript != null)
-                //    {
-                //        NewInstance.Metadata.Items.Add(new Metadata.ItemsData()
-                //        {
-                //            Key = _OSType == EBVMOSType.Linux ? "startup-script" : "windows-startup-script-ps1",
-                //            Value = _OptionalStartupScript
-                //        });
-                //    }
-
-                //    if (_GpuCount > 0)
-                //    {
-                //        if (NewInstance.GuestAccelerators == null)
-                //        {
-                //            NewInstance.GuestAccelerators = new List<AcceleratorConfig>();
-                //        }
-                //        NewInstance.GuestAccelerators.Add(
-                //            new AcceleratorConfig()
-                //            {
-                //                AcceleratorCount = _GpuCount,
-                //                AcceleratorType = "projects/" + ProjectID + "/zones/" + ZoneName + "/acceleratorTypes/" + _GpuName
-                //            });
-                //    }
-
-                //    if (_OSType == EBVMOSType.Windows)
-                //    {
-                //        if (NewInstance.Disks[0].GuestOsFeatures == null)
-                //        {
-                //            NewInstance.Disks[0].GuestOsFeatures = new List<GuestOsFeature>();
-                //        }
-
-                //        if (!NewInstance.Disks[0].GuestOsFeatures.Any(Item => Item.Type == "VIRTIO_SCSI_MULTIQUEUE"))
-                //            NewInstance.Disks[0].GuestOsFeatures.Add(new GuestOsFeature() { Type = "VIRTIO_SCSI_MULTIQUEUE" });
-
-                //        if (!NewInstance.Disks[0].GuestOsFeatures.Any(Item => Item.Type == "WINDOWS"))
-                //            NewInstance.Disks[0].GuestOsFeatures.Add(new GuestOsFeature() { Type = "WINDOWS" });
-
-                //        if (!NewInstance.Disks[0].GuestOsFeatures.Any(Item => Item.Type == "MULTI_IP_SUBNET"))
-                //            NewInstance.Disks[0].GuestOsFeatures.Add(new GuestOsFeature() { Type = "MULTI_IP_SUBNET" });
-
-                //        if (!NewInstance.Disks[0].GuestOsFeatures.Any(Item => Item.Type == "UEFI_COMPATIBLE"))
-                //            NewInstance.Disks[0].GuestOsFeatures.Add(new GuestOsFeature() { Type = "UEFI_COMPATIBLE" });
-                //    }
-
-                //    var NewFirewall = new Firewall()
-                //    {
-                //        Kind = "compute#firewall",
-                //        Name = RandomFirewallTag,
-                //        Priority = 1000,
-                //        Direction = "INGRESS",
-                //        SelfLink = "projects/" + ProjectID + "/global/firewalls/" + RandomFirewallTag,
-                //        Network = "projects/" + ProjectID + "/global/networks/default",
-                //        SourceRanges = new List<string>(),
-                //        TargetTags = new List<string>()
-                //        {
-                //            RandomFirewallTag
-                //        },
-                //        Allowed = new List<Firewall.AllowedData>()
-                //    };
-                //    if (_FirewallSettings.bOpenAll)
-                //    {
-                //        NewFirewall.Allowed.Add(new Firewall.AllowedData()
-                //        {
-                //            IPProtocol = "tcp"
-                //        });
-                //        NewFirewall.Allowed.Add(new Firewall.AllowedData()
-                //        {
-                //            IPProtocol = "udp"
-                //        });
-                //    }
-                //    else
-                //    {
-                //        foreach (var Current in _FirewallSettings.OpenPorts)
-                //        {
-                //            string[] OpenFor;
-                //            if (Current.OpenFor == BVMNetworkFirewall.EVMNetworkFirewallPortProtocol.TCP)
-                //                OpenFor = new string[] { "tcp" };
-                //            else if (Current.OpenFor == BVMNetworkFirewall.EVMNetworkFirewallPortProtocol.UDP)
-                //                OpenFor = new string[] { "udp" };
-                //            else
-                //                OpenFor = new string[] { "tcp", "udp" };
-
-                //            var PortList = new List<string>()
-                //            {
-                //                Current.FromPortInclusive + "-" + Current.ToPortInclusive
-                //            };
-                //            foreach (var OFor in OpenFor)
-                //            {
-                //                NewFirewall.Allowed.Add(new Firewall.AllowedData()
-                //                {
-                //                    IPProtocol = OFor,
-                //                    Ports = PortList
-                //                });
-                //            }
-                //        }
-                //    }
-
-                //    var FirewallCreationResult = Service.Firewalls.Insert(NewFirewall, ProjectID).Execute();
-                //    if (FirewallCreationResult == null || (FirewallCreationResult.HttpErrorStatusCode.HasValue && FirewallCreationResult.HttpErrorStatusCode.Value >= 400))
-                //    {
-                //        _ErrorMessageAction?.Invoke("BVMServiceAZ->CreateInstance: Firewall creation has failed: " + (FirewallCreationResult == null ? "Result is null." : FirewallCreationResult.HttpErrorMessage));
-                //        _ErrorCode = FirewallCreationResult.HttpErrorStatusCode.Value;
-                //        return false;
-                //    }
-
-                //    var VMCreationResult = Service.Instances.Insert(NewInstance, ProjectID, ZoneName).Execute();
-                //    if (VMCreationResult == null || (VMCreationResult.HttpErrorStatusCode.HasValue && VMCreationResult.HttpErrorStatusCode.Value >= 400))
-                //    {
-                //        _ErrorMessageAction?.Invoke("BVMServiceAZ->CreateInstance: VM creation has failed: " + (VMCreationResult == null ? "Result is null." : VMCreationResult.HttpErrorMessage));
-                //        _ErrorCode = VMCreationResult.HttpErrorStatusCode.Value;
-                //        return false;
-                //    }
-                //}
-            }
-            catch (Exception e)
-            {
-                _ErrorMessageAction?.Invoke("BVMServiceAZ->CreateInstance: " + e.Message + ", Trace: " + e.StackTrace);
-                return false;
-            }
-            return true;
+            return false;
         }
 
         private List<IVirtualMachine> GetInstanceList(Action<string> _ErrorMessageAction = null)
@@ -362,7 +163,7 @@ namespace BCloudServiceUtilities.VMServices
                         {
                             ["UniqueID"] = Current.Id,
                             ["Status"] = Current.PowerState.ToString(),
-                            //["Zone"] = Current.Zone,
+                            ["Zone"] = Current.AvailabilityZones.ToList().ToString(),
                             ["Kind"] = Current.Type,
                             //["bDeletionProtection"] = (Current.DeletionProtection ?? false),
                             //["CreationTimestamp"] = Current.,
@@ -522,57 +323,33 @@ namespace BCloudServiceUtilities.VMServices
                     ProgressStacks.Add(ProgressStackIx, ProgressStack);
                 }
 
-                var Request = new System.Threading.Tasks.TaskFactory();
+                var Request = new ConcurrentQueue<Task>();
 
-                //foreach (var _Operation in _Operations)
-                //{
-                //    var FoundInstance = FindInstanceByUniqueName(_Operation.Item1, _ErrorMessageAction);
-                //    if (FoundInstance != null)
-                //    {
-                //        if (GetStatusFromString(FoundInstance.PowerState.ToString()) == _Operation.Item3)
-                //        {
-                //            System.Threading.Tasks.Task RequestAction = null;
-                //            if (_Operation.Item2 == EBVMInstanceAction.Start)
-                //            {
-                //                RequestAction = FoundInstance.StartAsync();
-                //            }
-                //            else if (_Operation.Item2 == EBVMInstanceAction.Stop)
-                //            {
-                //                RequestAction = FoundInstance.PowerOffAsync();
-                //            }
+                foreach (var _Operation in _Operations)
+                {
+                    var FoundInstance = FindInstanceByUniqueName(_Operation.Item1, _ErrorMessageAction);
+                    if (FoundInstance != null)
+                    {
+                        if (GetStatusFromString(FoundInstance.PowerState.ToString()) == _Operation.Item3)
+                        {
+                            Task RequestAction = null;
+                            if (_Operation.Item2 == EBVMInstanceAction.Start)
+                            {
+                                RequestAction = FoundInstance.StartAsync();
+                            }
+                            else if (_Operation.Item2 == EBVMInstanceAction.Stop)
+                            {
+                                RequestAction = FoundInstance.DeallocateAsync();
+                            }
 
-                //            if (RequestAction != null)
-                //            {
-                //                Queue<System.Threading.Tasks.Task>(RequestAction,
-                //                (Content, Error, i, Message) =>
-                //                {
-                //                    lock (ProgressStacks_Lock)
-                //                    {
-                //                        if (ProgressStacks.TryGetValue(ProgressStackIx, out Stack<object> FoundStack) && FoundStack.Count > 0)
-                //                        {
-                //                            if (Error != null)
-                //                            {
-                //                                _ErrorMessageAction?.Invoke("BVMServiceAZ->PerformActionOnInstances->Error: " + Error.Message);
-                //                                FoundStack.Clear();
-                //                                _OnFailure?.Invoke();
-                //                            }
-                //                            else
-                //                            {
-                //                                FoundStack.Pop();
-                //                                if (FoundStack.Count == 0)
-                //                                {
-                //                                    ProgressStacks.Remove(ProgressStackIx);
-                //                                    _OnCompleted?.Invoke();
-                //                                }
-                //                            }
-                //                        }
-                //                    }
-                //                });
-                //                ProgressStack.Push(new object());
-                //            }
-                //        }
-                //    }
-                //}
+                            if (RequestAction != null)
+                            {
+                                Request.Enqueue(RequestAction);
+                                ProgressStack.Push(new object());
+                            }
+                        }
+                    }
+                }
                 if (ProgressStack.Count > 0)
                 {
                     BTaskWrapper.Run(() =>
@@ -581,10 +358,39 @@ namespace BCloudServiceUtilities.VMServices
 
                         try
                         {
-                            //using (var CreatedTask = Request.ExecuteAsync())
-                            //{
-                            //    CreatedTask.Wait();
-                            //}
+                            if (Request.TryDequeue(out Task CreatedTask))
+                            {
+                                using (CreatedTask)
+                                {
+                                    CreatedTask.Wait();
+                                    lock (ProgressStacks_Lock)
+                                    {
+                                        if (ProgressStacks.TryGetValue(ProgressStackIx, out Stack<object> FoundStack) && FoundStack.Count > 0)
+                                        {
+                                            if (CreatedTask.Exception != null)
+                                            {
+                                                _ErrorMessageAction?.Invoke("BVMServiceAZ->PerformActionOnInstances->Error: " + CreatedTask.Exception.Message);
+                                                FoundStack.Clear();
+                                                _OnFailure?.Invoke();
+                                            }
+                                            else
+                                            {
+                                                FoundStack.Pop();
+                                                if (FoundStack.Count == 0)
+                                                {
+                                                    ProgressStacks.Remove(ProgressStackIx);
+                                                    _OnCompleted?.Invoke();
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                _ErrorMessageAction?.Invoke("BVMServiceAZ->PerformActionOnInstances->TryDequeue error occured.");
+                                _OnFailure?.Invoke();
+                            }
                         }
                         catch (Exception e)
                         {
