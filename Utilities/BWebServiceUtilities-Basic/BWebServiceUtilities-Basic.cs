@@ -87,66 +87,6 @@ namespace BWebServiceUtilities
             }
         }
 
-        public static bool GetAccessTokenForServiceExecution(out string _TokenType, out string _AccessKey, string _ForExecutingRequestUrl, Action<string> _ErrorMessageAction)
-        {
-            _TokenType = null;
-            _AccessKey = null;
-
-            var FullEndpoint = _ForExecutingRequestUrl;
-
-            using (var Handler = new HttpClientHandler())
-            {
-                Handler.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls;
-                Handler.ServerCertificateCustomValidationCallback = (a, b, c, d) => true;
-
-                using (var Client = new HttpClient(Handler))
-                {
-                    try
-                    {
-                        using (var RequestTask = Client.GetAsync(FullEndpoint))
-                        {
-                            RequestTask.Wait();
-
-                            using (var Response = RequestTask.Result)
-                            {
-                                using (var Content = Response.Content)
-                                {
-                                    using (var ReadResponseTask = Content.ReadAsStringAsync())
-                                    {
-                                        ReadResponseTask.Wait();
-
-                                        if ((int)Response.StatusCode >= 400)
-                                        {
-                                            throw new Exception("Request returned: " + Response.StatusCode + ", with content: " + ReadResponseTask.Result);
-                                        }
-
-                                        _TokenType = "Bearer";
-                                        _AccessKey = ReadResponseTask.Result;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        _ErrorMessageAction?.Invoke("Error in GetAccessTokenForServiceExecution: " + e.Message + ", Trace: " + e.StackTrace);
-                        return false;
-                    }
-                    return true;
-                }
-            }
-        }
-
-        public static bool AddAccessTokenForServiceExecution(HttpWebRequest _Request, string _ForExecutingRequestUrl, Action<string> _ErrorMessageAction)
-        {
-            if (!GetAccessTokenForServiceExecution(out string TokenType, out string AccessKey, _ForExecutingRequestUrl, _ErrorMessageAction))
-            {
-                return false;
-            }
-            _Request.Headers.Set("authorization", TokenType + " " + AccessKey);
-            return true;
-        }
-
         public class InterServicesRequestRequest
         {
             public string DestinationServiceUrl;
@@ -201,11 +141,6 @@ namespace BWebServiceUtilities
                 {
                     _Request.UseContextHeaders.Request.Headers.Remove(CaseSensitive_FoundHeaderKey);
                     _Request.UseContextHeaders.Request.Headers.Add("client-authorization", ClientAuthorization);
-                }
-
-                if (!AddAccessTokenForServiceExecution(Request, _Request.DestinationServiceUrl, _ErrorMessageAction) && _bKillProcessOnAddAccessTokenForServiceExecutionFailure)
-                {
-                    return InterServicesRequestResponse.InternalErrorOccured("Request has failed due to an internal api gateway error.");
                 }
             }
 
