@@ -40,7 +40,7 @@ namespace BCloudServiceUtilities.PubSubServices
         private BPubSubUniqueMessageDeliveryEnsurer UniqueMessageDeliveryEnsurer = null;
 
         private readonly object SubscriberThreadsDictionaryLock = new object();
-        private readonly Dictionary<string, BTuple<Microsoft.Azure.ServiceBus.ISubscriptionClient, BValue<string>>> SubscriberThreadsCancelDictionary = new Dictionary<string, BTuple<Microsoft.Azure.ServiceBus.ISubscriptionClient, BValue<string>>>();
+        private readonly Dictionary<string, BTuple<Thread, BValue<bool>>> SubscriberThreadsDictionary = new Dictionary<string, BTuple<Thread, BValue<bool>>>();
 
         /// <summary>
         /// 
@@ -295,29 +295,29 @@ namespace BCloudServiceUtilities.PubSubServices
                         {
                             Thread.CurrentThread.IsBackground = true;
 
-                            // Define exception receiver handler
-                            Func<ExceptionReceivedEventArgs, Task> ExceptionReceiverHandler = (ExceptionReceivedEventArgs exceptionReceivedEventArgs) =>
-                            {
-                                _ErrorMessageAction?.Invoke("BPubSubServiceAzure->CustomSubscribe: " + exceptionReceivedEventArgs.Exception.Message + ", Trace: " + exceptionReceivedEventArgs.Exception.StackTrace);
-                                return Task.CompletedTask;
-                            };
-
-                            // Configure the message handler options in terms of exception handling, number of concurrent messages to deliver, etc.
-                            var messageHandlerOptions = new MessageHandlerOptions(ExceptionReceiverHandler)
-                            {
-                                // Maximum number of concurrent calls to the callback ProcessMessagesAsync(), set to 1 for simplicity.
-                                // Set it according to how many messages the application wants to process in parallel.
-                                MaxConcurrentCalls = 1,
-
-                                // Indicates whether the message pump should automatically complete the messages after returning from user callback.
-                                // False below indicates the complete operation is handled by the user callback as in ProcessMessagesAsync().
-                                AutoComplete = false
-                            };
-
                             try
                             {
+                                // Define exception receiver handler
+                                Func<ExceptionReceivedEventArgs, Task> ExceptionReceiverHandler = (ExceptionReceivedEventArgs exceptionReceivedEventArgs) =>
+                                {
+                                    _ErrorMessageAction?.Invoke("BPubSubServiceAzure->CustomSubscribe->ExceptionReceiverHandler: " + exceptionReceivedEventArgs.Exception.Message + ", Trace: " + exceptionReceivedEventArgs.Exception.StackTrace);
+                                    return Task.CompletedTask;
+                                };
+
+                                // Configure the message handler options in terms of exception handling, number of concurrent messages to deliver, etc.
+                                var messageHandlerOptions = new MessageHandlerOptions(ExceptionReceiverHandler)
+                                {
+                                    // Maximum number of concurrent calls to the callback ProcessMessagesAsync(), set to 1 for simplicity.
+                                    // Set it according to how many messages the application wants to process in parallel.
+                                    MaxConcurrentCalls = 1,
+
+                                    // Indicates whether the message pump should automatically complete the messages after returning from user callback.
+                                    // False below indicates the complete operation is handled by the user callback as in ProcessMessagesAsync().
+                                    AutoComplete = false
+                                };
+
                                 // Register the function that processes messages.
-                                _SubscriptionClient.RegisterMessageHandler((Message MessageContainer, CancellationToken token) =>
+                                _SubscriptionClient.RegisterMessageHandler(async (Message MessageContainer, CancellationToken token) =>
                                 {
                                     if (MessageContainer != null)
                                     {
@@ -333,6 +333,7 @@ namespace BCloudServiceUtilities.PubSubServices
                                                 if (UniqueMessageDeliveryEnsurer.Subscription_EnsureUniqueDelivery(_CustomTopic, TimestampHash, _ErrorMessageAction))
                                                 {
                                                     _OnMessage?.Invoke(_CustomTopic, Data);
+                                                    await _SubscriptionClient.CloseAsync();
                                                 }
                                             }
                                             else
@@ -340,22 +341,13 @@ namespace BCloudServiceUtilities.PubSubServices
                                                 _OnMessage?.Invoke(_CustomTopic, Data);
                                             }
 
-                                            lock (SubscriberThreadsDictionaryLock)
-                                            {
-                                                var LockTokenVar = new BValue<string>(MessageContainer.SystemProperties.LockToken, EBProducerStatus.MultipleProducer);
-                                                SubscriberThreadsCancelDictionary.Add(_CustomTopic, new BTuple<Microsoft.Azure.ServiceBus.ISubscriptionClient, BValue<string>>(_SubscriptionClient, LockTokenVar));
-                                            }
+                                            await _SubscriptionClient.CompleteAsync(MessageContainer.SystemProperties.LockToken);
                                         }
                                         else
                                         {
-                                            using (var DeadLetterTask = _SubscriptionClient.DeadLetterAsync(MessageContainer.SystemProperties.LockToken))
-                                            {
-                                                DeadLetterTask.Wait();
-                                            }
+                                            await _SubscriptionClient.DeadLetterAsync(MessageContainer.SystemProperties.LockToken);
                                         }
                                     }
-
-                                    return Task.CompletedTask;
                                 }, messageHandlerOptions);
                             }
                             catch (Exception e)
@@ -363,12 +355,27 @@ namespace BCloudServiceUtilities.PubSubServices
                                 _ErrorMessageAction?.Invoke("BPubSubServiceAzure->CustomSubscribe: " + e.Message + ", Trace: " + e.StackTrace);
                                 if (e.InnerException != null && e.InnerException != e)
                                 {
-                                    _ErrorMessageAction?.Invoke("BPubSubServiceAzure->CustomSubscribe->Inner: " + e.InnerException.Message + ", Trace: " + e.InnerException.StackTrace);
+                                    _ErrorMessageAction?.Invoke("BPubSubServiceAzure->CustomSubscribe->InnerException: " + e.InnerException.Message + ", Trace: " + e.InnerException.StackTrace);
                                 }
                             }
 
+                            while (!SubscriptionCancellationVar.Get())
+                            {
+                                //Wait until delete
+                                Thread.Sleep(1000);
+                            }
+
+                            using (var CloseSubscriptionTask = _SubscriptionClient.CloseAsync())
+                            {
+                                CloseSubscriptionTask.Wait();
+                            }
                         });
                         SubscriptionThread.Start();
+
+                        lock (SubscriberThreadsDictionaryLock)
+                        {
+                            SubscriberThreadsDictionary.Add(_CustomTopic, new BTuple<Thread, BValue<bool>>(SubscriptionThread, SubscriptionCancellationVar));
+                        }
                         return true;
                     }
                 }
@@ -385,21 +392,14 @@ namespace BCloudServiceUtilities.PubSubServices
                 {
                     lock (SubscriberThreadsDictionaryLock)
                     {
-                        if (SubscriberThreadsCancelDictionary.ContainsKey(_CustomTopic))
+                        if (SubscriberThreadsDictionary.ContainsKey(_CustomTopic))
                         {
-                            var SubscriberThread = SubscriberThreadsCancelDictionary[_CustomTopic];
+                            var SubscriberThread = SubscriberThreadsDictionary[_CustomTopic];
                             if (SubscriberThread != null)
                             {
-                                var _SubscriptionClient = SubscriberThread.Item1;
-                                var _LockToken = SubscriberThread.Item2.Get();
-                                // Complete the message so that it is not received again.
-                                // This can be done only if the client is created in ReceiveMode.PeekLock mode (which is the default).
-                                using (var ReceiveMessageCompleteTask = _SubscriptionClient.CompleteAsync(_LockToken))
-                                {
-                                    ReceiveMessageCompleteTask.Wait();
-                                }
+                                SubscriberThread.Item2.Set(true);
                             }
-                            SubscriberThreadsCancelDictionary.Remove(_CustomTopic);
+                            SubscriberThreadsDictionary.Remove(_CustomTopic);
                         }
                     }
 
