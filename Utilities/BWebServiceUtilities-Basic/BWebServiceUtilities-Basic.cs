@@ -167,7 +167,7 @@ namespace BWebServiceUtilities
 
             try
             {
-                if (_Request.RequestMethod != "GET" && _Request.RequestMethod != "DELETE"
+                if (_Request.RequestMethod != "GET" /*&& _Request.RequestMethod != "DELETE"*/
                     && _Request.Content != null && ((_Request.Content.Type == EBStringOrStreamEnum.Stream && _Request.Content.Stream != null) || (_Request.Content.Type == EBStringOrStreamEnum.String && _Request.Content.String != null && _Request.Content.String.Length > 0)))
                 {
                     Request.ContentType = _Request.ContentType;
