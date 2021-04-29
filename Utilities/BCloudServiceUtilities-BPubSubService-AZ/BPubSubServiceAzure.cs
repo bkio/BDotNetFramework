@@ -81,6 +81,16 @@ namespace BCloudServiceUtilities.PubSubServices
                     AzureNamespaceManager = GetNamespaceTask.Result;
                 }
 
+                if (AzureNamespaceManager == null)
+                {
+                    _ErrorMessageAction?.Invoke("BPubSubServiceAzure->GetNamespaceTask.Result is null. Please check your [AZ_SERVICEBUS_NAMESPACE_CONNECTION_STRING] and [AZ_SERVICEBUS_NAMESPACE_ID] information.");
+                    bInitializationSucceed = false;
+                }
+                else
+                {
+                    bInitializationSucceed = true;
+                }
+
                 bInitializationSucceed = true;
             }
             catch (Exception e)
@@ -222,11 +232,12 @@ namespace BCloudServiceUtilities.PubSubServices
 
         public bool CustomPublish(string _CustomTopic, string _CustomMessage, Action<string> _ErrorMessageAction = null)
         {
-            if (_CustomTopic != null && _CustomTopic.Length > 0
-                && _CustomMessage != null && _CustomMessage.Length > 0
-                && BUtility.CalculateStringMD5(_CustomTopic, out string TopicMD5, _ErrorMessageAction))
+            if (_CustomTopic != null && _CustomTopic.Length > 0 
+                && _CustomMessage != null && _CustomMessage.Length > 0)
             {
-                if (EnsureTopicExists(TopicMD5, out ITopicClient _TopicClient, _ErrorMessageAction))
+                _CustomTopic = GetAzureFriendlyTopicName(_CustomTopic);
+
+                if (EnsureTopicExists(_CustomTopic, out ITopicClient _TopicClient, _ErrorMessageAction))
                 {
                     string TimestampHash = null;
                     UniqueMessageDeliveryEnsurer?.Publish_PrependTimestampToMessage(ref _CustomMessage, out TimestampHash);
@@ -238,7 +249,7 @@ namespace BCloudServiceUtilities.PubSubServices
                             if (UniqueMessageDeliveryEnsurer.Publish_EnsureUniqueDelivery(_CustomTopic, TimestampHash, _ErrorMessageAction))
                             {
                                 var AzureMessage = new Message(Encoding.UTF8.GetBytes(_CustomMessage));
-                                AzureMessage.Label = TopicMD5;
+                                AzureMessage.Label = _CustomTopic;
                                 using (var SendMessageTask = _TopicClient.SendAsync(AzureMessage))
                                 {
                                     SendMessageTask.Wait();
@@ -283,12 +294,14 @@ namespace BCloudServiceUtilities.PubSubServices
 
         public bool CustomSubscribe(string _CustomTopic, Action<string, string> _OnMessage, Action<string> _ErrorMessageAction = null)
         {
-            if (_CustomTopic != null && _CustomTopic.Length > 0 && _OnMessage != null 
-                && BUtility.CalculateStringMD5(_CustomTopic, out string TopicMD5, _ErrorMessageAction))
+            if (_CustomTopic != null && _CustomTopic.Length > 0 
+                && _OnMessage != null)
             {
-                if (EnsureTopicExists(TopicMD5, out ITopicClient _TopicClient, _ErrorMessageAction))
+                _CustomTopic = GetAzureFriendlyTopicName(_CustomTopic);
+
+                if (EnsureTopicExists(_CustomTopic, out ITopicClient _TopicClient, _ErrorMessageAction))
                 {
-                    if(EnsureSubscriptionExists(TopicMD5, _TopicClient, out Microsoft.Azure.ServiceBus.ISubscriptionClient _SubscriptionClient, _ErrorMessageAction))
+                    if(EnsureSubscriptionExists(_CustomTopic, _TopicClient, out Microsoft.Azure.ServiceBus.ISubscriptionClient _SubscriptionClient, _ErrorMessageAction))
                     {
                         var SubscriptionCancellationVar = new BValue<bool>(false, EBProducerStatus.MultipleProducer);
                         var SubscriptionThread = new Thread(() =>
@@ -322,23 +335,24 @@ namespace BCloudServiceUtilities.PubSubServices
                                     if (MessageContainer != null)
                                     {
                                         if (MessageContainer.Label != null &&
-                                            MessageContainer.Label.Equals(TopicMD5, StringComparison.InvariantCultureIgnoreCase))
+                                            MessageContainer.Label.Equals(_CustomTopic, StringComparison.InvariantCultureIgnoreCase))
                                         {
+                                            string Topic = GetTopicNameFromAzureFriendlyName(_CustomTopic);
                                             string Data = Encoding.UTF8.GetString(MessageContainer.Body);
 
                                             if (UniqueMessageDeliveryEnsurer != null)
                                             {
                                                 UniqueMessageDeliveryEnsurer.Subscribe_ClearAndExtractTimestampFromMessage(ref Data, out string TimestampHash);
 
-                                                if (UniqueMessageDeliveryEnsurer.Subscription_EnsureUniqueDelivery(_CustomTopic, TimestampHash, _ErrorMessageAction))
+                                                if (UniqueMessageDeliveryEnsurer.Subscription_EnsureUniqueDelivery(Topic, TimestampHash, _ErrorMessageAction))
                                                 {
-                                                    _OnMessage?.Invoke(_CustomTopic, Data);
+                                                    _OnMessage?.Invoke(Topic, Data);
                                                     await _SubscriptionClient.CloseAsync();
                                                 }
                                             }
                                             else
                                             {
-                                                _OnMessage?.Invoke(_CustomTopic, Data);
+                                                _OnMessage?.Invoke(Topic, Data);
                                             }
 
                                             await _SubscriptionClient.CompleteAsync(MessageContainer.SystemProperties.LockToken);
@@ -385,9 +399,11 @@ namespace BCloudServiceUtilities.PubSubServices
 
         public void DeleteCustomTopicGlobally(string _CustomTopic, Action<string> _ErrorMessageAction = null)
         {
-            if (BUtility.CalculateStringMD5(_CustomTopic, out string TopicMD5, _ErrorMessageAction)
+            if (_CustomTopic != null && _CustomTopic.Length > 0 
                 && AzureNamespaceManager != null)
             {
+                _CustomTopic = GetAzureFriendlyTopicName(_CustomTopic);
+
                 try
                 {
                     lock (SubscriberThreadsDictionaryLock)
@@ -403,7 +419,7 @@ namespace BCloudServiceUtilities.PubSubServices
                         }
                     }
 
-                    using (var DeleteTopicTask = AzureNamespaceManager.Topics.DeleteByNameAsync(TopicMD5))
+                    using (var DeleteTopicTask = AzureNamespaceManager.Topics.DeleteByNameAsync(_CustomTopic))
                     {
                         DeleteTopicTask.Wait();
                     }
@@ -459,6 +475,15 @@ namespace BCloudServiceUtilities.PubSubServices
         public bool HasInitializationSucceed()
         {
             return bInitializationSucceed;
+        }
+
+        private static string GetAzureFriendlyTopicName(string Input)
+        {
+            return Input.Replace(":", "-");
+        }
+        private static string GetTopicNameFromAzureFriendlyName(string Input)
+        {
+            return Input.Replace("-", ":");
         }
 
         /// <summary>
