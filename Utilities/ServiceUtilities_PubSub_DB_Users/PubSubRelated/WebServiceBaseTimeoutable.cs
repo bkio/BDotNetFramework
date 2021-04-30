@@ -27,6 +27,21 @@ namespace ServiceUtilities
         }
         public abstract BWebServiceResponse OnRequest_Interruptable(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null);
     }
+    public abstract class InternalWebServiceBaseWebhookTimeoutable : InternalWebServiceBaseWebhook
+    {
+        public readonly WebServiceBaseTimeoutableProcessor InnerProcessor;
+
+        protected InternalWebServiceBaseWebhookTimeoutable(string _InternalCallPrivateKey) : base(_InternalCallPrivateKey)
+        {
+            InnerProcessor = new WebServiceBaseTimeoutableProcessor(OnRequest_Interruptable);
+        }
+
+        protected override BWebServiceResponse Process(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
+        {
+            return InnerProcessor.ProcessRequest(_Context, _ErrorMessageAction);
+        }
+        public abstract BWebServiceResponse OnRequest_Interruptable(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null);
+    }
 
     public abstract class WebServiceBaseTimeoutable : BppWebServiceBase
     {
