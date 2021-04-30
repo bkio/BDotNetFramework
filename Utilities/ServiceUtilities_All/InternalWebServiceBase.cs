@@ -1,6 +1,7 @@
 ﻿/// MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using BCommonUtilities;
@@ -41,6 +42,16 @@ namespace ServiceUtilities.All
 
         protected override BWebServiceResponse OnRequestPP(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
         {
+            string FoundedHeaderValue = "None";
+            bool bIsSubscriptionValidation =
+                BWebUtilities.DoesContextContainHeader(out List<string> HeaderValues, out string _, _Context, "aeg-event-type")
+                && BUtility.CheckAndGetFirstStringFromList(HeaderValues, out FoundedHeaderValue);
+
+            if (bIsSubscriptionValidation)
+            {
+                _ErrorMessageAction?.Invoke($"InternalWebServiceBaseWebhook->OnRequest: SubscriptionValidation is {bIsSubscriptionValidation}, FoundedHeaderValue is: {FoundedHeaderValue}");
+            }
+
             if (UrlParameters.ContainsKey("secret") && UrlParameters["secret"] == InternalCallPrivateKey)
             {
                 return Process(_Context, _ErrorMessageAction);
