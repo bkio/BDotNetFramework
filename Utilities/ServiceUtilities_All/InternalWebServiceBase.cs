@@ -42,6 +42,8 @@ namespace ServiceUtilities.All
 
         protected override BWebServiceResponse OnRequestPP(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
         {
+            _ErrorMessageAction?.Invoke($"InternalWebServiceBaseWebhook->OnRequest: Message received.");
+
             string FoundedHeaderValue = "None";
             bool bIsSubscriptionValidation =
                 BWebUtilities.DoesContextContainHeader(out List<string> HeaderValues, out string _, _Context, "aeg-event-type")
