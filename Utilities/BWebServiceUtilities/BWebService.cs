@@ -201,7 +201,11 @@ namespace BWebServiceUtilities
                         {
                             Context.Response.AppendHeader("Access-Control-Allow-Origin", "*");
 
-                            if (Context.Request.HttpMethod == "OPTIONS")
+                            bool bIsWebhookRequest =
+                                BWebUtilities.DoesContextContainHeader(out List<string> _, out string _, Context, "webhook-request-callback")
+                                && BWebUtilities.DoesContextContainHeader(out List<string> _, out string _, Context, "webhook-request-origin");
+
+                            if (Context.Request.HttpMethod == "OPTIONS" && !bIsWebhookRequest)
                             {
                                 Context.Response.AppendHeader("Access-Control-Allow-Headers", "*");
                                 Context.Response.AppendHeader("Access-Control-Allow-Credentials", "true");

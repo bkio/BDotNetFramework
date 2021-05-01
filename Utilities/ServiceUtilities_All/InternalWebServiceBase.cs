@@ -4,6 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
+using System.Security.Authentication;
+using System.Threading;
 using BCommonUtilities;
 using BWebServiceUtilities;
 using Newtonsoft.Json;
@@ -42,62 +45,54 @@ namespace ServiceUtilities.All
 
         protected override BWebServiceResponse OnRequestPP(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
         {
-            _ErrorMessageAction?.Invoke($"InternalWebServiceBaseWebhook->OnRequest: Message received.");
+            _ErrorMessageAction?.Invoke($"InternalWebServiceBaseWebhook->OnRequest: Message received. HttpMethod: {_Context.Request.HttpMethod}, Headers: {_Context.Request.Headers.ToString()}");
 
-            string FoundedHeaderValue = "None";
-            bool bIsSubscriptionValidation =
-                BWebUtilities.DoesContextContainHeader(out List<string> HeaderValues, out string _, _Context, "aeg-event-type")
-                && BUtility.CheckAndGetFirstStringFromList(HeaderValues, out FoundedHeaderValue);
-
-            if (bIsSubscriptionValidation)
+            // Cloud Event Schema v1.0
+            // https://github.com/cloudevents/spec/blob/v1.0/http-webhook.md#4-abuse-protection
+            if (_Context.Request.HttpMethod == "OPTIONS")
             {
-                _ErrorMessageAction?.Invoke($"InternalWebServiceBaseWebhook->OnRequest: SubscriptionValidation is {bIsSubscriptionValidation}, FoundedHeaderValue is: {FoundedHeaderValue}");
+                var WebhookRequestCallbak = _Context.Request.Headers.Get("webhook-request-callback");
+                var WebhookRequestOrigin = _Context.Request.Headers.Get("webhook-request-origin");
+
+                BTaskWrapper.Run(() =>
+                {
+                    Thread.CurrentThread.IsBackground = true;
+
+                    Thread.Sleep(3000);
+                    using var Handler = new HttpClientHandler
+                    {
+                        SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls,
+                        ServerCertificateCustomValidationCallback = (a, b, c, d) => true
+                    };
+                    using var Client = new HttpClient(Handler);
+                    Client.DefaultRequestHeaders.TryAddWithoutValidation("WebHook-Allowed-Origin", WebhookRequestOrigin);
+                    Client.DefaultRequestHeaders.TryAddWithoutValidation("WebHook-Allowed-Rate", "120");
+                    using (var RequestTask = Client.GetAsync(WebhookRequestCallbak))
+                    {
+                        RequestTask.Wait();
+                        using var Response = RequestTask.Result;
+                        using var ResponseContent = Response.Content;
+
+                        using var ReadResponseTask = ResponseContent.ReadAsStringAsync();
+                        ReadResponseTask.Wait();
+
+                        var ResponseString = ReadResponseTask.Result;
+                        var ResponseStatusCode = (int)Response.StatusCode;
+                        _ErrorMessageAction?.Invoke($"InternalWebServiceBaseWebhook->WebhookRequestResult: Request origin is {WebhookRequestOrigin}. Request url is {WebhookRequestCallbak}. Response: {ResponseString}, Code: {ResponseStatusCode}");
+
+                        if (!Response.IsSuccessStatusCode)
+                        {
+                            _ErrorMessageAction?.Invoke("Error: InternalWebServiceBaseWebhook->WebhookRequestResult: Request returned error. Code: " + Response.StatusCode + ", message: " + ResponseString);
+                        }
+                    }
+                });
+
+                return BWebResponse.StatusOK("OK.");
             }
 
             if (UrlParameters.ContainsKey("secret") && UrlParameters["secret"] == InternalCallPrivateKey)
             {
                 return Process(_Context, _ErrorMessageAction);
-            }
-            else
-            {
-                string ValidationCode = null;
-                using (var InputStream = _Context.Request.InputStream)
-                {
-                    using (var Reader = new StreamReader(InputStream))
-                    {
-                        var JsonMessage = Reader.ReadToEnd();
-                        try
-                        {
-                            dynamic ParsedArray = JsonConvert.DeserializeObject(JsonMessage);
-                            foreach (var Parsed in ParsedArray)
-                            {
-                                if (Parsed.ContainsKey("data"))
-                                {
-                                    var Data = (JObject)Parsed["data"];
-                                    if (Data.ContainsKey("validationCode"))
-                                    {
-                                        ValidationCode = (string)Data["validationCode"];
-                                    }
-                                }
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            _ErrorMessageAction?.Invoke("InternalWebServiceBaseWebhook->OnRequest: Webhook data object parse error: " + e.Message + ", trace: " + e.StackTrace + ", payload is: " + JsonMessage);
-                            return BWebResponse.BadRequest("Webhook data object parsing has failed for accessing validationCode.");
-                        }
-
-                        if (ValidationCode != null)
-                        {
-                            var Success_Object = new JObject()
-                            {
-                                ["validationResponse"] = ValidationCode
-                            };
-                            return new BWebServiceResponse(BWebResponse.Status_OK_Code, new BStringOrStream(Success_Object.ToString()), BWebResponse.Status_Success_ContentType);
-                        }
-                        _ErrorMessageAction?.Invoke("InternalWebServiceBaseWebhook->OnRequest: ValidationCode is null, payload is: " + JsonMessage);
-                    }
-                }
             }
 
             return BWebResponse.Forbidden("You are trying to access to a private service.");
