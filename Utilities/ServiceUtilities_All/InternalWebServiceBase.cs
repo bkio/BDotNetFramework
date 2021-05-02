@@ -45,7 +45,7 @@ namespace ServiceUtilities.All
 
         protected override BWebServiceResponse OnRequestPP(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
         {
-            _ErrorMessageAction?.Invoke($"InternalWebServiceBaseWebhook->OnRequest: Message received. HttpMethod: {_Context.Request.HttpMethod}, Headers: {_Context.Request.Headers.ToString()}");
+            _ErrorMessageAction?.Invoke($"InternalWebServiceBaseWebhook->OnRequest: Message received. HttpMethod: {_Context.Request.HttpMethod}");
 
             // Cloud Event Schema v1.0
             // https://github.com/cloudevents/spec/blob/v1.0/http-webhook.md#4-abuse-protection
@@ -78,12 +78,8 @@ namespace ServiceUtilities.All
 
                         var ResponseString = ReadResponseTask.Result;
                         var ResponseStatusCode = (int)Response.StatusCode;
-                        _ErrorMessageAction?.Invoke($"InternalWebServiceBaseWebhook->WebhookRequestResult: Request origin is {WebhookRequestOrigin}. Request url is {WebhookRequestCallbak}. Response: {ResponseString}, Code: {ResponseStatusCode}");
-
-                        if (!Response.IsSuccessStatusCode)
-                        {
-                            _ErrorMessageAction?.Invoke("Error: InternalWebServiceBaseWebhook->WebhookRequestResult: Request returned error. Code: " + Response.StatusCode + ", message: " + ResponseString);
-                        }
+                        var ResponseSuccessString = Response.IsSuccessStatusCode ? "Request is successful." : "Request has an error.";
+                        _ErrorMessageAction?.Invoke($"InternalWebServiceBaseWebhook->ValidationRequest: {ResponseSuccessString} Origin: '{WebhookRequestOrigin}', Response: '{ResponseString}', Code: '{ResponseStatusCode}'");
                     }
                 });
 
