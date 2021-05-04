@@ -171,7 +171,8 @@ namespace BCloudServiceUtilities
         bool CustomSubscribe(
             string _CustomTopic,
             Action<string, string> _OnMessage,
-            Action<string> _ErrorMessageAction = null);
+            Action<string> _ErrorMessageAction = null,
+            bool _SubscribeSingleMessage = false);
 
         /// <summary>
         /// 

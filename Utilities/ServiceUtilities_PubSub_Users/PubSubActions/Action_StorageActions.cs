@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 
 namespace ServiceUtilities
 {
@@ -71,6 +72,86 @@ namespace ServiceUtilities
 
         //Default Instance
         public static readonly Action_StorageFileDeleted DefaultInstance = new Action_StorageFileDeleted();
+        protected override Action GetStaticDefaultInstance() { return DefaultInstance; }
+    }
+
+    public class Action_StorageFileUploaded_CloudEventSchemaV1_0 : Action_StorageNotification
+    {
+        [JsonProperty("api")]
+        public string DataApi;
+
+        [JsonProperty("url")]
+        public string RelativeUrl;
+
+        public string CompleteUrl;
+
+        [JsonProperty("contentLength")]
+        public ulong Size;
+
+        [JsonProperty("eTag")]
+        public string ETag;
+
+        [JsonProperty("contentType")]
+        public string ContentType;
+
+        public static bool IsMatch(JObject _Input)
+        {
+            return _Input.ContainsKey("url")
+                && _Input.ContainsKey("api") && _Input.GetValue("api").ToString().Equals("PutBlob")
+                && _Input.ContainsKey("contentLength");
+        }
+
+        public override Actions.EAction GetActionType()
+        {
+            return Actions.EAction.ACTION_STORAGE_FILE_UPLOADED_CLOUDEVENT;
+        }
+
+        public void ConvertUrlToRelativeUrl(string _ServiceEndpointPart)
+        {
+            CompleteUrl = new string(RelativeUrl);
+            if (RelativeUrl.StartsWith(_ServiceEndpointPart))
+            {
+                RelativeUrl = RelativeUrl.Replace(_ServiceEndpointPart, "");
+            }
+        }
+
+        //Default Instance
+        public static readonly Action_StorageFileUploaded_CloudEventSchemaV1_0 DefaultInstance = new Action_StorageFileUploaded_CloudEventSchemaV1_0();
+        protected override Action GetStaticDefaultInstance() { return DefaultInstance; }
+    }
+
+    public class Action_StorageFileDeleted_CloudEventSchemaV1_0 : Action_StorageNotification
+    {
+        [JsonProperty("api")]
+        public string DataApi;
+
+        [JsonProperty("url")]
+        public string RelativeUrl;
+
+        public string CompleteUrl;
+
+        public static bool IsMatch(JObject _Input)
+        {
+            return _Input.ContainsKey("api") && _Input.GetValue("api").ToString().Equals("DeleteBlob")
+                && _Input.ContainsKey("url");
+        }
+
+        public override Actions.EAction GetActionType()
+        {
+            return Actions.EAction.ACTION_STORAGE_FILE_DELETED_CLOUDEVENT;
+        }
+
+        public void ConvertUrlToRelativeUrl(string _ServiceEndpointPart)
+        {
+            CompleteUrl = new string(RelativeUrl);
+            if (RelativeUrl.StartsWith(_ServiceEndpointPart))
+            {
+                RelativeUrl = RelativeUrl.Replace(_ServiceEndpointPart, "");
+            }
+        }
+
+        //Default Instance
+        public static readonly Action_StorageFileDeleted_CloudEventSchemaV1_0 DefaultInstance = new Action_StorageFileDeleted_CloudEventSchemaV1_0();
         protected override Action GetStaticDefaultInstance() { return DefaultInstance; }
     }
 }

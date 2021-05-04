@@ -152,7 +152,7 @@ namespace BCloudServiceUtilities.PubSubServices
         public bool CustomSubscribe(
             string _CustomTopic,
             Action<string, string> _OnMessage,
-            Action<string> _ErrorMessageAction = null)
+            Action<string> _ErrorMessageAction = null, bool _SubscribeSingleMessage = false)
         {
             if (_CustomTopic != null && _CustomTopic.Length > 0 && _OnMessage != null)
             {

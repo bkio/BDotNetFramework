@@ -45,7 +45,9 @@ namespace ServiceUtilities
             ACTION_MODEL_REVISION_FILE_ENTRY_DELETE_ALL,
             ACTION_MODEL_REVISION_RAW_FILE_UPLOADED,
             ACTION_STORAGE_FILE_UPLOADED,
+            ACTION_STORAGE_FILE_UPLOADED_CLOUDEVENT,
             ACTION_STORAGE_FILE_DELETED,
+            ACTION_STORAGE_FILE_DELETED_CLOUDEVENT,
             ACTION_ZIP_AND_UPLOAD_MODELS_TO_CDF,
             ACTION_BATCH_PROCESS_FAILED
         }
@@ -72,7 +74,9 @@ namespace ServiceUtilities
             [EAction.ACTION_MODEL_REVISION_FILE_ENTRY_DELETE_ALL] = "rev_file_entry_delete_all_",
             [EAction.ACTION_MODEL_REVISION_RAW_FILE_UPLOADED] = "rev_raw_file_uploaded_",
             [EAction.ACTION_STORAGE_FILE_UPLOADED] = "storage_file_uploaded_",
+            [EAction.ACTION_STORAGE_FILE_UPLOADED_CLOUDEVENT] = "storage_file_uploaded_ce_",
             [EAction.ACTION_STORAGE_FILE_DELETED] = "storage_file_deleted_",
+            [EAction.ACTION_STORAGE_FILE_DELETED_CLOUDEVENT] = "storage_file_deleted_ce_",
             [EAction.ACTION_ZIP_AND_UPLOAD_MODELS_TO_CDF] = "zip_and_upload_to_cdf_",
             [EAction.ACTION_BATCH_PROCESS_FAILED] = "cad_process_batch_failed_"
         };
@@ -116,8 +120,12 @@ namespace ServiceUtilities
                     return JsonConvert.DeserializeObject<Action_ModelRevisionRawFileUploaded>(_SerializedAction);
                 case EAction.ACTION_STORAGE_FILE_UPLOADED:
                     return JsonConvert.DeserializeObject<Action_StorageFileUploaded>(_SerializedAction);
+                case EAction.ACTION_STORAGE_FILE_UPLOADED_CLOUDEVENT:
+                    return JsonConvert.DeserializeObject<Action_StorageFileUploaded_CloudEventSchemaV1_0>(_SerializedAction);
                 case EAction.ACTION_STORAGE_FILE_DELETED:
                     return JsonConvert.DeserializeObject<Action_StorageFileDeleted>(_SerializedAction);
+                case EAction.ACTION_STORAGE_FILE_DELETED_CLOUDEVENT:
+                    return JsonConvert.DeserializeObject<Action_StorageFileDeleted_CloudEventSchemaV1_0>(_SerializedAction);
                 case EAction.ACTION_ZIP_AND_UPLOAD_MODELS_TO_CDF:
                     return JsonConvert.DeserializeObject<Action_ZipAndUploadModelsToCdf>(_SerializedAction);
                 case EAction.ACTION_BATCH_PROCESS_FAILED:

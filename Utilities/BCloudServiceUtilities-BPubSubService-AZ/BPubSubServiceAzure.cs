@@ -264,11 +264,13 @@ namespace BCloudServiceUtilities.PubSubServices
                         else
                         {
                             var AzureMessage = new Message(Encoding.UTF8.GetBytes(_CustomMessage));
+                            AzureMessage.Label = _CustomTopic;
                             using (var SendMessageTask = _TopicClient.SendAsync(AzureMessage))
                             {
                                 SendMessageTask.Wait();
                             }
                         }
+                        return true;
                     }
                     catch (Exception e)
                     {
@@ -286,13 +288,28 @@ namespace BCloudServiceUtilities.PubSubServices
                             CloseTask.Wait();
                         }
                     }
-                    return true;
                 }
             }
             return false;
         }
 
-        public bool CustomSubscribe(string _CustomTopic, Action<string, string> _OnMessage, Action<string> _ErrorMessageAction = null)
+        private void RemoveSubscriberThread(string _CustomTopic)
+        {
+            lock (SubscriberThreadsDictionaryLock)
+            {
+                if (SubscriberThreadsDictionary.ContainsKey(_CustomTopic))
+                {
+                    var SubscriberThread = SubscriberThreadsDictionary[_CustomTopic];
+                    if (SubscriberThread != null)
+                    {
+                        SubscriberThread.Item2.Set(true);
+                    }
+                    SubscriberThreadsDictionary.Remove(_CustomTopic);
+                }
+            }
+        }
+
+        public bool CustomSubscribe(string _CustomTopic, Action<string, string> _OnMessage, Action<string> _ErrorMessageAction = null, bool _SubscribeSingleMessage = false)
         {
             if (_CustomTopic != null && _CustomTopic.Length > 0 
                 && _OnMessage != null)
@@ -307,13 +324,22 @@ namespace BCloudServiceUtilities.PubSubServices
                         var SubscriptionThread = new Thread(() =>
                         {
                             Thread.CurrentThread.IsBackground = true;
-
                             try
                             {
                                 // Define exception receiver handler
-                                Func<ExceptionReceivedEventArgs, Task> ExceptionReceiverHandler = (ExceptionReceivedEventArgs exceptionReceivedEventArgs) =>
+                                Func<ExceptionReceivedEventArgs, Task> ExceptionReceiverHandler = (ExceptionReceivedEventArgs _EventArgs) =>
                                 {
-                                    _ErrorMessageAction?.Invoke("BPubSubServiceAzure->CustomSubscribe->ExceptionReceiverHandler: " + exceptionReceivedEventArgs.Exception.Message + ", Trace: " + exceptionReceivedEventArgs.Exception.StackTrace);
+                                    _ErrorMessageAction?.Invoke($"BPubSubServiceAzure->CustomSubscribe->ExceptionReceiverHandler: {_EventArgs.Exception.Message}, Action: {_EventArgs.ExceptionReceivedContext.Action}, EntityPath: {_EventArgs.ExceptionReceivedContext.EntityPath}, Endpoint: {_EventArgs.ExceptionReceivedContext.Endpoint}, ClientId: {_EventArgs.ExceptionReceivedContext.ClientId}, Trace: {_EventArgs.Exception.StackTrace}");
+
+                                    RemoveSubscriberThread(_CustomTopic);
+                                    if (!_SubscriptionClient.IsClosedOrClosing)
+                                    {
+                                        using (var CloseSubscriptionTask = _SubscriptionClient.CloseAsync())
+                                        {
+                                            CloseSubscriptionTask.Wait();
+                                        }
+                                    }
+
                                     return Task.CompletedTask;
                                 };
 
@@ -334,32 +360,47 @@ namespace BCloudServiceUtilities.PubSubServices
                                 {
                                     if (MessageContainer != null)
                                     {
-                                        if (MessageContainer.Label != null &&
-                                            MessageContainer.Label.Equals(_CustomTopic, StringComparison.InvariantCultureIgnoreCase))
+                                        string Topic = GetTopicNameFromAzureFriendlyName(_CustomTopic);
+                                        string Data = Encoding.UTF8.GetString(MessageContainer.Body);
+
+                                        if (MessageContainer.Label != null
+                                            && MessageContainer.Label.Equals(_CustomTopic))
                                         {
-                                            string Topic = GetTopicNameFromAzureFriendlyName(_CustomTopic);
-                                            string Data = Encoding.UTF8.GetString(MessageContainer.Body);
-
-                                            if (UniqueMessageDeliveryEnsurer != null)
-                                            {
-                                                UniqueMessageDeliveryEnsurer.Subscribe_ClearAndExtractTimestampFromMessage(ref Data, out string TimestampHash);
-
-                                                if (UniqueMessageDeliveryEnsurer.Subscription_EnsureUniqueDelivery(Topic, TimestampHash, _ErrorMessageAction))
-                                                {
-                                                    _OnMessage?.Invoke(Topic, Data);
-                                                    await _SubscriptionClient.CloseAsync();
-                                                }
-                                            }
-                                            else
-                                            {
-                                                _OnMessage?.Invoke(Topic, Data);
-                                            }
-
-                                            await _SubscriptionClient.CompleteAsync(MessageContainer.SystemProperties.LockToken);
+                                            _ErrorMessageAction?.Invoke("BPubSubServiceAzure->CustomSubscribe: Received [Internal] pub/sub message.");
                                         }
                                         else
                                         {
-                                            await _SubscriptionClient.DeadLetterAsync(MessageContainer.SystemProperties.LockToken);
+                                            _ErrorMessageAction?.Invoke("BPubSubServiceAzure->CustomSubscribe: Received [StorageAccount] pub/sub message.");
+                                        }
+
+                                        if (UniqueMessageDeliveryEnsurer != null)
+                                        {
+                                            UniqueMessageDeliveryEnsurer.Subscribe_ClearAndExtractTimestampFromMessage(ref Data, out string TimestampHash);
+
+                                            if (UniqueMessageDeliveryEnsurer.Subscription_EnsureUniqueDelivery(Topic, TimestampHash, _ErrorMessageAction))
+                                            {
+                                                _OnMessage?.Invoke(Topic, Data);
+                                                RemoveSubscriberThread(_CustomTopic);
+                                                if (!_SubscriptionClient.IsClosedOrClosing)
+                                                {
+                                                    await _SubscriptionClient.CloseAsync();
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            _OnMessage?.Invoke(Topic, Data);
+                                        }
+
+                                        await _SubscriptionClient.CompleteAsync(MessageContainer.SystemProperties.LockToken);
+
+                                        if (_SubscribeSingleMessage)
+                                        {
+                                            RemoveSubscriberThread(_CustomTopic);
+                                            if (!_SubscriptionClient.IsClosedOrClosing)
+                                            {
+                                                await _SubscriptionClient.CloseAsync();
+                                            }
                                         }
                                     }
                                 }, messageHandlerOptions);
@@ -371,17 +412,29 @@ namespace BCloudServiceUtilities.PubSubServices
                                 {
                                     _ErrorMessageAction?.Invoke("BPubSubServiceAzure->CustomSubscribe->InnerException: " + e.InnerException.Message + ", Trace: " + e.InnerException.StackTrace);
                                 }
+
+                                RemoveSubscriberThread(_CustomTopic);
+                                if (!_SubscriptionClient.IsClosedOrClosing)
+                                {
+                                    using (var CloseSubscriptionTask = _SubscriptionClient.CloseAsync())
+                                    {
+                                        CloseSubscriptionTask.Wait();
+                                    }
+                                }
                             }
 
                             while (!SubscriptionCancellationVar.Get())
                             {
                                 //Wait until delete
-                                Thread.Sleep(1000);
+                                Thread.Sleep(500);
                             }
 
-                            using (var CloseSubscriptionTask = _SubscriptionClient.CloseAsync())
+                            if (!_SubscriptionClient.IsClosedOrClosing)
                             {
-                                CloseSubscriptionTask.Wait();
+                                using (var CloseSubscriptionTask = _SubscriptionClient.CloseAsync())
+                                {
+                                    CloseSubscriptionTask.Wait();
+                                }
                             }
                         });
                         SubscriptionThread.Start();
@@ -406,18 +459,7 @@ namespace BCloudServiceUtilities.PubSubServices
 
                 try
                 {
-                    lock (SubscriberThreadsDictionaryLock)
-                    {
-                        if (SubscriberThreadsDictionary.ContainsKey(_CustomTopic))
-                        {
-                            var SubscriberThread = SubscriberThreadsDictionary[_CustomTopic];
-                            if (SubscriberThread != null)
-                            {
-                                SubscriberThread.Item2.Set(true);
-                            }
-                            SubscriberThreadsDictionary.Remove(_CustomTopic);
-                        }
-                    }
+                    RemoveSubscriberThread(_CustomTopic);
 
                     using (var DeleteTopicTask = AzureNamespaceManager.Topics.DeleteByNameAsync(_CustomTopic))
                     {

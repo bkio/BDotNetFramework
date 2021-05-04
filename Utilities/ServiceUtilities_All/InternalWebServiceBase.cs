@@ -66,7 +66,7 @@ namespace ServiceUtilities.All
                     };
                     using var Client = new HttpClient(Handler);
                     Client.DefaultRequestHeaders.TryAddWithoutValidation("WebHook-Allowed-Origin", WebhookRequestOrigin);
-                    Client.DefaultRequestHeaders.TryAddWithoutValidation("WebHook-Allowed-Rate", "120");
+                    Client.DefaultRequestHeaders.TryAddWithoutValidation("WebHook-Allowed-Rate", "*");
                     using (var RequestTask = Client.GetAsync(WebhookRequestCallbak))
                     {
                         RequestTask.Wait();

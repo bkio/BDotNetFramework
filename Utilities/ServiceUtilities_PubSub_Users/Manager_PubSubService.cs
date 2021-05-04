@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using BCloudServiceUtilities;
+using BCloudServiceUtilities.PubSubServices;
 using Newtonsoft.Json.Linq;
 
 namespace ServiceUtilities
@@ -92,6 +93,13 @@ namespace ServiceUtilities
             _ErrorMessageAction);
         }
 
+        public bool ReceiveSingleMessage(string _TopicName, Action<string, string> _OnMessageAction = null, Action<string> _ErrorMessageAction = null)
+        {
+            if (PubSubService == null) return false;
+
+            return PubSubService.CustomSubscribe(_TopicName, _OnMessageAction, _ErrorMessageAction, true);
+        }
+
         public bool DeserializeReceivedMessage(string _SerializedMessage, out Actions.EAction _Action, out string _SerializedAction, Action<string> _ErrorMessageAction = null)
         {
             JObject Parsed = null;
@@ -115,6 +123,18 @@ namespace ServiceUtilities
                     else if (Action_StorageFileDeleted.IsMatch(Parsed))
                     {
                         _Action = Actions.EAction.ACTION_STORAGE_FILE_DELETED;
+                        _SerializedAction = _SerializedMessage;
+                        return true;
+                    }
+                    else if (Action_StorageFileUploaded_CloudEventSchemaV1_0.IsMatch(Parsed))
+                    {
+                        _Action = Actions.EAction.ACTION_STORAGE_FILE_UPLOADED_CLOUDEVENT;
+                        _SerializedAction = _SerializedMessage;
+                        return true;
+                    }
+                    else if (Action_StorageFileDeleted_CloudEventSchemaV1_0.IsMatch(Parsed))
+                    {
+                        _Action = Actions.EAction.ACTION_STORAGE_FILE_DELETED_CLOUDEVENT;
                         _SerializedAction = _SerializedMessage;
                         return true;
                     }

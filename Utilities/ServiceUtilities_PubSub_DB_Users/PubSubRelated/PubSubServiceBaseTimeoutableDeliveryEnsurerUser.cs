@@ -37,7 +37,7 @@ namespace ServiceUtilities
 
         public override BWebServiceResponse OnRequest_Interruptable_DeliveryEnsurerUser(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
         {
-            return PubSubServiceBaseCommon.OnRequest(_Context, "PubSubServiceBaseWebhookTimeoutableDeliveryEnsurerUser",
+            return PubSubServiceBaseCommon.OnRequestWebhook(_Context, "PubSubServiceBaseWebhookTimeoutableDeliveryEnsurerUser",
                 (ServiceUtilities.Action _Action) =>
                 {
                     GetTracingService()?.On_FromGatewayToService_Received(_Context, _ErrorMessageAction);
