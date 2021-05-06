@@ -33,4 +33,13 @@
         Uploaded_ProcessFailed = 2,
         Uploaded_Processed = 3
     }
+    public enum EOptimizationPreset
+    {
+        Default,
+        LargeFiles_WideOpenFactory_WithUniformCompactness,
+        MediumFiles_WideOpenFactory_WithUniformCompactness,
+        WideArea_WithCompactModels,
+        VeryDenseVessel,
+        TopsideOilRig
+    }
 }

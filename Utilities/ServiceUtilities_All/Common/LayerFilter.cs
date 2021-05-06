@@ -1,0 +1,12 @@
+﻿using Newtonsoft.Json;
+
+namespace ServiceUtilities_All.Common
+{
+    public class LayerFilter
+    {
+        public const string FILTER_TYPE_PROPERTY = "filterType";
+
+        [JsonProperty(FILTER_TYPE_PROPERTY)]
+        public string FilterType = "";
+    }
+}

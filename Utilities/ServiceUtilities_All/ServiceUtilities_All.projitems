@@ -11,6 +11,8 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)BppWebServiceBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Enums.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\TransformOffset.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\LayerFilter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Methods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ServicesDebugOnlyUtilities.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)InternalWebServiceBase.cs" />
