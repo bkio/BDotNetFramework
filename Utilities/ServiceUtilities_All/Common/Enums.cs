@@ -1,30 +1,30 @@
 ﻿namespace ServiceUtilities_All.Common
 {
-    public enum EVMStatus
+    public enum EVMStatus : int
     {
-        Available,
-        Busy,
-        NotResponding
+        Available = 0,
+        Busy = 1,
+        NotResponding = 2
     }
 
-    public enum EProcessStage
+    public enum EProcessStage : int
     {
-        Stage0_FileUploaded,
-        Stage1_PullingData,
-        Stage2_ExtractingGeometryInfo,
-        Stage3_OptimizingModel,
-        Stage4_FilteringModel,
-        Stage5_CustomPlatformConvertion,
-        Stage6_UnrealEngineConvertion,
-        Stage7_Completed
+        Stage0_FileUpload = 0,
+        Stage1_PullingData = 1,
+        Stage2_ExtractingGeometryInfo = 2,
+        Stage3_OptimizingModel = 3,
+        Stage4_FilteringModel = 4,
+        Stage5_CustomPlatformConvertion = 5,
+        Stage6_UnrealEngineConvertion = 6,
+        Stage7_Completed = 7
     }
-    public enum EProcessStatus
+    public enum EProcessStatus : int
     {
-        Idle,
-        Processing,
-        Canceled,
-        Failed,
-        Completed
+        Idle = 0,
+        Processing = 1,
+        Canceled = 2,
+        Failed = 3,
+        Completed = 4
     }
     public enum EUploadProcessStage : int
     {
@@ -33,13 +33,13 @@
         Uploaded_ProcessFailed = 2,
         Uploaded_Processed = 3
     }
-    public enum EOptimizationPreset
+    public enum EOptimizationPreset : int
     {
-        Default,
-        LargeFiles_WideOpenFactory_WithUniformCompactness,
-        MediumFiles_WideOpenFactory_WithUniformCompactness,
-        WideArea_WithCompactModels,
-        VeryDenseVessel,
-        TopsideOilRig
+        Default = 0,
+        LargeFiles_WideOpenFactory_WithUniformCompactness = 1,
+        MediumFiles_WideOpenFactory_WithUniformCompactness = 2,
+        WideArea_WithCompactModels = 3,
+        VeryDenseVessel = 4,
+        TopsideOilRig = 5
     }
 }
