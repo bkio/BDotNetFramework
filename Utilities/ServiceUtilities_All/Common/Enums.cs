@@ -17,8 +17,7 @@ namespace ServiceUtilities_All.Common
         Stage3_OptimizingModel = 3,
         Stage4_FilteringModel = 4,
         Stage5_CustomPlatformConvertion = 5,
-        Stage6_UnrealEngineConvertion = 6,
-        Stage7_Completed = 7
+        Stage6_UnrealEngineConvertion = 6
     }
     public enum EProcessStatus : int
     {
