@@ -113,6 +113,10 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-DatabaseS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BWebServiceUtilities-Basic", "Utilities\BWebServiceUtilities-Basic\BWebServiceUtilities-Basic.csproj", "{A21E1631-E9ED-45DD-A9A2-D4F63B1222A7}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-VMService-AZ", "Services\BServiceUtilities-VMService-AZ\BServiceUtilities-VMService-AZ.shproj", "{9D86E4D0-8B57-4F15-BFDE-A537107825B3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BVMService-AZ", "Utilities\BCloudServiceUtilities-BVMService-AZ\BCloudServiceUtilities-BVMService-AZ.csproj", "{7A632EF0-F908-43C3-AEF6-F8A45BA57368}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Services\BServiceUtilities-FileService-GC\BServiceUtilities-FileService-GC.projitems*{12da451b-d5b9-453b-8b07-fffccba7742e}*SharedItemsImports = 5
@@ -132,6 +136,7 @@ Global
 		Services\BServiceUtilities-PubSubService-AWS\BServiceUtilities-PubSubService-AWS.projitems*{6a9d7d85-897b-4660-b068-c8246be79519}*SharedItemsImports = 13
 		Services\BServiceUtilities-DatabaseService-GC\BServiceUtilities-DatabaseService-GC.projitems*{747f302d-f7a8-468b-be17-0dfc46a1f181}*SharedItemsImports = 13
 		Services\BServiceUtilities-VMService-GC\BServiceUtilities-VMService-GC.projitems*{957218fd-0307-4215-b7c9-ca7d207a0309}*SharedItemsImports = 13
+		Services\BServiceUtilities-VMService-AZ\BServiceUtilities-VMService-AZ.projitems*{9d86e4d0-8b57-4f15-bfde-a537107825b3}*SharedItemsImports = 13
 		Services\BServiceUtilities-LoggingService-GC\BServiceUtilities-LoggingService-GC.projitems*{abf9c164-adde-4e24-b5d9-2b4247f323d9}*SharedItemsImports = 13
 		Services\BServiceUtilities-SMSService-Twilio\BServiceUtilities-SMSService-Twilio.projitems*{b4dd4534-945f-4fd1-894d-e5ac2cc254fc}*SharedItemsImports = 13
 		Utilities\ServiceUtilities_PubSub_Users\ServiceUtilities_PubSub_Users.projitems*{becbe5e8-7d82-4ec0-996f-380d24e065f1}*SharedItemsImports = 13
@@ -259,6 +264,10 @@ Global
 		{A21E1631-E9ED-45DD-A9A2-D4F63B1222A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A21E1631-E9ED-45DD-A9A2-D4F63B1222A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A21E1631-E9ED-45DD-A9A2-D4F63B1222A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A632EF0-F908-43C3-AEF6-F8A45BA57368}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A632EF0-F908-43C3-AEF6-F8A45BA57368}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A632EF0-F908-43C3-AEF6-F8A45BA57368}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A632EF0-F908-43C3-AEF6-F8A45BA57368}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -315,6 +324,8 @@ Global
 		{29B1DD26-FECE-4676-B6D6-745C60EF012F} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 		{2EAD34EF-40E1-4FDD-B610-3B476C9F26B3} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
 		{A21E1631-E9ED-45DD-A9A2-D4F63B1222A7} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
+		{9D86E4D0-8B57-4F15-BFDE-A537107825B3} = {052AE8BA-480B-4CE4-9515-318E41C515B8}
+		{7A632EF0-F908-43C3-AEF6-F8A45BA57368} = {63D1C307-B409-492E-87B5-828FAB9A47D9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0A20A57-39B7-4A17-85B0-DB0190848294}
