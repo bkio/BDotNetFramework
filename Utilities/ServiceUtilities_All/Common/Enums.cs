@@ -43,4 +43,10 @@ namespace ServiceUtilities_All.Common
         VeryDenseVessel = 4,
         TopsideOilRig = 5
     }
+    public enum EProcessMode : int
+    {
+        Undefined = 0,
+        Kubernetes = 1,
+        VirtualMachine = 2
+    }
 }
