@@ -2,7 +2,7 @@
 
 using Newtonsoft.Json;
 
-namespace ServiceUtilities_All.Common
+namespace ServiceUtilities.Common
 {
     public class TransformOffset
     {

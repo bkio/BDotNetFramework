@@ -1,7 +1,7 @@
 ﻿/// MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
 
 using BCloudServiceUtilities;
-using BCloudServiceUtilities.VMService;
+using BCloudServiceUtilities.VMServices;
 
 namespace BServiceUtilities
 {

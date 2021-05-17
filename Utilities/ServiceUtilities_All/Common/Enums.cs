@@ -1,6 +1,6 @@
 ﻿/// MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
 
-namespace ServiceUtilities_All.Common
+namespace ServiceUtilities.Common
 {
     public enum EVMStatus : int
     {
@@ -48,5 +48,10 @@ namespace ServiceUtilities_All.Common
         Undefined = 0,
         Kubernetes = 1,
         VirtualMachine = 2
+    }
+    public enum EGetClearance
+    {
+        Yes,
+        No
     }
 }

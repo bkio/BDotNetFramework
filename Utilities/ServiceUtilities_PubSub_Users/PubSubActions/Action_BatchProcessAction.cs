@@ -19,25 +19,25 @@ namespace ServiceUtilities
         [JsonProperty("revisionIndex")]
         public int RevisionIndex;
 
-        [JsonProperty("modelId")]
-        public string ModelID;
+        [JsonProperty("modelUniqueName")]
+        public string ModelName;
 
-        public Action_BatchProcessFailed(string _ModelId, int _RevisionIndex) 
+        public Action_BatchProcessFailed(string _ModelName, int _RevisionIndex) 
         {
-            ModelID = _ModelId;
+            ModelName = _ModelName;
             RevisionIndex = _RevisionIndex;
         }
 
         public override bool Equals(object _Other)
         {
             return _Other is Action_BatchProcessFailed Casted &&
-                    ModelID == Casted.ModelID &&
+                    ModelName == Casted.ModelName &&
                     RevisionIndex == Casted.RevisionIndex;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(ModelID, RevisionIndex);
+            return HashCode.Combine(ModelName, RevisionIndex);
         }
 
         //Default Instance
