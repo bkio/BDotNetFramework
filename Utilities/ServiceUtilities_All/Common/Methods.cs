@@ -73,9 +73,14 @@ namespace ServiceUtilities.Common
             }
         }
 
-        public static string GetNowAsLongDateAndTimeString()
+        public static string GetUtcNowShortDateAndLongTimeString()
         {
-            return DateTime.UtcNow.ToLongDateString() + " - " + DateTime.UtcNow.ToLongTimeString();
+            return DateTime.UtcNow.ToShortDateString() + " - " + DateTime.UtcNow.ToLongTimeString();
+        }
+
+        public static bool TryParseDateTimeFromUtcNowString(string _UtcNowShortDateAndLongTime, out DateTime ParsedDateTime)
+        {
+            return DateTime.TryParseExact(_UtcNowShortDateAndLongTime, "M/dd/yyyy - h:mm:ss tt", null, System.Globalization.DateTimeStyles.None, out ParsedDateTime);
         }
     }
 }
