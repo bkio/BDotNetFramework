@@ -17,6 +17,5 @@
     <Compile Include="$(MSBuildThisFileDirectory)ServicesDebugOnlyUtilities.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)InternalWebServiceBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resources_DeploymentManager.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)WebServiceBaseTimeoutable.cs" />
   </ItemGroup>
 </Project>

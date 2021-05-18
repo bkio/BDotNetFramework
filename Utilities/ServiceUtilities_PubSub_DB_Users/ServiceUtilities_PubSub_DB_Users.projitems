@@ -14,6 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)PubSubControllers\Controller_DeliveryEnsurer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PubSubRelated\FailedDeliveryEnsurerOperationEntry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PubSubRelated\PubSubServiceBaseTimeoutableDeliveryEnsurerUser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PubSubRelated\WebServiceBaseTimeoutable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PubSubRelated\WebServiceBaseTimeoutableDeliveryEnsurerUser.cs" />
   </ItemGroup>
 </Project>
