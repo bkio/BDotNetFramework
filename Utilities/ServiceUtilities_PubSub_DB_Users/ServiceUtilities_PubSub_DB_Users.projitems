@@ -9,6 +9,7 @@
     <Import_RootNamespace>ServiceUtilities_PubSub_DB_Users</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Methods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PubSubActions\Action_DeliveryEnsurer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PubSubControllers\Controller_AtomicDBOperation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PubSubControllers\Controller_DeliveryEnsurer.cs" />
