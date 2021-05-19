@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿/// MIT License, Copyright Burak Kara, burak@burak.io, https://en.wikipedia.org/wiki/MIT_License
+
+using Newtonsoft.Json;
 
 namespace ServiceUtilities.Common
 {
@@ -15,6 +17,6 @@ namespace ServiceUtilities.Common
         public int RecordProcessStage = (int)EProcessStage.Stage0_FileUpload;
 
         [JsonProperty(RECORD_PROCESS_INFO_PROPERTY)]
-        public string ProcessInfo = ""
+        public string ProcessInfo = "";
     }
 }
