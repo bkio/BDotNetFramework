@@ -281,7 +281,7 @@ namespace BCloudServiceUtilities.DatabaseServices
 
                 BsonDocument Document = new BsonDocument { { "$set", JObjectToBson(NewObject) } }; //use $set for preventing to get element name is not valid exception. more info https://stackoverflow.com/a/35441075
 
-                Table.ReplaceOne(Filter, Document, new UpdateOptions() { IsUpsert = true });
+                Table.UpdateOne(Filter, Document, new UpdateOptions() { IsUpsert = true });
                 return true;
             }
             catch (Exception ex)
