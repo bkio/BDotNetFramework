@@ -176,7 +176,7 @@ namespace BCloudServiceUtilities.FileServices
                     Resource = "b",
                 };
 
-                SasBuilder.StartsOn = DateTimeOffset.UtcNow;
+                SasBuilder.StartsOn = DateTimeOffset.UtcNow.AddMinutes(-60);
                 SasBuilder.ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(_URLValidForMinutes);
                 SasBuilder.SetPermissions(BlobContainerSasPermissions.Read);
 
@@ -218,9 +218,9 @@ namespace BCloudServiceUtilities.FileServices
                     Resource = "b",
                 };
 
-                SasBuilder.StartsOn = DateTimeOffset.UtcNow;
+                SasBuilder.StartsOn = DateTimeOffset.UtcNow.AddMinutes(-60);
                 SasBuilder.ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(_URLValidForMinutes);
-                SasBuilder.SetPermissions(BlobContainerSasPermissions.Create);
+                SasBuilder.SetPermissions(BlobContainerSasPermissions.Write | BlobContainerSasPermissions.Create | BlobContainerSasPermissions.Delete);
 
                 string SasToken = SasBuilder.ToSasQueryParameters(SharedKey).ToString();
 
