@@ -11,7 +11,7 @@ namespace ServiceUtilities.Common
         public const string RECORD_PROCESS_INFO_PROPERTY = "recordProcessInfo";
 
         [JsonProperty(RECORD_DATE_PROPERTY)]
-        public string RecordDate = Methods.GetUtcNowShortDateAndLongTimeString();
+        public string RecordDate = Methods.ToISOString();
 
         [JsonProperty(RECORD_PROCESS_STAGE_PROPERTY)]
         public int RecordProcessStage = (int)EProcessStage.Stage0_FileUpload;
