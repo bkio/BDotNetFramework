@@ -75,12 +75,12 @@ namespace ServiceUtilities.Common
 
         public static string ToISOString()
         {
-            return DateTime.UtcNow.ToString("YYYY-MM-DDTHH:mm:ss.sssZ");
+            return DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
         }
 
         public static bool TryParseDateTimeFromUtcNowString(string _UtcNowShortDateAndLongTime, out DateTime ParsedDateTime)
         {
-            return DateTime.TryParseExact(_UtcNowShortDateAndLongTime, "YYYY-MM-DDTHH:mm:ss.sssZ", null, System.Globalization.DateTimeStyles.None, out ParsedDateTime);
+            return DateTime.TryParseExact(_UtcNowShortDateAndLongTime, "yyyy-MM-ddTHH:mm:ss.fffZ", null, System.Globalization.DateTimeStyles.None, out ParsedDateTime);
         }
     }
 }
