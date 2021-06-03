@@ -259,11 +259,11 @@ namespace BCloudServiceUtilities.VMServices
 
         public EBVMInstanceStatus GetStatusFromString(string _Status)
         {
-            if (_Status == "Running")
+            if (_Status == "Running" || _Status.Contains("running"))
             {
                 return EBVMInstanceStatus.Running;
             }
-            else if (_Status == "Stopped" || _Status == "Deallocated")
+            else if (_Status == "Stopped" || _Status == "Deallocated" || _Status.Contains("deallocated"))
             {
                 return EBVMInstanceStatus.Stopped;
             }
@@ -336,6 +336,7 @@ namespace BCloudServiceUtilities.VMServices
                             if (_Operation.Item2 == EBVMInstanceAction.Start)
                             {
                                 RequestAction = FoundInstance.StartAsync();
+                                //FoundInstance.Start();
                             }
                             else if (_Operation.Item2 == EBVMInstanceAction.Stop)
                             {
