@@ -9,9 +9,9 @@ namespace ServiceUtilities.Common
         public const string LOCATION_OFFSET_X_PROPERTY = "locationOffsetX";
         public const string LOCATION_OFFSET_Y_PROPERTY = "locationOffsetY";
         public const string LOCATION_OFFSET_Z_PROPERTY = "locationOffsetZ";
-        public const string ROTATION_OFFSET_X_PROPERTY = "quaternionRotationOffsetX";
-        public const string ROTATION_OFFSET_Y_PROPERTY = "quaternionRotationOffsetY";
-        public const string ROTATION_OFFSET_Z_PROPERTY = "quaternionRotationOffsetZ";
+        public const string ROTATION_OFFSET_X_PROPERTY = "rotationOffsetX";
+        public const string ROTATION_OFFSET_Y_PROPERTY = "rotationOffsetY";
+        public const string ROTATION_OFFSET_Z_PROPERTY = "rotationOffsetZ";
         public const string UNIFORM_SCALE_PROPERTY = "uniformScale";
 
         [JsonProperty(LOCATION_OFFSET_X_PROPERTY)]
