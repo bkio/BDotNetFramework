@@ -727,5 +727,10 @@ namespace BCloudServiceUtilities.VMServices
             return true;
         }
         private bool ThreadSleep(int _MS) { Thread.Sleep(_MS); return true; }
+
+        public bool RunCommand(string[] _UniqueInstanceNames, EBVMOSType _VMOperationSystemType, string[] _Commands, Action _OnCompleted, Action _OnFailure, Action<string> _ErrorMessageAction = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

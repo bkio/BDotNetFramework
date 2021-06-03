@@ -199,5 +199,30 @@ namespace BCloudServiceUtilities
             string _UniqueInstanceName,
             EBVMInstanceStatus[] _OrStatus,
             Action<string> _ErrorMessageAction = null);
+
+        /// <summary>
+        /// 
+        /// <para>RunCommand:</para>
+        /// 
+        /// <para>Run given command in given VM instances</para>
+        /// 
+        /// <para>Parameters:</para>
+        /// <para><paramref name="_UniqueInstanceNames"/>           Name of the instances to be started</para>
+        /// <para><paramref name="_VMOperationSystemType"/>         Virtual Machine Operation System Type for selecting script type Shell (Linux) or PowerShell (Windows).</para>
+        /// <para><paramref name="_Commands"/>                      Commands array to be run.</para>
+        /// <para><paramref name="_OnCompleted"/>                   This callback will be called upon success</para>
+        /// <para><paramref name="_OnFailure"/>                     This callback will be called upon failure</para>
+        /// <para><paramref name="_ErrorMessageAction"/>            Error messages will be pushed to this action</para>
+        /// 
+        /// <returns>Returns: Success or not</returns>
+        /// 
+        /// </summary>
+        bool RunCommand(
+            string[] _UniqueInstanceNames,
+            EBVMOSType _VMOperationSystemType,
+            string[] _Commands,
+            Action _OnCompleted, 
+            Action _OnFailure, 
+            Action<string> _ErrorMessageAction = null);
     }
 }

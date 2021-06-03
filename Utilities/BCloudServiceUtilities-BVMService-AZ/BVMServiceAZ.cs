@@ -452,6 +452,140 @@ namespace BCloudServiceUtilities.VMServices
             return StartOrStopInstances(_UniqueInstanceNames, EBVMInstanceAction.Stop, _OnCompleted, _OnFailure, _ErrorMessageAction);
         }
 
+        //EBVMInstanceStatus is the condition in here
+        private int PerformRunCommandActions(
+            string[] _UniqueInstanceNames,
+            EBVMOSType _VMOperationSystemType,
+            string[] _Commands,
+            Action _OnCompleted,
+            Action _OnFailure,
+            Action<string> _ErrorMessageAction = null)
+        {
+            int ProgressStackIx = Interlocked.Increment(ref CurrentActionIndex);
+
+            var ProgressStack = new Stack<object>();
+
+            if (_UniqueInstanceNames != null && _UniqueInstanceNames.Length > 0)
+            {
+                lock (ProgressStacks_Lock)
+                {
+                    ProgressStacks.Add(ProgressStackIx, ProgressStack);
+                }
+
+                var Request = new ConcurrentQueue<Task>();
+
+                foreach (var _InstanceName in _UniqueInstanceNames)
+                {
+                    var FoundInstance = FindInstanceByUniqueName(_InstanceName, _ErrorMessageAction);
+                    if (FoundInstance != null)
+                    {
+                        if (GetStatusFromString(FoundInstance.PowerState.ToString()) == EBVMInstanceStatus.Running)
+                        {
+                            try
+                            {
+                                var _CommandId = "RunPowerShellScript";
+                                if (_VMOperationSystemType == EBVMOSType.Linux)
+                                {
+                                    _CommandId = "RunShellScript";
+                                }
+
+                                var _RunCommandInput = new RunCommandInput()
+                                {
+                                    CommandId = _CommandId,
+                                    Script = _Commands.ToList()
+                                };
+                                Task RequestAction = FoundInstance.RunCommandAsync(_RunCommandInput);
+                                Request.Enqueue(RequestAction);
+                                ProgressStack.Push(new object());
+                            }
+                            catch (System.Exception ex)
+                            {
+                                _ErrorMessageAction?.Invoke($"BVMServiceAZ->PerformRunCommandActions->An error occurred when RunCommandInput is casting. Error: { ex.Message } - StackTrace: {ex.StackTrace}");
+                                _OnFailure?.Invoke();
+                            }
+                        }
+                        else
+                        {
+                            _ErrorMessageAction?.Invoke("BVMServiceAZ->PerformRunCommandActions->Virtual Machine is not running.");
+                            _OnFailure?.Invoke();
+                        }
+                    }
+                }
+                if (ProgressStack.Count > 0)
+                {
+                    BTaskWrapper.Run(() =>
+                    {
+                        Thread.CurrentThread.IsBackground = true;
+
+                        try
+                        {
+                            if (Request.TryDequeue(out Task CreatedTask))
+                            {
+                                using (CreatedTask)
+                                {
+                                    CreatedTask.Wait();
+                                    lock (ProgressStacks_Lock)
+                                    {
+                                        if (ProgressStacks.TryGetValue(ProgressStackIx, out Stack<object> FoundStack) && FoundStack.Count > 0)
+                                        {
+                                            if (CreatedTask.Exception != null)
+                                            {
+                                                _ErrorMessageAction?.Invoke("BVMServiceAZ->PerformRunCommandActions->Error: " + CreatedTask.Exception.Message);
+                                                FoundStack.Clear();
+                                                _OnFailure?.Invoke();
+                                            }
+                                            else
+                                            {
+                                                FoundStack.Pop();
+                                                if (FoundStack.Count == 0)
+                                                {
+                                                    ProgressStacks.Remove(ProgressStackIx);
+                                                    _OnCompleted?.Invoke();
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                _ErrorMessageAction?.Invoke("BVMServiceAZ->PerformRunCommandActions->TryDequeue error occured.");
+                                _OnFailure?.Invoke();
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            _ErrorMessageAction?.Invoke("BVMServiceAZ->PerformRunCommandActions->Exception: " + e.Message);
+                            _OnFailure?.Invoke();
+                        }
+                    });
+                }
+                else
+                {
+                    lock (ProgressStacks_Lock)
+                    {
+                        ProgressStacks.Remove(ProgressStackIx);
+                    }
+                }
+            }
+            return ProgressStack.Count;
+        }
+
+        public bool RunCommand(
+            string[] _UniqueInstanceNames,
+            EBVMOSType _VMOperationSystemType,
+            string[] _Commands,
+            Action _OnCompleted,
+            Action _OnFailure,
+            Action<string> _ErrorMessageAction = null)
+        {
+            if (_UniqueInstanceNames != null && _UniqueInstanceNames.Length > 0)
+            {
+                return PerformRunCommandActions(_UniqueInstanceNames, _VMOperationSystemType, _Commands, _OnCompleted, _OnFailure, _ErrorMessageAction) > 0;
+            }
+            return false;
+        }
+
         public bool WaitUntilInstanceStatus(
             string _UniqueInstanceName,
             EBVMInstanceStatus[] _OrStatus,
