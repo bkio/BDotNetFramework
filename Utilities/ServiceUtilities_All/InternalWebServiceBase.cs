@@ -57,15 +57,11 @@ namespace ServiceUtilities.All
 
                 if (WebhookRequestCallbak != null && WebhookRequestOrigin != null)
                 {
-                    _ErrorMessageAction?.Invoke($"InternalWebServiceBaseWebhook->RequestReceived: Url: {_Context.Request.RawUrl} - Origin: '{WebhookRequestOrigin}' - Callback: '{WebhookRequestCallbak}'");
-
                     BTaskWrapper.Run(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
 
                         Thread.Sleep(1000);
-
-                        _ErrorMessageAction?.Invoke($"InternalWebServiceBaseWebhook->BeforeSendingResponse: Url: {_Context.Request.RawUrl} - Origin: '{WebhookRequestOrigin}' - Callback: '{WebhookRequestCallbak}'");
 
                         SendValidationRequest(WebhookRequestOrigin, WebhookRequestCallbak, _ErrorMessageAction);
                     });
