@@ -38,6 +38,9 @@ namespace ServiceUtilities.All
     public abstract class InternalWebServiceBaseWebhook : BppWebServiceBase
     {
         protected readonly string InternalCallPrivateKey;
+        private string WebhookRequestCallbak = null;
+        private string WebhookRequestOrigin = null;
+
         public InternalWebServiceBaseWebhook(string _InternalCallPrivateKey)
         {
             InternalCallPrivateKey = _InternalCallPrivateKey;
@@ -49,39 +52,28 @@ namespace ServiceUtilities.All
             // https://github.com/cloudevents/spec/blob/v1.0/http-webhook.md#4-abuse-protection
             if (_Context.Request.HttpMethod == "OPTIONS")
             {
-                var WebhookRequestCallbak = _Context.Request.Headers.Get("webhook-request-callback");
-                var WebhookRequestOrigin = _Context.Request.Headers.Get("webhook-request-origin");
+                WebhookRequestCallbak = _Context.Request.Headers.Get("WebHook-Request-Callback");
+                WebhookRequestOrigin = _Context.Request.Headers.Get("WebHook-Request-Origin");
 
-                BTaskWrapper.Run(() =>
+                if (WebhookRequestCallbak != null && WebhookRequestOrigin != null)
                 {
-                    Thread.CurrentThread.IsBackground = true;
+                    _ErrorMessageAction?.Invoke($"InternalWebServiceBaseWebhook->RequestReceived: Url: {_Context.Request.RawUrl} - Origin: '{WebhookRequestOrigin}' - Callback: '{WebhookRequestCallbak}'");
 
-                    Thread.Sleep(500);
-                    using var Handler = new HttpClientHandler
+                    BTaskWrapper.Run(() =>
                     {
-                        SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls,
-                        ServerCertificateCustomValidationCallback = (a, b, c, d) => true
-                    };
-                    using var Client = new HttpClient(Handler);
-                    Client.DefaultRequestHeaders.TryAddWithoutValidation("WebHook-Allowed-Origin", WebhookRequestOrigin);
-                    Client.DefaultRequestHeaders.TryAddWithoutValidation("WebHook-Allowed-Rate", "*");
-                    using (var RequestTask = Client.GetAsync(WebhookRequestCallbak))
-                    {
-                        RequestTask.Wait();
-                        using var Response = RequestTask.Result;
-                        using var ResponseContent = Response.Content;
+                        Thread.CurrentThread.IsBackground = true;
 
-                        using var ReadResponseTask = ResponseContent.ReadAsStringAsync();
-                        ReadResponseTask.Wait();
+                        Thread.Sleep(1000);
 
-                        var ResponseString = ReadResponseTask.Result;
-                        var ResponseStatusCode = (int)Response.StatusCode;
-                        var ResponseSuccessString = Response.IsSuccessStatusCode ? "OK" : "ERROR";
-                        _ErrorMessageAction?.Invoke($"InternalWebServiceBaseWebhook->ValidationResponse: From '{WebhookRequestOrigin}', Result {ResponseSuccessString} ({ResponseStatusCode}): '{ResponseString}'");
-                    }
-                });
+                        _ErrorMessageAction?.Invoke($"InternalWebServiceBaseWebhook->BeforeSendingResponse: Url: {_Context.Request.RawUrl} - Origin: '{WebhookRequestOrigin}' - Callback: '{WebhookRequestCallbak}'");
 
-                return BWebResponse.StatusOK("OK.");
+                        SendValidationRequest(WebhookRequestOrigin, WebhookRequestCallbak, _ErrorMessageAction);
+                    });
+
+                    return BWebResponse.StatusOK("OK.");
+                }
+
+                return BWebResponse.BadRequest("WebHook-Request-Callback and WebHook-Request-Origin must be included in the request.");
             }
 
             if (UrlParameters.ContainsKey("secret") && UrlParameters["secret"] == InternalCallPrivateKey)
@@ -90,6 +82,32 @@ namespace ServiceUtilities.All
             }
 
             return BWebResponse.Forbidden("You are trying to access to a private service.");
+        }
+
+        private void SendValidationRequest(string _WebhookRequestOrigin, string _WebhookRequestCallbak, Action<string> _ErrorMessageAction)
+        {
+            using var Handler = new HttpClientHandler
+            {
+                SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls,
+                ServerCertificateCustomValidationCallback = (a, b, c, d) => true
+            };
+            using var Client = new HttpClient(Handler);
+            Client.DefaultRequestHeaders.TryAddWithoutValidation("WebHook-Allowed-Origin", _WebhookRequestOrigin);
+            Client.DefaultRequestHeaders.TryAddWithoutValidation("WebHook-Allowed-Rate", "*");
+            using (var RequestTask = Client.GetAsync(_WebhookRequestCallbak))
+            {
+                RequestTask.Wait();
+                using var Response = RequestTask.Result;
+                using var ResponseContent = Response.Content;
+
+                using var ReadResponseTask = ResponseContent.ReadAsStringAsync();
+                ReadResponseTask.Wait();
+
+                var ResponseString = ReadResponseTask.Result;
+                var ResponseStatusCode = (int)Response.StatusCode;
+                var ResponseSuccessString = Response.IsSuccessStatusCode ? "OK" : "ERROR";
+                _ErrorMessageAction?.Invoke($"InternalWebServiceBaseWebhook->ValidationResponse: From '{_WebhookRequestOrigin}', Result {ResponseSuccessString} ({ResponseStatusCode}): '{ResponseString}'");
+            }
         }
 
         protected abstract BWebServiceResponse Process(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null);
