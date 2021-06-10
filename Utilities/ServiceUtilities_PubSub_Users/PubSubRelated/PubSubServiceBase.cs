@@ -138,12 +138,12 @@ namespace ServiceUtilities
                         out string SerializedAction,
                         _ErrorMessageAction))
                     {
-                        _ErrorMessageAction?.Invoke(_CallerMethod + "->SubscribeAction: An error occured. Retrying.");
+                        _ErrorMessageAction?.Invoke($"{_CallerMethod}->SubscribeAction: An error occured when subscribing {Action.ToString()}.");
                     }
 
                     if (!_HandleAction.Invoke(Actions.DeserializeAction(Action, SerializedAction)))
                     {
-                        _ErrorMessageAction?.Invoke(_CallerMethod + "->DeserializeAction: An error occured. Retrying.");
+                        _ErrorMessageAction?.Invoke($"{_CallerMethod}->DeserializeAction: An error occured when deserializing {Action.ToString()}.");
                     }
 
                 }, _ErrorMessageAction))
