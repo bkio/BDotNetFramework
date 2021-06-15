@@ -97,7 +97,7 @@ namespace ServiceUtilities
         public static bool IsMatch(JObject _Input)
         {
             return _Input.ContainsKey("url")
-                && _Input.ContainsKey("api") && _Input.GetValue("api").ToString().Equals("PutBlob")
+                && _Input.ContainsKey("api") && _Input.GetValue("api").ToString().StartsWith("Put")
                 && _Input.ContainsKey("contentLength");
         }
 
@@ -132,7 +132,7 @@ namespace ServiceUtilities
 
         public static bool IsMatch(JObject _Input)
         {
-            return _Input.ContainsKey("api") && _Input.GetValue("api").ToString().Equals("DeleteBlob")
+            return _Input.ContainsKey("api") && _Input.GetValue("api").ToString().StartsWith("Delete")
                 && _Input.ContainsKey("url");
         }
 
