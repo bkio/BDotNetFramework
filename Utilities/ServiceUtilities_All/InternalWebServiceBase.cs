@@ -17,34 +17,14 @@ namespace ServiceUtilities.All
     public abstract class InternalWebServiceBase : BppWebServiceBase
     {
         protected readonly string InternalCallPrivateKey;
+        private string WebhookRequestCallbak = null;
+        private string WebhookRequestOrigin = null;
+
         public InternalWebServiceBase(string _InternalCallPrivateKey)
         {
             InternalCallPrivateKey = _InternalCallPrivateKey;
         }
         private InternalWebServiceBase() { }
-
-        protected override BWebServiceResponse OnRequestPP(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
-        {
-            if (UrlParameters.ContainsKey("secret") && UrlParameters["secret"] == InternalCallPrivateKey)
-            {
-                return Process(_Context, _ErrorMessageAction);
-            }
-            return BWebResponse.Forbidden("You are trying to access to a private service.");
-        }
-
-        protected abstract BWebServiceResponse Process(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null);
-    }
-
-    public abstract class InternalWebServiceBaseWebhook : BppWebServiceBase
-    {
-        protected readonly string InternalCallPrivateKey;
-        private string WebhookRequestCallbak = null;
-        private string WebhookRequestOrigin = null;
-
-        public InternalWebServiceBaseWebhook(string _InternalCallPrivateKey)
-        {
-            InternalCallPrivateKey = _InternalCallPrivateKey;
-        }
 
         protected override BWebServiceResponse OnRequestPP(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
         {
@@ -63,7 +43,7 @@ namespace ServiceUtilities.All
 
                         Thread.Sleep(1000);
 
-                        SendValidationRequest(WebhookRequestOrigin, WebhookRequestCallbak, _ErrorMessageAction);
+                        SendWebhookValidationRequest(WebhookRequestOrigin, WebhookRequestCallbak, _ErrorMessageAction);
                     });
 
                     return BWebResponse.StatusOK("OK.");
@@ -76,11 +56,10 @@ namespace ServiceUtilities.All
             {
                 return Process(_Context, _ErrorMessageAction);
             }
-
             return BWebResponse.Forbidden("You are trying to access to a private service.");
         }
 
-        private void SendValidationRequest(string _WebhookRequestOrigin, string _WebhookRequestCallbak, Action<string> _ErrorMessageAction)
+        private void SendWebhookValidationRequest(string _WebhookRequestOrigin, string _WebhookRequestCallbak, Action<string> _ErrorMessageAction)
         {
             using var Handler = new HttpClientHandler
             {
