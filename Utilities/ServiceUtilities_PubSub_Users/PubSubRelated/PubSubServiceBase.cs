@@ -33,6 +33,10 @@ namespace ServiceUtilities
                                 SerializedData = Encoding.UTF8.GetString(Convert.FromBase64String(EncodedData));
                             }
                         }
+                        if (Parsed.ContainsKey("data"))
+                        {
+                            SerializedData = (string)Parsed["data"];
+                        }
                         if (SerializedData == null)
                         {
                             SerializedData = JsonMessage;
@@ -75,83 +79,6 @@ namespace ServiceUtilities
             Thread.Sleep(1000);
 
             return BWebResponse.BadRequest("An error occurred. Retrying.");
-        }
-
-        public static BWebServiceResponse OnRequestWebhook(HttpListenerContext _Context, string _CallerMethod, Func<ServiceUtilities.Action, bool> _HandleAction, Action<string> _ErrorMessageAction = null)
-        {
-            string SerializedData = null;
-            string TopicName = null;
-            using (var InputStream = _Context.Request.InputStream)
-            {
-                using (var Reader = new StreamReader(InputStream))
-                {
-                    var JsonMessage = Reader.ReadToEnd();
-                    try
-                    {
-                        var Parsed = JObject.Parse(JsonMessage);
-                        if (Parsed.ContainsKey("data"))
-                        {
-                            var DataObject = (JObject)Parsed["data"];
-
-                            if (DataObject.ContainsKey("topicName")/*,
-                                DataObject.ContainsKey("namespaceName")
-                                && DataObject.ContainsKey("requestUri")
-                                && DataObject.ContainsKey("subscriptionName")*/)
-                            {
-                                TopicName = (string)DataObject["topicName"];
-                                //var NamespaceName = (string)DataObject["namespaceName"];
-                                //var RequestUri = (string)DataObject["requestUri"];
-                                //var SubscriptionName = (string)DataObject["subscriptionName"];
-
-                                _ErrorMessageAction?.Invoke($"{_CallerMethod}->OnRequest[INFO]: Action received from CloudEventSchemaV1_0. TopicName: '{TopicName}'");
-                            }
-                        }
-                        else
-                        {
-                            _ErrorMessageAction?.Invoke(_CallerMethod + "->OnRequest[ERROR]: Invalid CloudEventSchemaV1_0 data type. Payload is: " + JsonMessage);
-                            return BWebResponse.BadRequest("Invalid CloudEventSchemaV1_0 data type. Json Parse error occurred.");
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        _ErrorMessageAction?.Invoke(_CallerMethod + "->OnRequest[ERROR]: Invalid CloudEventSchemaV1_0 data type. Error: " + e.Message + ", trace: " + e.StackTrace + ", payload is: " + JsonMessage);
-                        return BWebResponse.BadRequest("Invalid CloudEventSchemaV1_0 data type. Json Parse error occurred.");
-                    }
-                }
-            }
-
-            if (!Manager_PubSubService.Get().ReceiveSingleMessage(TopicName, 
-                (string ReceivedTopic, string ReceivedMessage) =>
-                {
-                    var ParsedMessage = JObject.Parse(ReceivedMessage);
-                    if (ParsedMessage.ContainsKey("data"))
-                    {
-                        SerializedData = ParsedMessage["data"].ToString();
-                    }
-                    else
-                    {
-                        SerializedData = ParsedMessage.ToString();
-                    }
-
-                    if (!Manager_PubSubService.Get().DeserializeReceivedMessage(SerializedData,
-                        out Actions.EAction Action,
-                        out string SerializedAction,
-                        _ErrorMessageAction))
-                    {
-                        _ErrorMessageAction?.Invoke($"{_CallerMethod}->SubscribeAction: An error occured when subscribing {Action.ToString()}.");
-                    }
-
-                    if (!_HandleAction.Invoke(Actions.DeserializeAction(Action, SerializedAction)))
-                    {
-                        _ErrorMessageAction?.Invoke($"{_CallerMethod}->DeserializeAction: An error occured when deserializing {Action.ToString()}.");
-                    }
-
-                }, _ErrorMessageAction))
-            {
-                return BWebResponse.BadRequest("Receiving message from subscription has failed.");
-            }
-
-            return BWebResponse.StatusOK("Action has been received. It will be processed.");
         }
     }
 

@@ -93,13 +93,6 @@ namespace ServiceUtilities
             _ErrorMessageAction);
         }
 
-        public bool ReceiveSingleMessage(string _TopicName, Action<string, string> _OnMessageAction = null, Action<string> _ErrorMessageAction = null)
-        {
-            if (PubSubService == null) return false;
-
-            return PubSubService.CustomSubscribe(_TopicName, _OnMessageAction, _ErrorMessageAction, true);
-        }
-
         public bool DeserializeReceivedMessage(string _SerializedMessage, out Actions.EAction _Action, out string _SerializedAction, Action<string> _ErrorMessageAction = null)
         {
             JObject Parsed = null;

@@ -39,22 +39,6 @@ namespace ServiceUtilities.PubSubUsers.PubSubRelated
 
         public abstract BWebServiceResponse OnRequest_Interruptable_DeliveryEnsurerUser(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null);
     }
-    public abstract class InternalWebServiceBaseWebhookTimeoutableDeliveryEnsurerUser : InternalWebServiceBaseWebhookTimeoutable
-    {
-        public readonly WebServiceBaseTimeoutableDeliveryEnsurerUserProcessor InnerDeliveryEnsurerUserProcessor;
-
-        protected InternalWebServiceBaseWebhookTimeoutableDeliveryEnsurerUser(string _InternalCallPrivateKey) : base(_InternalCallPrivateKey)
-        {
-            InnerDeliveryEnsurerUserProcessor = new WebServiceBaseTimeoutableDeliveryEnsurerUserProcessor(new WeakReference<WebServiceBaseTimeoutableProcessor>(InnerProcessor), OnRequest_Interruptable_DeliveryEnsurerUser);
-        }
-
-        public override BWebServiceResponse OnRequest_Interruptable(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
-        {
-            return InnerDeliveryEnsurerUserProcessor.OnRequest_Interruptable(_Context, _ErrorMessageAction);
-        }
-
-        public abstract BWebServiceResponse OnRequest_Interruptable_DeliveryEnsurerUser(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null);
-    }
     public class WebServiceBaseTimeoutableDeliveryEnsurerUserProcessor
     {
         public HttpListenerContext CachedContext;

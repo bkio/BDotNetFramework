@@ -309,7 +309,7 @@ namespace BCloudServiceUtilities.PubSubServices
             }
         }
 
-        public bool CustomSubscribe(string _CustomTopic, Action<string, string> _OnMessage, Action<string> _ErrorMessageAction = null, bool _SubscribeSingleMessage = false)
+        public bool CustomSubscribe(string _CustomTopic, Action<string, string> _OnMessage, Action<string> _ErrorMessageAction = null)
         {
             if (_CustomTopic != null && _CustomTopic.Length > 0 
                 && _OnMessage != null)
@@ -393,15 +393,6 @@ namespace BCloudServiceUtilities.PubSubServices
                                         }
 
                                         await _SubscriptionClient.CompleteAsync(MessageContainer.SystemProperties.LockToken);
-
-                                        if (_SubscribeSingleMessage)
-                                        {
-                                            RemoveSubscriberThread(_CustomTopic);
-                                            if (!_SubscriptionClient.IsClosedOrClosing)
-                                            {
-                                                await _SubscriptionClient.CloseAsync();
-                                            }
-                                        }
                                     }
                                 }, messageHandlerOptions);
                             }

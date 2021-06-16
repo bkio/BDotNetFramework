@@ -208,7 +208,7 @@ namespace BCloudServiceUtilities.PubSubServices
         /// <para>Check <seealso cref="IBPubSubServiceInterface.CustomSubscribe"/> for detailed documentation</para>
         ///
         /// </summary>
-        public bool CustomSubscribe(string _CustomTopic, Action<string, string> _OnMessage, Action<string> _ErrorMessageAction = null, bool _SubscribeSingleMessage = false)
+        public bool CustomSubscribe(string _CustomTopic, Action<string, string> _OnMessage, Action<string> _ErrorMessageAction = null)
         {
             if (_CustomTopic != null && _CustomTopic.Length > 0 && _OnMessage != null && BUtility.CalculateStringMD5(_CustomTopic, out string TopicMD5, _ErrorMessageAction))
             {
