@@ -8,6 +8,7 @@ using System.Threading;
 using BWebServiceUtilities;
 using ServiceUtilities.All;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace ServiceUtilities
 {
@@ -35,7 +36,8 @@ namespace ServiceUtilities
                         }
                         if (Parsed.ContainsKey("data"))
                         {
-                            SerializedData = (string)Parsed["data"];
+                            var CloudEventObject = (JObject)Parsed["data"];
+                            SerializedData = JsonConvert.SerializeObject(CloudEventObject);
                         }
                         if (SerializedData == null)
                         {
