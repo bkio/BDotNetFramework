@@ -5,13 +5,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Messaging.EventGrid;
 using BCommonUtilities;
-using Microsoft.Azure.Management.Fluent;
-using Microsoft.Azure.Management.ResourceManager.Fluent;
-using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
-using Microsoft.Azure.Management.ServiceBus.Fluent;
 using Microsoft.Azure.ServiceBus;
 using Newtonsoft.Json.Linq;
+using Azure;
+using Azure.Messaging;
 
 namespace BCloudServiceUtilities.PubSubServices
 {
@@ -20,12 +19,14 @@ namespace BCloudServiceUtilities.PubSubServices
         /// <summary>
         /// Azure Manager for managing Azure resources
         /// </summary>
-        private readonly IAzure AzureManager;
+        private readonly Microsoft.Azure.Management.Fluent.IAzure AzureManager;
 
         /// <summary>
         /// Azure Namespace Manager for managing Azure Service Bus Namespaces
         /// </summary>
-        private readonly IServiceBusNamespace AzureNamespaceManager;
+        private readonly Microsoft.Azure.Management.ServiceBus.Fluent.IServiceBusNamespace AzureNamespaceManager;
+
+        private readonly EventGridPublisherClient EventGridDomainPublisher;
 
         /// <summary>
         /// Holds namespace connection string for ITopicClient and ISubscriptionClient connections.
@@ -44,7 +45,7 @@ namespace BCloudServiceUtilities.PubSubServices
 
         /// <summary>
         /// 
-        /// <para>BPubSubServiceAzure: Parametered Constructor for Managed Service by Microsoft Azure</para>
+        /// <para>BPubSubServiceAzure: Parameterized Constructor for Managed Service by Microsoft Azure</para>
         /// 
         /// <para>Parameters:</para>
         /// <para><paramref name="_ClientId"/>                                  Azure Client Id</para>
@@ -52,6 +53,8 @@ namespace BCloudServiceUtilities.PubSubServices
         /// <para><paramref name="_TenantId"/>                                  Azure Tenant Id</para>
         /// <para><paramref name="_ServiceBusNamespaceId"/>                     Azure Service Bus Namespace Id</para>
         /// <para><paramref name="_ServiceBusNamespaceConnectionString"/>       Azure Service Bus Namespace Connection String</para>
+        /// <para><paramref name="_EventGridDomainEndpoint"/>                   Event Grid Domain Endpoint</para>
+        /// <para><paramref name="_EventGridDomainAccessKey"/>                  Event Grid Domain Access Key</para>
         /// <para><paramref name="_ErrorMessageAction"/>                        Error messages will be pushed to this action</para>
         /// 
         /// </summary>
@@ -61,19 +64,30 @@ namespace BCloudServiceUtilities.PubSubServices
             string _TenantId,
             string _ServiceBusNamespaceId,
             string _ServiceBusNamespaceConnectionString,
+            string _EventGridDomainEndpoint,
+            string _EventGridDomainAccessKey,
             Action<string> _ErrorMessageAction = null)
         {
             try
             {
                 ServiceBusNamespaceConnectionString = _ServiceBusNamespaceConnectionString;
 
-                var credentials = SdkContext.AzureCredentialsFactory.FromServicePrincipal(_ClientId, _ClientSecret, _TenantId, AzureEnvironment.AzureGlobalCloud);
+                var credentials = Microsoft.Azure.Management.ResourceManager.Fluent.SdkContext.AzureCredentialsFactory.FromServicePrincipal(_ClientId, _ClientSecret, _TenantId, Microsoft.Azure.Management.ResourceManager.Fluent.AzureEnvironment.AzureGlobalCloud);
 
-                AzureManager = Azure
+                AzureManager = Microsoft.Azure.Management.Fluent.Azure
                     .Configure()
-                    .WithLogLevel(HttpLoggingDelegatingHandler.Level.Basic)
+                    .WithLogLevel(Microsoft.Azure.Management.ResourceManager.Fluent.Core.HttpLoggingDelegatingHandler.Level.Basic)
                     .Authenticate(credentials)
                     .WithDefaultSubscription();
+
+                if (!string.IsNullOrEmpty(_EventGridDomainEndpoint) && !string.IsNullOrEmpty(_EventGridDomainAccessKey))
+                {
+                    EventGridDomainPublisher = new EventGridPublisherClient(new Uri(_EventGridDomainEndpoint), new AzureKeyCredential(_EventGridDomainAccessKey));
+                }
+                else
+                {
+                    EventGridDomainPublisher = null;
+                }
 
                 using (var GetNamespaceTask = AzureManager.ServiceBusNamespaces.GetByIdAsync(_ServiceBusNamespaceId))
                 {
@@ -268,6 +282,17 @@ namespace BCloudServiceUtilities.PubSubServices
                             using (var SendMessageTask = _TopicClient.SendAsync(AzureMessage))
                             {
                                 SendMessageTask.Wait();
+                            }
+                        }
+                        if (EventGridDomainPublisher != null)
+                        {
+                            var CloudEventData = new CloudEvent(_CustomTopic, _CustomTopic, Encoding.UTF8.GetBytes(_CustomMessage));
+                            CloudEventData.Subject = $"topics/{_CustomTopic}/subscriptions/{_CustomTopic}";
+
+                            List <CloudEvent> _EventsList = new List<CloudEvent> { CloudEventData };
+                            using (var SendCloudEventTask = EventGridDomainPublisher.SendEventsAsync(_EventsList))
+                            {
+                                SendCloudEventTask.Wait();
                             }
                         }
                         return true;

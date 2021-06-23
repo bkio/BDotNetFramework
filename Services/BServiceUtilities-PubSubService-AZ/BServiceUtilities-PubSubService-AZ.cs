@@ -28,6 +28,8 @@ namespace BServiceUtilities
                 RequiredEnvironmentVariables["AZ_TENANT_ID"], 
                 RequiredEnvironmentVariables["AZ_SERVICEBUS_NAMESPACE_ID"], 
                 RequiredEnvironmentVariables["AZ_SERVICEBUS_NAMESPACE_CONNECTION_STRING"],
+                RequiredEnvironmentVariables["AZ_EVENTGRID_DOMAIN_ENDPOINT"],
+                RequiredEnvironmentVariables["AZ_EVENTGRID_DOMAIN_ACCESS_KEY"],
                 (string Message) =>
                 {
                     LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, Message), ProgramID, "Initialization");

@@ -246,6 +246,8 @@ namespace BCloudServiceUtilitiesTest
                         RequiredEnvVars["AZURE_TENANT_ID"],
                         RequiredEnvVars["AZURE_NAMESPACE_ID"],
                         RequiredEnvVars["AZURE_NAMESPACE_CONNSTR"],
+                        RequiredEnvVars["AZURE_EVENTGRID_DOMAIN_ENDPOINT"],
+                        RequiredEnvVars["AZURE_EVENTGRID_DOMAIN_ACCESS_KEY"],
                         Console.WriteLine),
                     true,
                     Console.WriteLine),
