@@ -286,7 +286,7 @@ namespace BCloudServiceUtilities.PubSubServices
                         }
                         if (EventGridDomainPublisher != null)
                         {
-                            var CloudEventData = new CloudEvent(_CustomTopic, _CustomTopic, Encoding.UTF8.GetBytes(_CustomMessage));
+                            var CloudEventData = new CloudEvent(_CustomTopic, _CustomTopic, _CustomMessage);
                             CloudEventData.Subject = $"topics/{_CustomTopic}/subscriptions/{_CustomTopic}";
 
                             List <CloudEvent> _EventsList = new List<CloudEvent> { CloudEventData };
