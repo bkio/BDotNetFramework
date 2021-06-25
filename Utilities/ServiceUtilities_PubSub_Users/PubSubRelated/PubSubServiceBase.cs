@@ -36,8 +36,17 @@ namespace ServiceUtilities
                         }
                         if (Parsed.ContainsKey("data"))
                         {
-                            var CloudEventObject = (JObject)Parsed["data"];
-                            SerializedData = JsonConvert.SerializeObject(CloudEventObject);
+                            var CloudEventDataToken = Parsed["data"];
+                            if (CloudEventDataToken.Type == JTokenType.Object)
+                            {
+                                var CloudEventData = (JObject)Parsed["data"];
+                                SerializedData = JsonConvert.SerializeObject(CloudEventData);
+                            }
+                            else if (CloudEventDataToken.Type == JTokenType.String)
+                            {
+                                var CloudEventData = (string)Parsed["data"];
+                                SerializedData = Encoding.UTF8.GetString(Convert.FromBase64String(CloudEventData));
+                            }
                         }
                         if (SerializedData == null)
                         {
