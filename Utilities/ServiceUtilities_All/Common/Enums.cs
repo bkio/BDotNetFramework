@@ -27,12 +27,13 @@ namespace ServiceUtilities.Common
         Failed = 3,
         Completed = 4
     }
-    public enum EUploadProcessStage : int
+    public enum EFileProcessStatus : int
     {
         NotUploaded = 0,
-        Uploaded_Processing = 1,
-        Uploaded_ProcessFailed = 2,
-        Uploaded_Processed = 3
+        Processing = 1,
+        ProcessFailed = 2,
+        ProcessCanceled = 3,
+        Processed = 4
     }
     public enum EOptimizationPreset : int
     {

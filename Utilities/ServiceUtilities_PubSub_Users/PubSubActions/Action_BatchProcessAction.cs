@@ -21,23 +21,28 @@ namespace ServiceUtilities
 
         [JsonProperty("modelUniqueName")]
         public string ModelName;
+        
+        [JsonProperty("statusMessage")]
+        public string StatusMessage;
 
-        public Action_BatchProcessFailed(string _ModelName, int _RevisionIndex) 
+        public Action_BatchProcessFailed(string _ModelName, int _RevisionIndex, string _StatusMessage) 
         {
             ModelName = _ModelName;
             RevisionIndex = _RevisionIndex;
+            StatusMessage = _StatusMessage;
         }
 
         public override bool Equals(object _Other)
         {
             return _Other is Action_BatchProcessFailed Casted &&
                     ModelName == Casted.ModelName &&
-                    RevisionIndex == Casted.RevisionIndex;
+                    RevisionIndex == Casted.RevisionIndex &&
+                    StatusMessage.Equals(Casted.StatusMessage);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(ModelName, RevisionIndex);
+            return HashCode.Combine(ModelName, RevisionIndex, StatusMessage);
         }
 
         //Default Instance
