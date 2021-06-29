@@ -6,7 +6,8 @@ namespace ServiceUtilities.Common
     {
         Available = 0,
         Busy = 1,
-        NotResponding = 2
+        NotResponding = 2,
+        Stopped = 3
     }
 
     public enum EProcessStage : int
