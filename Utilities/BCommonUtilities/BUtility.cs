@@ -415,7 +415,8 @@ namespace BCommonUtilities
                     if (!bFound)
                     {
                         _ParsedResult = null;
-                        _ErrorMessageAction?.Invoke("BUtility->GetRequiredEnvironmentVariables: Some required environment variables are not set.");
+                        string VarKeyAsString = string.Join(", ", VarKey);
+                        _ErrorMessageAction?.Invoke($"BUtility->GetRequiredEnvironmentVariables: Some required environment variables are not set. Missing environment variables can be one of them: {VarKeyAsString}");
                         return false;
                     }
                 }
