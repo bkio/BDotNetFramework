@@ -24,14 +24,14 @@ namespace BServiceUtilities
             /*
             * File service initialization
             */
-            if (!RequiredEnvironmentVariables.ContainsKey("MONGODB_DATABASE"))
+            if (!RequiredEnvironmentVariables.ContainsKey("MONGODB_DATABASE") || RequiredEnvironmentVariables["MONGODB_DATABASE"] == null)
             {
                 LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, "((MONGODB_CONNECTION_STRING) or (MONGODB_CLIENT_CONFIG, MONGODB_PASSWORD) or (MONGODB_HOST, MONGODB_PORT)) and MONGODB_DATABASE must be provided and valid."), ProgramID, "Initialization");
                 return false;
             }
 
-            if (RequiredEnvironmentVariables.ContainsKey("MONGODB_CLIENT_CONFIG")
-                && RequiredEnvironmentVariables.ContainsKey("MONGODB_PASSWORD"))
+            if (RequiredEnvironmentVariables.ContainsKey("MONGODB_CLIENT_CONFIG") && RequiredEnvironmentVariables["MONGODB_CLIENT_CONFIG"] != null
+                && RequiredEnvironmentVariables.ContainsKey("MONGODB_PASSWORD") && RequiredEnvironmentVariables["MONGODB_PASSWORD"] != null)
             {
                 DatabaseService = new BDatabaseServiceMongoDB(RequiredEnvironmentVariables["MONGODB_CLIENT_CONFIG"], RequiredEnvironmentVariables["MONGODB_PASSWORD"], RequiredEnvironmentVariables["MONGODB_DATABASE"],
                 (string Message) =>
@@ -39,7 +39,7 @@ namespace BServiceUtilities
                     LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, Message), ProgramID, "Initialization");
                 });
             }
-            else if (RequiredEnvironmentVariables.ContainsKey("MONGODB_CONNECTION_STRING"))
+            else if (RequiredEnvironmentVariables.ContainsKey("MONGODB_CONNECTION_STRING") && RequiredEnvironmentVariables["MONGODB_CONNECTION_STRING"] != null)
             {
                 DatabaseService = new BDatabaseServiceMongoDB(RequiredEnvironmentVariables["MONGODB_CONNECTION_STRING"], RequiredEnvironmentVariables["MONGODB_DATABASE"],
                     (string Message) =>
@@ -47,8 +47,8 @@ namespace BServiceUtilities
                         LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Critical, Message), ProgramID, "Initialization");
                     });
             }
-            else if (RequiredEnvironmentVariables.ContainsKey("MONGODB_HOST")
-                && RequiredEnvironmentVariables.ContainsKey("MONGODB_PORT")
+            else if (RequiredEnvironmentVariables.ContainsKey("MONGODB_HOST") && RequiredEnvironmentVariables["MONGODB_HOST"] != null
+                && RequiredEnvironmentVariables.ContainsKey("MONGODB_PORT") && RequiredEnvironmentVariables["MONGODB_PORT"] != null
                 && int.TryParse(RequiredEnvironmentVariables["MONGODB_PORT"], out int MongoDbPort))
             {
                 DatabaseService = new BDatabaseServiceMongoDB(RequiredEnvironmentVariables["MONGODB_HOST"], MongoDbPort, RequiredEnvironmentVariables["MONGODB_DATABASE"],
