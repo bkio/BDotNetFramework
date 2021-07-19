@@ -10,6 +10,7 @@ namespace BServiceUtilities
     /// <para>Required Environment variables:</para>
     /// 
     /// <para>REDIS_ENDPOINT, REDIS_PORT, REDIS_PASSWORD must be provided and valid.</para>
+    /// <para>REDIS_SSL_ENABLED can be sent to set SSL enabled, otherwise it will be false.</para>
     /// 
     /// </summary>
     public partial class BServiceInitializer
